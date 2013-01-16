@@ -1,0 +1,14 @@
+$select = `ls -sl`;
+$path = dirname(`file -q -sceneName`);
+$objs = $path + "/objs";
+$size = `size($select)`;
+int $n = 0;
+
+sysFile -makeDir $objs;
+
+while ($n < $size)
+{
+select -r $select[$n];
+file -force -options "groups=0;ptgroups=0;materials=0;smoothing=0;normals=0" -typ "OBJexport" -pr -es ($objs + "/" + $select[$n] + ".obj");
+$n = $n + 1;
+}

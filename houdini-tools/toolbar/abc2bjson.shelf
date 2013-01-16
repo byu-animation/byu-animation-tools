@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
+  <tool name="abc2bjson" label="ABC to BJSON" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import abc2bjson_hou as a2b
+
+try:
+    # Get Alembic file from user.
+    inputFile = a2b.getInputFile()
+        
+    # Get Output Directory. User selects from list of options
+    outDir = a2b.getOutputDir(a2b.getChasmShotList())
+    
+    # Get Frame Range from user.
+    start, end, step = a2b.getFrameRange()
+    a2b.setFrameRange(start,end,step)
+    
+    # Set the Geometry Dictionary
+    a2b.setGeoDict(a2b.getAddisonGeoDict())
+    
+    # Generate geometry sequences    
+    a2b.abc2bjson(inputFile, outDir)
+
+except Exception as e:
+    print "Exiting: " + str(e)
+
+]]></script>
+  </tool>
+</shelfDocument>
