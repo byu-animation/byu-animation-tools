@@ -18,6 +18,8 @@ if [ ! -d "$JOB" ]; then
 	mkdir -p "$JOB"
 fi
 
+export PRODUCTION_DIR=${JOB}/PRODUCTION
+
 # User directory for checkout files, testing, ect.
 export USER_DIR=${JOB}/users/${USER}
 if [ ! -d "$USER_DIR" ]; then
@@ -27,19 +29,19 @@ if [ ! -d "$USER_DIR" ]; then
 fi
 
 # Directory for models
-export MODELS=${JOB}/models
+export MODELS=${PRODUCTION_DIR}/models
 if [ ! -d "$MODELS" ]; then
 	mkdir -p "$MODELS"
 fi
 
 # Directory for rigs
-export RIGS=${JOB}/rigs
+export RIGS=${PRODUCTION_DIR}/rigs
 if [ ! -d "$RIGS" ]; then
 	mkdir -p "$RIGS"
 fi
 
 # Directory for animations
-export ANIMATION=${JOB}/animations
+export ANIMATION=${PRODUCTION_DIR}/animations
 if [ ! -d "$ANIMATION" ]; then
 	mkdir -p "$ANIMATION"
 fi
@@ -48,7 +50,7 @@ fi
 # Houdini specific environment
 ###############################################################################
 
-export GLOBAL_DIR=${JOB}/global
+export GLOBAL_DIR=${PRODUCTION_DIR}/global
 
 # Directory for houdini digital assets
 export OTL_DIR=${GLOBAL_DIR}/otls
