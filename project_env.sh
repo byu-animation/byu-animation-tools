@@ -2,7 +2,10 @@
 
 # project_evn.sh
 #	Exports all project environment variables and creates missing directories
-#	This script will need to be edited for each project
+#	This script will need to be edited for each project.
+#
+#   Place this script and other tools inside the ${PROJECT_TOOLS} directory defined below.
+#
 # @author: Brian Kingery
 
 ###############################################################################
@@ -13,12 +16,18 @@
 export PROJECT_NAME=owned
 
 # Root directory for the projcet (ie: /grp5/owned)
+# This directory should be created manually.
 export JOB=/grp5/${PROJECT_NAME}
-if [ ! -d "$JOB" ]; then
-	mkdir -p "$JOB"
-fi
 
+# Tools/scripts directory. This script should be placed here.
+# Yes, its a chicken egg problem...
+export PROJECT_TOOLS=${JOB}/byu-animation-tools
+
+# Production directory
 export PRODUCTION_DIR=${JOB}/PRODUCTION
+if [ ! -d "$PRODUCTION_DIR" ]; then
+    mkdir -p "$PRODUCTION_DIR"
+fi
 
 # User directory for checkout files, testing, ect.
 export USER_DIR=${JOB}/users/${USER}
@@ -29,31 +38,33 @@ if [ ! -d "$USER_DIR" ]; then
 fi
 
 # Directory for models
-export MODELS=${PRODUCTION_DIR}/models
-if [ ! -d "$MODELS" ]; then
-	mkdir -p "$MODELS"
+export MODELS_DIR=${PRODUCTION_DIR}/models
+if [ ! -d "$MODELS_DIR" ]; then
+	mkdir -p "$MODELS_DIR"
 fi
 
 # Directory for rigs
-export RIGS=${PRODUCTION_DIR}/rigs
-if [ ! -d "$RIGS" ]; then
-	mkdir -p "$RIGS"
+export RIGS_DIR=${PRODUCTION_DIR}/rigs
+if [ ! -d "$RIGS_DIR" ]; then
+	mkdir -p "$RIGS_DIR"
 fi
 
 # Directory for animations
-export ANIMATION=${PRODUCTION_DIR}/animations
-if [ ! -d "$ANIMATION" ]; then
-	mkdir -p "$ANIMATION"
+export ANIMATIONS_DIR=${PRODUCTION_DIR}/animations
+if [ ! -d "$ANIMATION_DIR" ]; then
+	mkdir -p "$ANIMATION_DIR"
 fi
+
+# Directory for otls
+export OTLS_DIR=${PRODUCTION_DIR}/otls
+if [ ! -d "$OTLS_DIR" ]; then
+    mkdir -p "$OTLS_DIR"
+fi
+
 
 ###############################################################################
 # Houdini specific environment
 ###############################################################################
-
-export GLOBAL_DIR=${PRODUCTION_DIR}/global
-
-# Directory for houdini digital assets
-export OTL_DIR=${GLOBAL_DIR}/otls
 
 # The Python that ships with RHEL is too old.
 export HOUDINI_USE_HFS_PYTHON=1
@@ -62,10 +73,16 @@ export HOUDINI_USE_HFS_PYTHON=1
 export HSITE=/grp5
 
 # Include GLOBAL_DIR in Houdini path, so we will pick up project settings and assets.
-export HOUDINI_PATH=${HOME}/houdini${HOUDINI_MAJOR_RELEASE}.${HOUDINI_MINOR_RELEASE}:${GLOBAL_DIR}:${HSITE}/houdini${HOUDINI_MAJOR_RELEASE}.${HOUDINI_MINOR_RELEASE}:${HFS}/houdini
+export HOUDINI_PATH=${HOME}/houdini${HOUDINI_MAJOR_RELEASE}.${HOUDINI_MINOR_RELEASE}:${HSITE}/houdini${HOUDINI_MAJOR_RELEASE}.${HOUDINI_MINOR_RELEASE}:${HFS}/houdini
 
-# We also want to check for otls in a user's work folder.
-export HOUDINI_OTL_PATH=${USER_DIR}:${HOUDINI_PATH}
+# Add our custom python scripts
+export HOUDINI_PYTHON_LIB=${PRODUCTION_TOOLS}/python2.6libs:${HOUDINI_PYTHON_LIB}
+
+# Add our custom shelf tools
+export HOUDINI_TOOLBAR_PATH=${PRODUCTION_TOOLS}/toolbar:${HOUDINI_TOOLBAR_PATH}
+
+# Add production and checkout otls to the OTL PATH.
+export HOUDINI_OTL_PATH=${OTLS_DIR}:${USER_DIR}/checkout/otls:${HOUDINI_PATH}
 
 ###############################################################################
 # Maya specific environment
