@@ -47,30 +47,13 @@ if [ ! -d "$ASSETS_DIR" ]; then
 	mkdir -p "$ASSETS_DIR"/set
 fi
 
-# Directory for models
-#export MODELS_DIR=${PRODUCTION_DIR}/models
-#if [ ! -d "$MODELS_DIR" ]; then
-#	mkdir -p "$MODELS_DIR"
-#fi
-
-# Directory for rigs
-#export RIGS_DIR=${PRODUCTION_DIR}/rigs
-#if [ ! -d "$RIGS_DIR" ]; then
-#	mkdir -p "$RIGS_DIR"
-#fi
-
-# Directory for animations
-#export ANIMATIONS_DIR=${PRODUCTION_DIR}/animations
-#if [ ! -d "$ANIMATION_DIR" ]; then
-#	mkdir -p "$ANIMATION_DIR"
-#fi
-
 # Directory for otls
 export OTLS_DIR=${PRODUCTION_DIR}/otls
 if [ ! -d "$OTLS_DIR" ]; then
     mkdir -p "$OTLS_DIR"
 fi
 
+export PYTHONPATH=${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${PROJECT_TOOLS}/python2.6libs:${PYTHONPATH}
 
 ###############################################################################
 # Houdini specific environment
@@ -86,7 +69,7 @@ export HSITE=/grp5
 export HOUDINI_PATH=${HOME}/houdini${HOUDINI_MAJOR_RELEASE}.${HOUDINI_MINOR_RELEASE}:${HSITE}/houdini${HOUDINI_MAJOR_RELEASE}.${HOUDINI_MINOR_RELEASE}:${HFS}/houdini
 
 # Add our custom python scripts
-export HOUDINI_PYTHON_LIB=${PRODUCTION_TOOLS}/python2.6libs:${HOUDINI_PYTHON_LIB}
+export HOUDINI_PYTHON_LIB=${PYTHONPATH}:${HOUDINI_PYTHON_LIB}
 
 # Add our custom shelf tools
 export HOUDINI_TOOLBAR_PATH=${PRODUCTION_TOOLS}/toolbar:${HOUDINI_TOOLBAR_PATH}
