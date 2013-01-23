@@ -1,4 +1,3 @@
-
 # Digital Asset management
 # Provides New, Add, Checkin, Checkout, Revert, and other functionality for .otl files
 # Author: Brian Kingery
@@ -252,7 +251,7 @@ def new():
 	done = False
 	ok = 0
 	while not done and ok ==0:
-		ok, resp = hou.ui.readInput("Enter the New Operator Lable", buttons=b, title="New OTL")
+		ok, resp = hou.ui.readInput("Enter the New Operator Label", buttons=b, title="New OTL")
 		if ok == 0:
 			name = formatName(resp)
 			filename = name.replace(' ', '_')
