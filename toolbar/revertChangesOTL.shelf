@@ -5,14 +5,14 @@
  Note, that two definitions of the same element are not allowed in
  a single file. -->
 
-  <tool name="RevertChanges" label="Revert" icon="PLASMA_App">
+  <tool name="RevertChanges" label="Discard" icon="PLASMA_App">
     <helpText><![CDATA[= Revert Asset =
 
 """Gets rid of any changes made to a checked out asset and allows the global asset to be checked out. This is to be used to easily throw away changes in a checked out asset that you are unhappy with."""
 
 NOTE:
     This tool is still under construction and may not work exactly as expected yet.]]></helpText>
-    <script scriptType="python"><![CDATA[import otlmanager as mgr
+    <script scriptType="python"><![CDATA[import hou_asset_mgr as mgr
 mgr.revertChanges()]]></script>
   </tool>
 </shelfDocument>

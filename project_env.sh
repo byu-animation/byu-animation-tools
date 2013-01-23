@@ -17,9 +17,10 @@ export PROJECT_NAME=owned
 
 # Root directory for the projcet (ie: /grp5/owned)
 # This directory should be created manually.
-export JOB=/grp5/${PROJECT_NAME}
+export JOB=/home/bkingery/Storage/byu-animation/${PROJECT_NAME}
 
-# Tools/scripts directory. This script should be placed here.
+# Tools/scripts directory. This project_env.sh script should be placed here.
+# along with the other tools and scripts.
 # Yes, its a chicken egg problem...
 export PROJECT_TOOLS=${JOB}/byu-animation-tools
 
@@ -34,26 +35,35 @@ export USER_DIR=${JOB}/users/${USER}
 if [ ! -d "$USER_DIR" ]; then
 	mkdir -p "$USER_DIR"
 	mkdir -p "$USER_DIR"/checkout
-	mkdir -p "$USER_DIR"/checkout/otls
+	mkdir -p "$USER_DIR"/otls
+fi
+
+# Root directory for assets
+export ASSETS_DIR=${PRODUCTION_DIR}/assets
+if [ ! -d "$ASSETS_DIR" ]; then
+	mkdir -p "$ASSETS_DIR"
+	mkdir -p "$ASSETS_DIR"/chars
+	mkdir -p "$ASSETS_DIR"/props
+	mkdir -p "$ASSETS_DIR"/set
 fi
 
 # Directory for models
-export MODELS_DIR=${PRODUCTION_DIR}/models
-if [ ! -d "$MODELS_DIR" ]; then
-	mkdir -p "$MODELS_DIR"
-fi
+#export MODELS_DIR=${PRODUCTION_DIR}/models
+#if [ ! -d "$MODELS_DIR" ]; then
+#	mkdir -p "$MODELS_DIR"
+#fi
 
 # Directory for rigs
-export RIGS_DIR=${PRODUCTION_DIR}/rigs
-if [ ! -d "$RIGS_DIR" ]; then
-	mkdir -p "$RIGS_DIR"
-fi
+#export RIGS_DIR=${PRODUCTION_DIR}/rigs
+#if [ ! -d "$RIGS_DIR" ]; then
+#	mkdir -p "$RIGS_DIR"
+#fi
 
 # Directory for animations
-export ANIMATIONS_DIR=${PRODUCTION_DIR}/animations
-if [ ! -d "$ANIMATION_DIR" ]; then
-	mkdir -p "$ANIMATION_DIR"
-fi
+#export ANIMATIONS_DIR=${PRODUCTION_DIR}/animations
+#if [ ! -d "$ANIMATION_DIR" ]; then
+#	mkdir -p "$ANIMATION_DIR"
+#fi
 
 # Directory for otls
 export OTLS_DIR=${PRODUCTION_DIR}/otls

@@ -10,7 +10,7 @@
 # Digital Asset management for Chasm
 # Add a digital asset.
 
-import otlmanager as mgr
+import hou_asset_mgr as mgr
 mgr.add()]]></script>
   </tool>
 </shelfDocument>

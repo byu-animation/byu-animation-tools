@@ -1,0 +1,6 @@
+#!/bin/csh -f
+
+source /usr/local/bin/houdini.csh
+echo $1
+houdini $1 &
+

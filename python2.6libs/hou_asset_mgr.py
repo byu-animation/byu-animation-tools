@@ -7,12 +7,12 @@ import sqlite3 as lite
 import os, glob
 import hou
 
-import assetManagerUtilities as amu
+import asset_mgr_utils as amu
 
 JOB=os.environ['JOB']
 USERNAME=os.environ['USER']
 OTLDIR=os.environ['OTLS_DIR']
-USERDIR=os.path.join(os.environ['USER_DIR'], 'checkout', 'otls')
+USERDIR=os.path.join(os.environ['USER_DIR'], 'otls')
 
 database=os.path.join(OTLDIR, '.otl.db')
 otlTableDef="otl_table(id INTEGER PRIMARY KEY, filename TEXT, locked INT, lockedby TEXT, UNIQUE(filename))"
@@ -236,14 +236,13 @@ def revertChanges():
 def formatName(name):
 	name = name.strip()
 	name = name.replace('_', ' ')
-	if name[:5].lower() != 'chasm':
-		#name = 'chasm_'+name
+	if name.split()[0].lower() != os.environ['PROJECT_NAME']:
 		name = str(os.environ['PROJECT_NAME'])+' '+name
 	return name.lower()
 
 def createAssetDirs(filename):
-	if not os.path.exists(os.path.join(os.environ['MODELS_DIR'], filename)):
-		amu.addVersionedFolder(os.environ['MODELS_DIR'], filename)
+	if not os.path.exists(os.path.join(os.environ['ASSETS_DIR'], filename)):
+		amu.addVersionedFolder(os.environ['ASSETS_DIR'], filename)
 
 def new():
 	updateDB()

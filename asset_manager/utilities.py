@@ -3,24 +3,17 @@ This module contains functionality to manage the animation project.
 @author: Morgan Strong, Brian Kingery
 """
 
-import os, time, shutil, glob, project
+import os, time, shutil, glob
 from ConfigParser import ConfigParser
 from subprocess import call
 
-# The project object is just a container to store persistent
-# project information.
-project = project.Project()
 def getProjectName():
-	#return project._name
 	return os.environ['PROJECT_NAME']
-def getProjectDir():
-	#return project._project_dir
-	return os.environ['PRODUCTION_DIR']
+def getAssetsDir():
+	return os.environ['ASSETS_DIR']
 def getUsername():
-	#return project._username
 	return os.environ['USER']
-def getUserDir():
-	#return project._local_dir
+def getUserCheckoutDir():
 	return os.path.join(os.environ['USER_DIR'], 'checkout')
 
 def getHoudiniPython():
@@ -32,63 +25,26 @@ def getMayapy():
 	"""precondition: MAYA_LOCATION environment variable is set correctly"""
 	return os.path.join(os.environ['MAYA_LOCATION'], "bin", "mayapy")
 
-def getNullReference():
-	"""@returns: The path to the .nullReference file used for symlinks"""
-	if not os.path.exists(os.path.join(getProjectDir(), '.nullReference')):
-		nullRef = open(os.path.join(getProjectDir(), '.nullReference'), "w")
-		nullRef.write("#This is a null reference for symlinks.\n#Nothing has been installed.")
-		nullRef.close()
-	return os.path.join(getProjectDir(), '.nullReference')
-
-#def _writeConfigFile(filePath, configParser):
-#	"""
-#	Will update the config file specified by filePath with the contents of configParser
-#	@precondition: filePath is a valid path
-#	@precondition: confgParser is an instance of ConfigParser()
-#	"""
-#	configFile = open(filePath, 'wb')
-#	configParser.write(configFile)
-
-#def _configureProject(parms, file_name):
-#	project._name = parms[0]
-#	project._project_dir = parms[1]
-#	project._username = parms[2]
-#	project._local_dir = parms[3]
-#	
-#	cp = ConfigParser()
-#	cp.add_section("Project")
-#	cp.add_section("User")
-#	cp.set("Project", "Name", getProjectName())
-#	cp.set("Project", "Directory", getProjectDir())
-#	cp.set("User", "Name", getUsername())
-#	cp.set("User", "Directory", getUserDir())
-#	
-#	_writeConfigFile(file_name, cp)
-
-def configureProject(file_name):
-	"""
-	Configures the Project based on the .config.ini file found in the
-	program's root directory. This function uses the ConfigParser python
-	module for functionality.
-	
-	@precondition: .config.ini file exists in the program's root directory.
-	@precondition: .config.ini file contains complete [Project], [User], and [Misc] sections.
-	
-	@postcondition: The project is configured with the given information:
-		Name, User's Name, Project Directory, and Local Directory.
-	"""
-	cp = ConfigParser()
-	cp.read(file_name)
-	
-	parms = []
-	parms.append(cp.get("Project", "Name"))
-	parms.append(cp.get("Project", "Directory"))
-	parms.append(cp.get("User", "Name"))
-	parms.append(cp.get("User", "Directory"))
-	
-	_configureProject(parms, file_name)
+#def getNullReference():
+#	"""@returns: The path to the .nullReference file used for symlinks"""
+#	if not os.path.exists(os.path.join(getAssetsDir(), '.nullReference')):
+#		nullRef = open(os.path.join(getAssetsDir(), '.nullReference'), "w")
+#		nullRef.write("#This is a null reference for symlinks.\n#Nothing has been installed.")
+#		nullRef.close()
+#	return os.path.join(getAssetsDir(), '.nullReference')
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Folder Management
+
+def _writeConfigFile(filePath, configParser):
+       """
+       Will update the config file specified by filePath with the contents of configParser
+       @precondition: filePath is a valid path
+       @precondition: confgParser is an instance of ConfigParser()
+       """
+       configFile = open(filePath, 'wb')
+       configParser.write(configFile)
+
+
 def createNodeInfoFile(dirPath):
 	"""
 	Creates the .nodeInfo file in the directory specified by dirPath.
@@ -117,21 +73,29 @@ def createNodeInfoFile(dirPath):
 def addVersionedFolder(parent, name):
 	new_dir = os.path.join(parent, name)
 	os.makedirs(os.path.join(new_dir, "src", "v0"))
-	os.makedirs(os.path.join(new_dir, "inst"))
-	os.makedirs(os.path.join(new_dir, "geo"))
-	os.makedirs(os.path.join(new_dir, "abc"))
-	os.makedirs(os.path.join(new_dir, "images"))
-	#os.symlink(os.path.join(new_dir, 'inst', getNullReference()), os.path.join(new_dir, 'inst','stable'))
+	os.makedirs(os.path.join(new_dir, "stable"))
+	os.makedirs(os.path.join(new_dir, 'stable', 'backups'))
+
+	#os.symlink(os.path.join(new_dir, 'stable', getNullReference()), os.path.join(new_dir, 'stable','stable'))
 	#TODO change for stable selection
-	os.symlink(getNullReference(), os.path.join(new_dir, 'inst','stable'))
+	#os.symlink(getNullReference(), os.path.join(new_dir, 'stable','stable'))
 	createNodeInfoFile(new_dir)
-	#TODO create otl
 	return new_dir
 
 def addProjectFolder(parent, name):
 	newPath = os.path.join(parent, name)
 	os.makedirs(newPath)
 	return newPath
+
+def createNewAssetFolders(parent, name):
+	new_dir = os.path.join(parent, name)
+	addProjectFolder(parent, name)
+	addVersionedFolder(new_dir, 'model')
+	addVersionedFolder(new_dir, 'rig')
+	addVersionedFolder(new_dir, 'animation')
+	os.makedirs(os.path.join(new_dir, "geo"))
+	os.makedirs(os.path.join(new_dir, "abc"))
+	os.makedirs(os.path.join(new_dir, "images"))
 
 def isEmptyFolder(dirPath):
 	return not bool(glob.glob(os.path.join(dirPath, '*')))
@@ -179,12 +143,7 @@ def isVersionedFolder(dirPath):
 		return False
 
 def isInstalled(dirPath):
-	stable = os.path.join(dirPath, "inst", "stable")
-	#print os.path.basename(os.readlink(stable))
-	if os.path.exists(os.readlink(stable)) and not os.path.basename(os.readlink(stable)) == ".nullReference":
-		return True
-	else:
-		return False
+	return bool(glob.glob(os.path.join(dirPath, 'stable', '*stable*')))
 
 def getVersionedFolderInfo(dirPath):
 	if not isVersionedFolder(dirPath):
@@ -201,13 +160,15 @@ def getVersionedFolderInfo(dirPath):
 	nodeInfo.append(cp.get("Versioning", "lastcheckintime"))
 	if isInstalled(dirPath):
 		nodeInfo.append("Yes")
-		nodeInfo.append(os.path.join(dirPath, "inst", "stable"))
+		nodeInfo.append(glob.glob(os.path.join(dirPath, 'stable', '*stable*'))[0])
 	else:
 		nodeInfo.append("No")
 		nodeInfo.append("")
 	return nodeInfo
 
-# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Checkout
+#################################################################################
+# Checkout
+#################################################################################
 def _createCheckoutInfoFile(dirPath, coPath, version, timestamp, lock):
 	"""
 	Creates a .checkoutInfo file in the directory specified by dirPath
@@ -269,12 +230,13 @@ def checkout(coPath, lock):
 	if nodeInfo.get("Versioning", "locked") == "False":
 		version = nodeInfo.get("Versioning", "latestversion")
 		toCopy = os.path.join(coPath, "src", "v"+version)
-		dest = os.path.join(getUserDir(), os.path.basename(os.path.dirname(coPath))+"_"+os.path.basename(coPath)+"_"+version)
+		dest = os.path.join(getUserCheckoutDir(), os.path.basename(os.path.dirname(coPath))+"_"+os.path.basename(coPath)+"_"+version)
 		
 		if(os.path.exists(toCopy)):
 			try:
 				shutil.copytree(toCopy, dest) # Make the copy
 			except Exception:
+				print "asset_mgr_utils, checkout: Could not copy files."
 				raise Exception("Could not copy files.")
 			timestamp = time.strftime("%a, %d %b %Y %I:%M:%S %p", time.localtime())
 			nodeInfo.set("Versioning", "lastcheckoutuser", getUsername())
@@ -290,7 +252,9 @@ def checkout(coPath, lock):
 		whenLocked = nodeInfo.get("Versioning", "lastcheckouttime")
 		raise Exception("Can not checkout. Folder is locked by "+whoLocked+" at "+whenLocked)
 
-# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Checkin
+################################################################################
+# Checkin
+################################################################################
 def canCheckin(toCheckin):
 	"""
 	@returns: True if destination is not locked by another user
@@ -360,6 +324,7 @@ def checkin(toCheckin):
 	newVersionPath = os.path.join(chkInDest, "src", "v"+str(newVersion))
 	
 	if not canCheckin(toCheckin):
+		print "Can not overwrite locked folder."
 		raise Exception("Can not overwrite locked folder.")
 	
 	# Checkin
@@ -379,7 +344,9 @@ def checkin(toCheckin):
 	shutil.rmtree(toCheckin)
 	os.remove(os.path.join(newVersionPath, ".checkoutInfo"))
 
-# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Install
+################################################################################
+# Install
+################################################################################
 def getAvailableInstallFiles(vDirPath):
 	"""
 	@returns: a list of all file paths in this directory
@@ -412,17 +379,26 @@ def _isMayaFile(filename):
 	name, ext = os.path.splitext(filename)
 	return ext in mayaExts
 	
-def install(vDirPath, srcFilePath, setStable):
+def install(vDirPath, srcFilePath):
 	"""
 	Installs a file for production use and flattens maya/houdini dependencies.
 	Use getAvailableInstallFiles(dirPath) to get a list of files.
 	@precondition: vDirPath and srcFilePath are valid paths
 	@postcondition: if setStable == True then stable symlink will point to filename
 	"""
-	instDir = os.path.join(vDirPath, "inst")
-	numFiles = len(glob.glob(os.path.join(instDir, '*')))
-	instName, instExt = os.path.splitext(os.path.basename(srcFilePath))
-	newInstFilePath = os.path.join(instDir, instName + '_' + str(numFiles) + instExt)
+	print 'utilities, install'
+	stableDir = os.path.join(vDirPath, "stable")
+	backupsDir = os.path.join(stableDir, 'backups')
+	numFiles = len(glob.glob(os.path.join(backupsDir, '*')))
+	
+	srcName, srcExt = os.path.splitext(os.path.basename(srcFilePath))
+	stableName = os.path.basename(os.path.dirname(vDirPath))+"_"+os.path.basename(vDirPath)+"_stable"
+	
+	# Backup old stable file
+	if os.path.exists(os.path.join(stableDir, stableName+srcExt)):
+		shutil.move(os.path.join(stableDir, stableName+srcExt), os.path.join(backupsDir, stableName+'_'+str(numFiles)+srcExt))
+	
+	newInstFilePath = os.path.join(stableDir, stableName+srcExt)
 	
 	if _isHoudiniFile(newInstFilePath):
 		call([getHoudiniPython(), "installHoudiniFile.py", srcFilePath, newInstFilePath])
@@ -430,9 +406,6 @@ def install(vDirPath, srcFilePath, setStable):
 		call([getMayapy(), "installMayaFile.py", srcFilePath, newInstFilePath])
 	else:
 		#Just copy the file
+		print 'copying file...'
 		shutil.copy(srcFilePath, newInstFilePath)
 	
-	if setStable:
-		#TODO os.symlink() doesn't work in windows
-		os.unlink(os.path.join(instDir, 'stable'))
-		os.symlink(newInstFilePath, os.path.join(instDir, 'stable'))

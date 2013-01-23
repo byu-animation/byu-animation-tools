@@ -6,7 +6,7 @@
  a single file. -->
 
   <tool name="unlock DB" label="unlock" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[import otlmanager as mgr
+    <script scriptType="python"><![CDATA[import hou_asset_mgr as mgr
 
 message = 'WARNING! You are unlocking the Database! \n If you are being dumb, please click \n CANCEL!'
 b = ('OK', 'Cancel')
@@ -19,17 +19,7 @@ if ok == 0:
     else:
         hou.ui.displayMessage('Thank you for being safe. \n If you have question please talk to Brian, Morgan, or Ethan')
 else:
-    hou.ui.displayMessage('Thank you for being safe. \n If you have question please talk to Brian, Morgan, or Ethan')]]></script>
+    hou.ui.displayMessage('Thank you for being safe. \n If you have question please talk to a Technical Lead')]]></script>
   </tool>
 
-  <tool name="unlock DB0" label="unlock" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[import otlmanager as mgr
-
-message = 'WARNING! You are unlocking the Database! \n If you are being dumb, please click Cancle'
-
-ok = 0
-
-ok = hou.ui.readInput(message, ('OK', 'Cancel'))
-#mgr.unlockOTL()]]></script>
-  </tool>
 </shelfDocument>

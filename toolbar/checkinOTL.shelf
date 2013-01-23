@@ -16,7 +16,7 @@ NOTE:
 # Digital Asset management for Chasm
 # Checkin a Digital Asset and releas it for others use
 
-import otlmanager as mgr
+import hou_asset_mgr as mgr
 mgr.checkin()]]></script>
   </tool>
 </shelfDocument>

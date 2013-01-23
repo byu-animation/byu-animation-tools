@@ -15,7 +15,7 @@ Once the asset has been checked in again, then another user may check it out. Th
 # Digital Asset management for Chasm: Attempt to claim a Digital Asset and Edit it
 # If someone else has already claimed it for editing you will not be permitted to do so
 
-import otlmanager as mgr
+import hou_asset_mgr as mgr
 mgr.checkout()]]></script>
   </tool>
 </shelfDocument>
