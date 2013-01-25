@@ -9,8 +9,8 @@ from subprocess import call
 
 def getProjectName():
 	return os.environ['PROJECT_NAME']
-def getAssetsDir():
-	return os.environ['ASSETS_DIR']
+def getProductionDir():
+	return os.environ['PRODUCTION_DIR']
 def getUsername():
 	return os.environ['USER']
 def getUserCheckoutDir():
@@ -27,11 +27,11 @@ def getMayapy():
 
 #def getNullReference():
 #	"""@returns: The path to the .nullReference file used for symlinks"""
-#	if not os.path.exists(os.path.join(getAssetsDir(), '.nullReference')):
-#		nullRef = open(os.path.join(getAssetsDir(), '.nullReference'), "w")
+#	if not os.path.exists(os.path.join(getProductionDir(), '.nullReference')):
+#		nullRef = open(os.path.join(getProductionDir(), '.nullReference'), "w")
 #		nullRef.write("#This is a null reference for symlinks.\n#Nothing has been installed.")
 #		nullRef.close()
-#	return os.path.join(getAssetsDir(), '.nullReference')
+#	return os.path.join(getProductionDir(), '.nullReference')
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Folder Management
 
@@ -92,7 +92,6 @@ def createNewAssetFolders(parent, name):
 	addProjectFolder(parent, name)
 	addVersionedFolder(new_dir, 'model')
 	addVersionedFolder(new_dir, 'rig')
-	os.makedirs(os.path.join(new_dir, 'animation'))
 	os.makedirs(os.path.join(new_dir, "geo"))
 	os.makedirs(os.path.join(new_dir, "abc"))
 	os.makedirs(os.path.join(new_dir, "images"))
@@ -272,7 +271,6 @@ def canCheckin(toCheckin):
 	locked = nodeInfo.getboolean("Versioning", "locked")
 	latestVersion = nodeInfo.getint("Versioning", "latestversion")
 	
-	#TODO raise different exceptions to give override options to the user
 	result = True
 	if lockedbyme == False:
 		if locked == True:

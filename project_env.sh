@@ -15,9 +15,9 @@
 # The name of the project (ie: owned)
 export PROJECT_NAME=owned
 
-# Root directory for the projcet (ie: /grp5/owned)
+# Root directory for the projcet (ie: /groups/owned)
 # This directory should be created manually.
-export JOB=/home/bkingery/Storage/byu-animation/${PROJECT_NAME}
+export JOB=/groups/${PROJECT_NAME}
 
 # Tools/scripts directory. This project_env.sh script should be placed here.
 # along with the other tools and scripts.
@@ -42,9 +42,18 @@ fi
 export ASSETS_DIR=${PRODUCTION_DIR}/assets
 if [ ! -d "$ASSETS_DIR" ]; then
 	mkdir -p "$ASSETS_DIR"
-	#mkdir -p "$ASSETS_DIR"/chars
-	#mkdir -p "$ASSETS_DIR"/props
-	#mkdir -p "$ASSETS_DIR"/set
+fi
+
+# Root directory for animation
+export ANIMATION_DIR=${PRODUCTION_DIR}/animation
+if [ ! -d "$ANIMATION_DIR" ]; then
+	mkdir -p "$ANIMATION_DIR"
+fi
+
+# Root directory for lighting files
+export LIGHTING_DIR=${PRODUCTION_DIR}/lighting
+if [ ! -d "$LIGHTING_DIR" ]; then
+	mkdir -p "$LIGHTING_DIR"
 fi
 
 # Directory for otls
