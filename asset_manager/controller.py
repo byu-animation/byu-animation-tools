@@ -90,6 +90,9 @@ def runNew(ui):
 			if curItem.text(0) == 'assets':
 				newPath = createNewAssetFolders(ui.getTreeItemPath(curItem, getProductionDir()), folderName)
 				refreshTree(ui)
+			elif curItem.text(0) == 'lighting' or curItem.text(0) == 'animation':
+				newPath = addVersionedFolder(ui.getTreeItemPath(curItem, getProductionDir()), folderName)
+				curItem.addChildren(convertToProjectTreeItems([newPath]))
 		#    if folderType == 0:
 		#        newPath = addProjectFolder(ui.getTreeItemPath(curItem, getProductionDir()), folderName)
 		#    else:

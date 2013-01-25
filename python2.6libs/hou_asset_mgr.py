@@ -6,7 +6,7 @@ import sqlite3 as lite
 import os, glob
 import hou
 
-import asset_mgr_utils as amu
+import utilities as amu #asset manager utilites
 
 JOB=os.environ['JOB']
 USERNAME=os.environ['USER']
@@ -239,10 +239,6 @@ def formatName(name):
 		name = str(os.environ['PROJECT_NAME'])+' '+name
 	return name.lower()
 
-def createAssetDirs(filename):
-	if not os.path.exists(os.path.join(os.environ['ASSETS_DIR'], filename)):
-		amu.addVersionedFolder(os.environ['ASSETS_DIR'], filename)
-
 def new():
 	updateDB()
 	templateNode = hou.node("/obj").createNode("newGeoTemplate")
@@ -262,7 +258,8 @@ def new():
 				hou.node('/obj').createNode(filename)
 				#clean up
 				templateNode.destroy()
-				#createAssetDirs(filename)
+				#create file heirarchy
+				amu.createNewAssetFolders(os.environ['ASSETS_DIR'], filename)
 				done = True
 			else:
 				hou.ui.displayMessage("OTL Alread Exists. Choose a different name.")

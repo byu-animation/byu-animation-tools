@@ -15,9 +15,9 @@
 # The name of the project (ie: owned)
 export PROJECT_NAME=owned
 
-# Root directory for the projcet (ie: /grp5/owned)
+# Root directory for the projcet (ie: /groups/owned)
 # This directory should be created manually.
-export JOB=/home/bkingery/Storage/byu-animation/${PROJECT_NAME}
+export JOB=/groups/${PROJECT_NAME}
 
 # Tools/scripts directory. This project_env.sh script should be placed here.
 # along with the other tools and scripts.
