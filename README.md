@@ -14,3 +14,6 @@ TODO:
 -create file structure when otl is created, and add .obj to the geo folder
 
 -modify to allow for 'stable' selection
+
+### Tips
+Make sure you check the WIKI to see tutorials and tips!
