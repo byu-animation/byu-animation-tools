@@ -29,7 +29,7 @@ def runCheckout(ui):
     tabNum = ui.fileTabs.currentIndex()
     if tabNum == 1:
         curItem = ui.projectFilesTreeWidget.currentItem()
-        coPath = ui.getTreeItemPath(curItem, getAssetsDir())
+        coPath = ui.getTreeItemPath(curItem, getProductionDir())
         try:
             #TODO ask about locking?
             checkout(coPath, True)
@@ -66,7 +66,7 @@ def runInstall(ui):
     tabNum = ui.fileTabs.currentIndex()
     if tabNum == 1:
         curItem = ui.projectFilesTreeWidget.currentItem()
-        vDirPath = ui.getTreeItemPath(curItem, getAssetsDir())
+        vDirPath = ui.getTreeItemPath(curItem, getProductionDir())
         files = getAvailableInstallFiles(vDirPath)
         selected = ui.file_select_dialog.selectFile(convertToFileSelectionDialogItems(files))
         if not selected == None:
@@ -76,33 +76,32 @@ def runInstall(ui):
     else:
         ui.errorMessage.showMessage("You can only install project files")
 
-def allowSubDirs(curItem):
-	return curItem.parent() is None
 
 def runNew(ui):
 	if ui.fileTabs.currentIndex() == 1:
 		curItem = ui.projectFilesTreeWidget.currentItem()
-		if curItem != None and curItem.isSelected() and isVersionedFolder(ui.getTreeItemPath(curItem, getAssetsDir())):
+		if curItem != None and curItem.isSelected() and isVersionedFolder(ui.getTreeItemPath(curItem, getProductionDir())):
 			return
 		folderName = ui.newFolderDialog.getNewFolder()
-		newPath = createNewAssetFolders(getAssetsDir(), folderName)
 		#ui.projectFilesTreeWidget.addTopLevelItems(convertToProjectTreeItems([newPath]))
-		refreshTree(ui)
 		#if folderType == None or folderName == None:
 		#    return
-		#if curItem != None and curItem.isSelected():# and allowSubDirs(curItem):
+		if curItem != None and curItem.isSelected():
+			if curItem.text(0) == 'assets':
+				newPath = createNewAssetFolders(ui.getTreeItemPath(curItem, getProductionDir()), folderName)
+				refreshTree(ui)
 		#    if folderType == 0:
-		#        newPath = addProjectFolder(ui.getTreeItemPath(curItem, getAssetsDir()), folderName)
+		#        newPath = addProjectFolder(ui.getTreeItemPath(curItem, getProductionDir()), folderName)
 		#    else:
-		#        newPath = addVersionedFolder(ui.getTreeItemPath(curItem, getAssetsDir()), folderName)
+		#        newPath = addVersionedFolder(ui.getTreeItemPath(curItem, getProductionDir()), folderName)
 		#    curItem.addChildren(convertToProjectTreeItems([newPath]))
 		#else:
 		#    if folderType == 0:
-		#        newPath = addProjectFolder(getAssetsDir(), folderName)
+		#        newPath = addProjectFolder(getProductionDir(), folderName)
 		#    else:
-		#        newPath = addVersionedFolder(getAssetsDir(), folderName)
+		#        newPath = addVersionedFolder(getProductionDir(), folderName)
 		#    ui.projectFilesTreeWidget.addTopLevelItems(convertToProjectTreeItems([newPath]))
-		#createNewAssetFolders(getAssetsDir(), folderName)
+		#createNewAssetFolders(getProductionDir(), folderName)
 		#refreshTree(ui)
 	else:
 		print "local new"
@@ -115,7 +114,7 @@ def runRename(ui):
         if ok:
             name = str(a)
             try:
-                renameFolder(ui.getTreeItemPath(curItem, getAssetsDir()), name)
+                renameFolder(ui.getTreeItemPath(curItem, getProductionDir()), name)
                 curItem.setText(0, name)
             except Exception:
                 ui.errorMessage.showMessage("Error")
@@ -123,7 +122,7 @@ def runRename(ui):
 def runRemove(ui):
     if ui.fileTabs.currentIndex() == 1:
         curItem = ui.projectFilesTreeWidget.currentItem()
-        curItemPath = str(ui.getTreeItemPath(curItem, getAssetsDir()))
+        curItemPath = str(ui.getTreeItemPath(curItem, getProductionDir()))
         if not isEmptyFolder(curItemPath):
             warning = "Folder NOT empty! You will destroy data! \nContinue?"
             reply = ui.messageBox.question(ui._MainWindow,'Warning', warning, QMessageBox.Yes, QMessageBox.No)
@@ -153,7 +152,7 @@ def refreshTree(ui):
 		populateProjectTree(ui)
 
 def runSettings(ui):
-    settings = 'Username: '+getUsername()+'\nProject Folder: '+getAssetsDir()+'\nChecked Out Folder: '+getUserCheckoutDir()
+    settings = 'Username: '+getUsername()+'\nProject Folder: '+getProductionDir()+'\nChecked Out Folder: '+getUserCheckoutDir()
     ui.messageBox.information(ui._MainWindow, 'Settings', settings)
 
 
@@ -202,7 +201,7 @@ def setProjectTreeVersionedItemInfo(pTreeItem, curDir):
 
 def populateProjectTree(ui):
     ui.projectFilesTreeWidget.clear()
-    recurseProjectFiles(ui, ui.projectFilesTreeWidget, getAssetsDir())
+    recurseProjectFiles(ui, ui.projectFilesTreeWidget, getProductionDir())
     ui.projectFilesTreeWidget.sortItems(0,0)
 
 def recurseProjectFiles(ui, parent, curDir):
@@ -241,7 +240,7 @@ def enableComponents(ui):
 		curItem = ui.projectFilesTreeWidget.currentItem()	
 
 		if curItem and curItem.isSelected():
-			curItemPath = ui.getTreeItemPath(curItem, getAssetsDir())
+			curItemPath = ui.getTreeItemPath(curItem, getProductionDir())
 			#if curItem.text(2):
 			if isVersionedFolder(curItemPath):
 				ui.actionNew.setEnabled(False)
@@ -252,7 +251,7 @@ def enableComponents(ui):
 				ui.actionRename.setEnabled(True)
 			if canRemove(curItemPath):
 				ui.actionRemove.setEnabled(True)
-			ui.actionNew.setEnabled(allowSubDirs(curItem))
+			#ui.actionNew.setEnabled(True)
 	# Local Tab Open
 	else:
 		ui.actionNew.setEnabled(False)

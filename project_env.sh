@@ -42,9 +42,18 @@ fi
 export ASSETS_DIR=${PRODUCTION_DIR}/assets
 if [ ! -d "$ASSETS_DIR" ]; then
 	mkdir -p "$ASSETS_DIR"
-	#mkdir -p "$ASSETS_DIR"/chars
-	#mkdir -p "$ASSETS_DIR"/props
-	#mkdir -p "$ASSETS_DIR"/set
+fi
+
+# Root directory for animation
+export ANIMATION_DIR=${PRODUCTION_DIR}/animation
+if [ ! -d "$ANIMATION_DIR" ]; then
+	mkdir -p "$ANIMATION_DIR"
+fi
+
+# Root directory for lighting files
+export LIGHTING_DIR=${PRODUCTION_DIR}/lighting
+if [ ! -d "$LIGHTING_DIR" ]; then
+	mkdir -p "$LIGHTING_DIR"
 fi
 
 # Directory for otls
