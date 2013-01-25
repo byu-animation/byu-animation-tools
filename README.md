@@ -17,3 +17,4 @@ TODO:
 
 ### Tips
 Make sure you check the WIKI to see tutorials and tips!
+Did you get it?
