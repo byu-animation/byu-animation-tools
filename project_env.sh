@@ -42,9 +42,9 @@ fi
 export ASSETS_DIR=${PRODUCTION_DIR}/assets
 if [ ! -d "$ASSETS_DIR" ]; then
 	mkdir -p "$ASSETS_DIR"
-	mkdir -p "$ASSETS_DIR"/chars
-	mkdir -p "$ASSETS_DIR"/props
-	mkdir -p "$ASSETS_DIR"/set
+	#mkdir -p "$ASSETS_DIR"/chars
+	#mkdir -p "$ASSETS_DIR"/props
+	#mkdir -p "$ASSETS_DIR"/set
 fi
 
 # Directory for otls

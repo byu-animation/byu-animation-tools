@@ -92,10 +92,11 @@ def createNewAssetFolders(parent, name):
 	addProjectFolder(parent, name)
 	addVersionedFolder(new_dir, 'model')
 	addVersionedFolder(new_dir, 'rig')
-	addVersionedFolder(new_dir, 'animation')
+	os.makedirs(os.path.join(new_dir, 'animation'))
 	os.makedirs(os.path.join(new_dir, "geo"))
 	os.makedirs(os.path.join(new_dir, "abc"))
 	os.makedirs(os.path.join(new_dir, "images"))
+	return new_dir
 
 def isEmptyFolder(dirPath):
 	return not bool(glob.glob(os.path.join(dirPath, '*')))

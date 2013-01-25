@@ -85,11 +85,12 @@ def runNew(ui):
 		if curItem != None and curItem.isSelected() and isVersionedFolder(ui.getTreeItemPath(curItem, getAssetsDir())):
 			return
 		folderName = ui.newFolderDialog.getNewFolder()
+		newPath = createNewAssetFolders(getAssetsDir(), folderName)
+		#ui.projectFilesTreeWidget.addTopLevelItems(convertToProjectTreeItems([newPath]))
+		refreshTree(ui)
 		#if folderType == None or folderName == None:
 		#    return
-		if curItem != None and curItem.isSelected() and allowSubDirs(curItem):
-			createNewAssetFolders(ui.getTreeItemPath(curItem, getAssetsDir()), folderName)
-			curItem.addChildren(convertToProjectTreeItems([newPath]))
+		#if curItem != None and curItem.isSelected():# and allowSubDirs(curItem):
 		#    if folderType == 0:
 		#        newPath = addProjectFolder(ui.getTreeItemPath(curItem, getAssetsDir()), folderName)
 		#    else:
@@ -230,7 +231,7 @@ def enableComponents(ui):
 		ui.actionCheckin.setEnabled(False)
 		ui.actionOpen_File.setEnabled(False)
 		
-		ui.actionNew.setEnabled(False)
+		ui.actionNew.setEnabled(True)
 		ui.actionCheckout.setEnabled(False)
 		ui.actionInstall.setEnabled(False)
 		ui.actionCache_to_Alembic.setEnabled(False)
@@ -243,7 +244,7 @@ def enableComponents(ui):
 			curItemPath = ui.getTreeItemPath(curItem, getAssetsDir())
 			#if curItem.text(2):
 			if isVersionedFolder(curItemPath):
-				#ui.actionNew.setEnabled(False)
+				ui.actionNew.setEnabled(False)
 				ui.actionCheckout.setEnabled(True)
 				ui.actionInstall.setEnabled(True)
 				ui.actionCache_to_Alembic.setEnabled(True)
