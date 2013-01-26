@@ -1,0 +1,9 @@
+{
+    "buttons":[
+        {
+            "icon":"brent.xpm",
+            "annotation":"Print an inspirational quote from Brent to the command line.",
+            "python_file":"brent.py"
+        }
+    ]
+}
