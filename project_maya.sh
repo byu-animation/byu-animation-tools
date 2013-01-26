@@ -5,7 +5,8 @@
 
 # source project environment
 source project_env.sh
+export BYU_MAYA_SHELF_DIR=${PROJECT_TOOLS}/maya-tools/shelf
 
 echo "Starting Maya..."
-maya
+maya -script ${BYU_MAYA_SHELF_DIR}/byu_shelf.mel
 
