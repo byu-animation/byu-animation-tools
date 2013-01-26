@@ -12,5 +12,5 @@ cd -
 source project_env.sh
 
 echo "Starting Houdini..."
-houdini
+houdinifx
 
