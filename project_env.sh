@@ -75,13 +75,13 @@ export HOUDINI_USE_HFS_PYTHON=1
 export HSITE=/grp5
 
 # Include GLOBAL_DIR in Houdini path, so we will pick up project settings and assets.
-export HOUDINI_PATH=${HOME}/houdini${HOUDINI_MAJOR_RELEASE}.${HOUDINI_MINOR_RELEASE}:${HSITE}/houdini${HOUDINI_MAJOR_RELEASE}.${HOUDINI_MINOR_RELEASE}:${HFS}/houdini
+export HOUDINI_PATH=${HOME}/houdini${HOUDINI_MAJOR_RELEASE}.${HOUDINI_MINOR_RELEASE}:${HSITE}/houdini${HOUDINI_MAJOR_RELEASE}.${HOUDINI_MINOR_RELEASE}:${PRODUCTION_DIR}:${HFS}/houdini
 
 # Add our custom python scripts
 export HOUDINI_PYTHON_LIB=${PYTHONPATH}:${HOUDINI_PYTHON_LIB}
 
 # Add our custom shelf tools
-export HOUDINI_TOOLBAR_PATH=${PRODUCTION_TOOLS}/toolbar:${HOUDINI_TOOLBAR_PATH}
+export HOUDINI_TOOLBAR_PATH=${PROJECT_TOOLS}:${HOUDINI_PATH}
 
 # Add production and checkout otls to the OTL PATH.
 export HOUDINI_OTL_PATH=${OTLS_DIR}:${USER_DIR}/checkout/otls:${HOUDINI_PATH}

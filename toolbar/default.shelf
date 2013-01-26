@@ -6,7 +6,7 @@
  a single file. -->
 
   <shelfSet name="shelf_set_1" label="Create and Refine">
-    <memberToolshelf name="chasm_tools"/>
+    <memberToolshelf name="byu_tools"/>
     <memberToolshelf name="create"/>
     <memberToolshelf name="modify"/>
     <memberToolshelf name="model"/>
@@ -20,7 +20,7 @@
   </shelfSet>
 
   <shelfSet name="shelf_set_td" label="Technical Director">
-    <memberToolshelf name="chasm_tools"/>
+    <memberToolshelf name="byu_tools"/>
     <memberToolshelf name="create"/>
     <memberToolshelf name="modify"/>
     <memberToolshelf name="model"/>
