@@ -1,7 +1,7 @@
 byu-animation-tools
 =============
 
-This is a code base for BYU Animation scrips and tools.
+This is a code base for BYU Animation scripts and tools.
 
 **Place the byu-animation-tools folder inside the ${JOB} folder**
 
