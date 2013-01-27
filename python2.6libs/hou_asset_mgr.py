@@ -11,6 +11,7 @@ import utilities as amu #asset manager utilites
 JOB=os.environ['JOB']
 USERNAME=os.environ['USER']
 OTLDIR=os.environ['OTLS_DIR']
+ASSETSDIR=os.environ['ASSETS_DIR']
 USERDIR=os.path.join(os.environ['USER_DIR'], 'otls')
 
 database=os.path.join(OTLDIR, '.otl.db')
@@ -155,11 +156,20 @@ def getFileInfo(filename):
     con.close()
     return info
 
-def lockAsset(node, lockit):
+def isContainer(node):
     ndef = node.type().definition()
     nsec = ndef.sections()['Tools.shelf']
     contents = str(nsec.contents())
     if contents.find('Container Assets') != -1:
+        return True
+    else:
+        return False
+
+def lockAsset(node, lockit):
+    if isContainer(node):
+        ndef = node.type().definition()
+        nsec = ndef.sections()['Tools.shelf']
+        contents = str(nsec.contents())
         opts = ndef.options()
         opts.setLockContents(lockit)
         ndef.setOptions(opts)
@@ -252,37 +262,79 @@ def formatName(name):
         name = str(os.environ['PROJECT_NAME']) + ' ' + name
     return name.lower()
 
+def listContainers():
+    dirlist = list()
+    for root,dirs,files in os.walk(ASSETSDIR):
+        if root != ASSETSDIR:
+            break
+        else:
+            for dir in dirs:
+                dirlist.append(dir)
+    return dirlist
+
+def newContainer():
+    templateNode = hou.node("/obj").createNode("containerTemplate")
+    templateNode.hide(True)
+    ok, resp = hou.ui.readInput("Enter the New Operator Label", buttons=('OK', 'Cancel'), title="OTL Label")
+    if ok == 0 and resp.strip() != '':
+        name = formatName(resp)
+        filename = name.replace(' ', '_')
+        newfilepath = os.path.join(OTLDIR, filename+'.otl')
+        if not os.path.exists(newfilepath):
+            # create file heirarchy if container asset
+            amu.createNewAssetFolders(ASSETSDIR, filename)
+            templateNode.type().definition().copyToHDAFile(newfilepath, new_name=filename, new_menu_name=name)
+            hou.hda.installFile(newfilepath, change_oplibraries_file=True)
+            newnode = hou.node('/obj').createNode(filename)
+        else:
+            hou.ui.displayMessage("Asset by that name already exists. Cannot create asset.", title='Asset Name', severity=hou.severityType.Error)
+        
+    # clean up
+    templateNode.destroy()
+
+def newGeo():
+    templateNode = hou.node("/obj").createNode("geometryTemplate")
+    templateNode.hide(True)
+    ok, resp = hou.ui.readInput("Enter the New Operator Label", buttons=('OK', 'Cancel'), title="OTL Label")
+    if ok == 0 and resp.strip() != '':
+        name = formatName(resp)
+        filename = name.replace(' ', '_')
+        newfilepath = os.path.join(OTLDIR, filename+'.otl')
+        if not os.path.exists(newfilepath):
+            alist = listContainers()
+            answer = hou.ui.selectFromList(alist, exclusive=True, message='Select Container Asset this belongs to:')[0]
+            if not answer:
+                hou.ui.displayMessage("Geometry assets must be associated with a container asset! Geometry asset not created.", severity=hou.severityType.Error)
+                templateNode.destroy()
+                return
+            templateNode.type().definition().copyToHDAFile(newfilepath, new_name=filename, new_menu_name=name)
+            hou.hda.installFile(newfilepath, change_oplibraries_file=True)
+            newnode = hou.node('/obj').createNode(filename)
+            sdir = '$JOB/PRODUCTION/assets/'
+            gfile = hou.ui.selectFile(start_directory=sdir + alist[answer]+'/geo', title='Choose Geometry', chooser_mode=hou.fileChooserMode.Read)
+            if len(gfile) > 4 and gfile[:4] != '$JOB':
+                hou.ui.displayMessage("Path must start with '$JOB'. Default geometry used.", title='Path Name', severity=hou.severityType.Error)
+                templateNode.destroy()
+                return
+            elif gfile != '':
+                ndef = newnode.type().definition()
+                newnode.allowEditingOfContents()
+                hou.parm(newnode.path() + '/read_file/file').set(gfile)
+                ndef.updateFromNode(newnode)
+                newnode.matchCurrentDefinition()
+        else:
+            hou.ui.displayMessage("Asset by that name already exists. Cannot create asset.", title='Asset Name', severity=hou.severityType.Error)
+    # clean up
+    templateNode.destroy()
+
 def new():
     updateDB()
     otb = ('Container', 'Geometry', 'Cancel')
-    ok = hou.ui.displayMessage("Choose operator type.", buttons=otb, title='Asset Type')
-    if ok == 1:
-        templateNode = hou.node("/obj").createNode("geometryTemplate")
-    elif ok == 0:
-        templateNode = hou.node("/obj").createNode("containerTemplate")
-    else:
-        return
-    templateNode.hide(True)
-    b = ('OK', 'Cancel')
-    done = False
-    ok = 0
-    while not done and ok ==0:
-        ok, resp = hou.ui.readInput("Enter the New Operator Label", buttons=b, title="OTL Label")
-        if ok == 0 and resp.strip() != '':
-            name = formatName(resp)
-            filename = name.replace(' ', '_')
-            newfilepath = os.path.join(OTLDIR, filename+'.otl')
-            if not os.path.exists(newfilepath):
-                templateNode.type().definition().copyToHDAFile(newfilepath, new_name=filename, new_menu_name=name)
-                hou.hda.installFile(newfilepath, change_oplibraries_file=True)
-                hou.node('/obj').createNode(filename)
-                #clean up
-                templateNode.destroy()
-                #create file heirarchy
-                amu.createNewAssetFolders(os.environ['ASSETS_DIR'], filename)
-                done = True
-            else:
-                hou.ui.displayMessage("OTL Already Exists. Choose a different name.")
+    optype = hou.ui.displayMessage("Choose operator type.", buttons=otb, title='Asset Type')
+    if optype == 0:
+        newContainer()
+    elif optype == 1:
+        newGeo()
 
 def add():
     """Adds the selected node. EXACTLY ONE node may be selected, and it MUST be a digital asset.
@@ -305,10 +357,4 @@ def add():
                 hou.ui.displayMessage("Already Added")
     else:
         hou.ui.displayMessage("Select EXACTLY one node.")
-
-
-
-
-
-
 
