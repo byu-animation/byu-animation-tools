@@ -251,6 +251,7 @@ def checkout(coPath, lock):
 		whoLocked = nodeInfo.get("Versioning", "lastcheckoutuser")
 		whenLocked = nodeInfo.get("Versioning", "lastcheckouttime")
 		raise Exception("Can not checkout. Folder is locked by "+whoLocked+" at "+whenLocked)
+	return dest
 
 ################################################################################
 # Checkin
