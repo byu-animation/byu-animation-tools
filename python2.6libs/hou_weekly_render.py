@@ -4,14 +4,56 @@ import xmlrpclib
 # Connect to the HQueue server.
 hq_server = xmlrpclib.ServerProxy( "http://hqueue:5000")
 
+# Make sure the server is running.
+try:
+         hq_server.ping()
+except:
+         print "HQueue server is down."
+
+
 # Define a job which renders an image from an IFD using Mantra.
-job_spec = { 
-         "name":	 "Render My Image",
-         "shell":	 "bash",
+job_name = "Weekly Render"
+ifd_path = "$JOB/" #TODO set by user
+frames_to_render = {1,2,3} #TODO set by user
+job_spec = 
+{ 
+         "name":	job_name,
+         "shell":	"bash",
          "command": 
                   "cd $HQROOT/houdini_distros/hfs;"
                   + " source houdini_setup;"
-                  + " mantra < $HQROOT/path/to/ifds/some_frame.ifd"
+						+ "for F in " + ifd_path + "*.ifd"
+						+ "do"
+						+ "echo Doing ifd: $F"
+						+ "mantra -f $F"
+						+ "echo Finished ifd: $F"
+						+ "done"
+         "children": [ 
+                  { 
+                           "name":	"Render Frame " + frames_to_render[0],
+                           "shell":	"bash",
+                           "command": 
+                           "cd $HQROOT/houdini_distros/hfs; 
+                           source houdini_setup; 
+                           mantra < " + ifd_path + "frame0" + frames_to_render[0] +".ifd"
+                  },
+                  { 
+                           "name":	"Render Frame " + frames_to_render[1],
+                           "shell":	"bash",
+                           "command": 
+                           "cd $HQROOT/houdini_distros/hfs; 
+                           source houdini_setup; 
+                           mantra < " + ifd_path + "frame0"+ frames_to_render[1]+".ifd"
+                  },
+                  { 
+                           "name":	"Render Frame " + frames_to_render[2],
+                           "shell":	"bash",
+                           "command": 
+                           "cd $HQROOT/houdini_distros/hfs; 
+                           source houdini_setup; 
+                           mantra < " + ifd_path + "frame0"+ frames_to_render[2] + ".ifd"
+                  },
+         ]
 }
 
 # Submit the job to the server.
