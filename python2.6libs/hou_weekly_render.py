@@ -14,46 +14,38 @@ except:
 # Define a job which renders an image from an IFD using Mantra.
 job_name = "Weekly Render"
 ifd_path = "$JOB/" #TODO set by user
-frames_to_render = {1,2,3} #TODO set by user
+output_path = "$JOB/" #TODO set by user
+frames_to_render = [1,2,3] #TODO set by user
+
+# generate frame-specific jobs
+children = []
+for frame in frames_to_render:
+		child = { 
+                        "name":	"Render Frame " + frame,
+                        "shell":	"bash",
+                        "command": 
+                        "cd $HQROOT/houdini_distros/hfs; 
+                        source houdini_setup; 
+                        cd "+ifd_path+"
+                        mantra < " + ifd_path + "frame0" + frame +".ifd"
+               }
+		children.append(child)
+
 job_spec = 
 { 
          "name":	job_name,
          "shell":	"bash",
          "command": 
-                  "cd $HQROOT/houdini_distros/hfs;"
-                  + " source houdini_setup;"
+                  "cd $HQROOT/houdini_distros/hfs"
+                  + "source houdini_setup"
+                  + "cd " + output_path +";"
 						+ "for F in " + ifd_path + "*.ifd"
 						+ "do"
 						+ "echo Doing ifd: $F"
 						+ "mantra -f $F"
 						+ "echo Finished ifd: $F"
 						+ "done"
-         "children": [ 
-                  { 
-                           "name":	"Render Frame " + frames_to_render[0],
-                           "shell":	"bash",
-                           "command": 
-                           "cd $HQROOT/houdini_distros/hfs; 
-                           source houdini_setup; 
-                           mantra < " + ifd_path + "frame0" + frames_to_render[0] +".ifd"
-                  },
-                  { 
-                           "name":	"Render Frame " + frames_to_render[1],
-                           "shell":	"bash",
-                           "command": 
-                           "cd $HQROOT/houdini_distros/hfs; 
-                           source houdini_setup; 
-                           mantra < " + ifd_path + "frame0"+ frames_to_render[1]+".ifd"
-                  },
-                  { 
-                           "name":	"Render Frame " + frames_to_render[2],
-                           "shell":	"bash",
-                           "command": 
-                           "cd $HQROOT/houdini_distros/hfs; 
-                           source houdini_setup; 
-                           mantra < " + ifd_path + "frame0"+ frames_to_render[2] + ".ifd"
-                  },
-         ]
+         "children": children
 }
 
 # Submit the job to the server.
