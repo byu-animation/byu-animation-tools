@@ -112,5 +112,4 @@ export HOUDINI_OTL_PATH=${OTLS_DIR}:${USER_DIR}/checkout/otls:${HOUDINI_PATH}
 # Maya specific environment
 ###############################################################################
 
-# SOMEONE WRITE ME!
-
+export BYU_MAYA_SHELF_DIR=${PROJECT_TOOLS}/maya-tools/shelf
