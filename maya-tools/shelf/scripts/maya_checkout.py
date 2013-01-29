@@ -119,8 +119,8 @@ class CheckoutDialog(QDialog):
 	def set_current_item(self, item):
 		self.current_item = item
 		
-		
-if __name__ == '__main__':
+
+def go():
 	import sys
 	app = QApplication(sys.argv)
 	MainWindow = QMainWindow()
@@ -130,6 +130,8 @@ if __name__ == '__main__':
 	dialog.show()
 	sys.exit(app.exec_())
 	
+if __name__ == '__main__':
+	go()
 	
 	
 	
