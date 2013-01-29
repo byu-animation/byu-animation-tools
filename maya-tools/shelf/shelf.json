@@ -4,6 +4,11 @@
             "icon":"brent.xpm",
             "annotation":"Print an inspirational quote from Brent to the command line.",
             "python_file":"brent.py"
+        },
+        {
+            "icon":"brent.xpm",
+            "annotation":"Checkout a model, rig, or animation.",
+            "python_file":"maya_checkout.py"
         }
     ]
 }

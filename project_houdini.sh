@@ -9,7 +9,7 @@ source ./houdini_setup
 cd -
 
 # source project environment
-source project_env.sh
+source ./project_env.sh
 
 echo "Starting Houdini..."
 houdinifx
