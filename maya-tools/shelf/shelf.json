@@ -9,6 +9,11 @@
             "icon":"checkout.xpm",
             "annotation":"Checkout a model, rig, or animation.",
             "python_file":"maya_checkout.py"
+        },
+        {
+            "icon":"checkin.xpm",
+            "annotation":"Checkin the current file",
+            "python_file":"maya_checkin.py"
         }
     ]
 }
