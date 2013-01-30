@@ -43,7 +43,7 @@ export LIGHTING_DIR=${PRODUCTION_DIR}/lighting
 export OTLS_DIR=${PRODUCTION_DIR}/otls
 
 # Append to python path so batch scripts can access our modules
-export PYTHONPATH=/usr/lib64/python2.6/site-packages/PyQt4/:${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${PROJECT_TOOLS}/python2.6libs:${PYTHONPATH}
+export PYTHONPATH=/usr/lib64/python2.6/site-packages:${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${PROJECT_TOOLS}/python2.6libs:${PYTHONPATH}
 
 # Function to build directory structure
 buildDirs()
