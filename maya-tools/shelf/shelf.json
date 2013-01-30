@@ -6,7 +6,7 @@
             "python_file":"brent.py"
         },
         {
-            "icon":"brent.xpm",
+            "icon":"checkout.xpm",
             "annotation":"Checkout a model, rig, or animation.",
             "python_file":"maya_checkout.py"
         }
