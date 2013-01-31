@@ -53,13 +53,6 @@ buildDirs()
         mkdir -p "$PRODUCTION_DIR"
     fi
 
-    # Create User directory for checkout files, testing, ect.
-    if [ ! -d "$USER_DIR" ]; then
-        mkdir -p "$USER_DIR"
-        mkdir -p "$USER_DIR"/checkout
-        mkdir -p "$USER_DIR"/otls
-    fi
-
     # Create Root directory for assets
     if [ ! -d "$ASSETS_DIR" ]; then
         mkdir -p "$ASSETS_DIR"
@@ -79,9 +72,16 @@ buildDirs()
     if [ ! -d "$OTLS_DIR" ]; then
         mkdir -p "$OTLS_DIR"
     fi
+
+    cp -u ${PROJECT_TOOLS}/otl_templates/*.otl ${OTLS_DIR}
 }
 
-buildDirs
+# Create User directory for checkout files, testing, ect.
+if [ ! -d "$USER_DIR" ]; then
+    mkdir -p "$USER_DIR"
+    mkdir -p "$USER_DIR"/checkout
+    mkdir -p "$USER_DIR"/otls
+fi
 
 ###############################################################################
 # Houdini specific environment
@@ -115,3 +115,8 @@ export HOUDINI_OTL_PATH=${OTLS_DIR}:${USER_DIR}/checkout/otls:${HOUDINI_PATH}
 # Add our custom python scripts
 export BYU_MAYA_SHELF_DIR=${PROJECT_TOOLS}/maya-tools/shelf
 export MAYA_SCRIPT_PATH=${MAYA_SCRIPT_PATH}:${PYTHONPATH}:${BYU_MAYA_SHELF_DIR}
+
+###############################################################################
+# BEGIN AWESOMENESS!!!
+###############################################################################
+
