@@ -105,6 +105,36 @@ def checkFiles(files):
 	
 	return missingFiles
 
+def installGeometry(path=os.path.dirname(mc.file(q=True, sceneName=True))):
+	'''
+		Function to install the geometry into the PRODUCTION asset directory
+
+		Moves the geometry into os.path.join(os.environ['ASSETS_DIR'], assetName, 'geo')
+
+		@return: True is the files were moved successfully
+		@throws: a shutil exception if the move failed
+	'''
+	assetName = os.path.basename(path).split('_')[0]
+
+	srcOBJ = os.path.join(path, 'geo/objfiles')
+	srcBJSON = os.path.join(path, 'geo/bjsonfiles')
+	destOBJ = os.path.join(os.environ['ASSETS_DIR'], assetName, 'geo/objfiles')
+	destBJSON = os.path.join(os.environ['ASSETS_DIR'], assetName, 'geo/bjsonfiles')
+
+	if os.path.exists(destOBJ):
+		shutil.rmtree(destOBJ)
+	if os.path.exists(destBJSON):
+		shutil.rmtree(destBJSON)
+
+	shutil.copytree(src=srcOBJ, dst=destOBJ)
+	shutil.copytree(src=srcBJSON, dst=destBJSON)
+
+	shutil.rmtree(os.path.join(path, 'geo'))
+
+	return True
+
+
+
 
 def generateGeometry(path=os.path.dirname(mc.file(q=True, sceneName=True))):	
 	'''
@@ -121,6 +151,8 @@ def generateGeometry(path=os.path.dirname(mc.file(q=True, sceneName=True))):
 				as presented in a Maya confirm dialog.
 	'''
 	
+	os.makedirs(os.path.join(path, 'geo'))
+
 	# Define output paths
 	OBJPATH = os.path.join(path, "geo/objFiles")
 	BJSONPATH = os.path.join(path, "geo/bjsonFiles")
