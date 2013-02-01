@@ -14,6 +14,11 @@
             "icon":"checkin.xpm",
             "annotation":"Checkin the current file",
             "python_file":"maya_checkin.py"
+        },
+        {
+            "icon":"Trash.xpm",
+            "annotation":"Discard changes and release asset",
+            "python_file":"maya_discard.py"
         }
     ]
 }
