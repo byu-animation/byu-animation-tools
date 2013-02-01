@@ -294,38 +294,26 @@ def newContainer():
 
 def newGeo():
     templateNode = hou.node("/obj").createNode("geometryTemplate")
-    templateNode.hide(True)
+    alist = listContainers()
     ok, resp = hou.ui.readInput("Enter the New Operator Label", buttons=('OK', 'Cancel'), title="OTL Label")
+    filename = str()
     if ok == 0 and resp.strip() != '':
         name = formatName(resp)
         filename = name.replace(' ', '_')
-        newfilepath = os.path.join(OTLDIR, filename+'.otl')
-        if not os.path.exists(newfilepath):
-            alist = listContainers()
-            answer = hou.ui.selectFromList(alist, exclusive=True, message='Select Container Asset this belongs to:')[0]
-            if not answer:
-                hou.ui.displayMessage("Geometry assets must be associated with a container asset! Geometry asset not created.", severity=hou.severityType.Error)
-                templateNode.destroy()
-                return
-            templateNode.type().definition().copyToHDAFile(newfilepath, new_name=filename, new_menu_name=name)
-            hou.hda.installFile(newfilepath, change_oplibraries_file=True)
-            newnode = hou.node('/obj').createNode(filename)
-            sdir = '$JOB/PRODUCTION/assets/'
-            gfile = hou.ui.selectFile(start_directory=sdir + alist[answer]+'/geo', title='Choose Geometry', chooser_mode=hou.fileChooserMode.Read)
-            if len(gfile) > 4 and gfile[:4] != '$JOB':
-                hou.ui.displayMessage("Path must start with '$JOB'. Default geometry used.", title='Path Name', severity=hou.severityType.Error)
-                templateNode.destroy()
-                return
-            elif gfile != '':
-                ndef = newnode.type().definition()
-                newnode.allowEditingOfContents()
-                hou.parm(newnode.path() + '/read_file/file').set(gfile)
-                ndef.updateFromNode(newnode)
-                newnode.matchCurrentDefinition()
-        else:
-            hou.ui.displayMessage("Asset by that name already exists. Cannot create asset.", title='Asset Name', severity=hou.severityType.Error)
-    # clean up
-    templateNode.destroy()
+        templateNode.setName(filename, unique_name=True)
+    answer = hou.ui.selectFromList(alist, exclusive=True, message='Select Container Asset this belongs to:')
+    if not answer:
+        hou.ui.displayMessage("Geometry assets must be associated with a container asset! Geometry asset not created.", severity=hou.severityType.Error)
+        templateNode.destroy()
+        return
+    answer = answer[0]
+    sdir = '$JOB/PRODUCTION/assets/'
+    gfile = hou.ui.selectFile(start_directory=sdir + alist[answer]+'/geo', title='Choose Geometry', chooser_mode=hou.fileChooserMode.Read)
+    if len(gfile) > 4 and gfile[:4] != '$JOB':
+        hou.ui.displayMessage("Path must start with '$JOB'. Default geometry used instead.", title='Path Name', severity=hou.severityType.Error)
+        templateNode.destroy()
+    elif gfile != '':
+        hou.parm(templateNode.path() + '/read_file/file').set(gfile)
 
 def new():
     updateDB()

@@ -43,7 +43,7 @@ export LIGHTING_DIR=${PRODUCTION_DIR}/lighting
 export OTLS_DIR=${PRODUCTION_DIR}/otls
 
 # Append to python path so batch scripts can access our modules
-export PYTHONPATH=${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${PROJECT_TOOLS}/python2.6libs:${PYTHONPATH}
+export PYTHONPATH=/usr/lib64/python2.6/site-packages:${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${PROJECT_TOOLS}/python2.6libs:${PYTHONPATH}
 
 # Function to build directory structure
 buildDirs()
@@ -51,13 +51,6 @@ buildDirs()
     # Create Production directory
     if [ ! -d "$PRODUCTION_DIR" ]; then
         mkdir -p "$PRODUCTION_DIR"
-    fi
-
-    # Create User directory for checkout files, testing, ect.
-    if [ ! -d "$USER_DIR" ]; then
-        mkdir -p "$USER_DIR"
-        mkdir -p "$USER_DIR"/checkout
-        mkdir -p "$USER_DIR"/otls
     fi
 
     # Create Root directory for assets
@@ -79,9 +72,16 @@ buildDirs()
     if [ ! -d "$OTLS_DIR" ]; then
         mkdir -p "$OTLS_DIR"
     fi
+
+    cp -u ${PROJECT_TOOLS}/otl_templates/*.otl ${OTLS_DIR}
 }
 
-buildDirs
+# Create User directory for checkout files, testing, ect.
+if [ ! -d "$USER_DIR" ]; then
+    mkdir -p "$USER_DIR"
+    mkdir -p "$USER_DIR"/checkout
+    mkdir -p "$USER_DIR"/otls
+fi
 
 ###############################################################################
 # Houdini specific environment
@@ -112,5 +112,11 @@ export HOUDINI_OTL_PATH=${OTLS_DIR}:${USER_DIR}/checkout/otls:${HOUDINI_PATH}
 # Maya specific environment
 ###############################################################################
 
-# SOMEONE WRITE ME!
+# Add our custom python scripts
+export BYU_MAYA_SHELF_DIR=${PROJECT_TOOLS}/maya-tools/shelf
+export MAYA_SCRIPT_PATH=${MAYA_SCRIPT_PATH}:${PYTHONPATH}:${BYU_MAYA_SHELF_DIR}
+
+###############################################################################
+# BEGIN AWESOMENESS!!!
+###############################################################################
 
