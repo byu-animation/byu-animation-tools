@@ -105,6 +105,29 @@ def checkFiles(files):
 	
 	return missingFiles
 
+
+def decodeFileName():
+        '''
+                Decodes the base name of the folder to get the asset name, assetType, and asset directory.
+
+                @return: Array = [assetName:- the asset name, assetType:- the asset Type, version:- the asset version]
+        '''
+        # get the encoded folder name from the filesystem        
+        encodedFolderName = os.path.basename(os.path.dirname(mc.file(q=True, sceneName=True)))
+
+        # split the string based on underscore delimiters
+        namesAry = encodedFolderName.split("_")
+        
+        # pop off the version and asset type information
+        version   = namesAry.pop()
+        assetType = namesAry.pop()
+
+        #combine the array into a string to form the assetname
+        assetName = '_'.join(namesAry)
+        
+        # return the assetName, assetType, and version
+        return [assetName, assetType, version] 
+
 def installGeometry(path=os.path.dirname(mc.file(q=True, sceneName=True))):
 	'''
 		Function to install the geometry into the PRODUCTION asset directory
@@ -114,7 +137,7 @@ def installGeometry(path=os.path.dirname(mc.file(q=True, sceneName=True))):
 		@return: True is the files were moved successfully
 		@throws: a shutil exception if the move failed
 	'''
-	assetName = os.path.basename(path).split('_')[0]
+	assetName, assetType, version = decodeFileName()
 
 	srcOBJ = os.path.join(path, 'geo/objfiles')
 	srcBJSON = os.path.join(path, 'geo/bjsonfiles')
