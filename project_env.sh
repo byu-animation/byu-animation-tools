@@ -30,6 +30,8 @@ export PRODUCTION_DIR=${JOB}/PRODUCTION
 # User directory for checkout files, testing, ect.
 export USER_DIR=${JOB}/users/${USER}
 
+export DAILIES_DIR=${JOB}/dailies
+
 # Root directory for assets
 export ASSETS_DIR=${PRODUCTION_DIR}/assets
 
@@ -46,8 +48,15 @@ export OTLS_DIR=${PRODUCTION_DIR}/otls
 export PYTHONPATH=/usr/lib64/python2.6/site-packages:${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${PROJECT_TOOLS}/python2.6libs:${PYTHONPATH}
 
 # Function to build directory structure
-buildDirs()
+buildProjectDirs()
 {
+    # Create Dailies directory
+    if [ ! -d "$DAILIES_DIR" ]; then
+        mkdir -p "$DAILIES_DIR"
+	mkdir -p "$DAILIES_DIR"/tmp
+	mkdir -p "$DAILIES_DIR"/renders
+    fi
+    
     # Create Production directory
     if [ ! -d "$PRODUCTION_DIR" ]; then
         mkdir -p "$PRODUCTION_DIR"
@@ -75,6 +84,9 @@ buildDirs()
 
     cp -u ${PROJECT_TOOLS}/otl_templates/*.otl ${OTLS_DIR}
 }
+
+# Uncomment to build the project directories
+#buildProjectDirs
 
 # Create User directory for checkout files, testing, ect.
 if [ ! -d "$USER_DIR" ]; then
