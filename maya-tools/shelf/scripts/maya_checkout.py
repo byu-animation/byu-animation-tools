@@ -99,9 +99,10 @@ class CheckoutDialog(QDialog):
 	# SLOTS
 	########################################################################
 	def checkout(self):
-		curfilepath = cmd.file(query=True, list=True)[0].encode('utf-8')
-		if not os.path.basename(curfilepath) == 'untitled':
+		curfilepath = cmd.file(query=True, sceneName=True)
+		if not curfilepath == '':
 			cmd.file(save=True, force=True)
+
 		asset_name = str(self.current_item.text())
 		if self.model_radio.isChecked():
 			toCheckout = os.path.join(os.environ['ASSETS_DIR'], asset_name, 'model')

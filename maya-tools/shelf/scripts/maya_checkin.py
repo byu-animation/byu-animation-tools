@@ -59,7 +59,6 @@ def saveObjs():
                 return False
 	
         
-
 def showFailDialog(): 
         return cmds.confirmDialog( title         = 'Checkin Failed'
                                  , message       = 'Checkin was unsuccessful'
