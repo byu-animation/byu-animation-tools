@@ -106,6 +106,69 @@ def checkFiles(files):
 	return missingFiles
 
 
+def decodeFileName():
+        '''
+                Decodes the base name of the folder to get the asset name, assetType, and asset directory.
+
+                @return: Array = [assetName:- the asset name, assetType:- the asset Type, version:- the asset version]
+        '''
+        # get the encoded folder name from the filesystem        
+        encodedFolderName = os.path.basename(os.path.dirname(mc.file(q=True, sceneName=True)))
+
+        # split the string based on underscore delimiters
+        namesAry = encodedFolderName.split("_")
+        
+        # pop off the version and asset type information
+        version   = namesAry.pop()
+        assetType = namesAry.pop()
+
+        #combine the array into a string to form the assetname
+        assetName = '_'.join(namesAry)
+        
+        # return the assetName, assetType, and version
+        return [assetName, assetType, version] 
+
+def installGeometry(path=os.path.dirname(mc.file(q=True, sceneName=True))):
+	'''
+		Function to install the geometry into the PRODUCTION asset directory
+
+		Moves the geometry into os.path.join(os.environ['ASSETS_DIR'], assetName, 'geo')
+
+		@return: True is the files were moved successfully
+		@throws: a shutil exception if the move failed
+	'''
+	assetName, assetType, version = decodeFileName()
+
+	srcOBJ = os.path.join(path, 'geo/objFiles')
+	srcBJSON = os.path.join(path, 'geo/bjsonFiles')
+	destOBJ = os.path.join(os.environ['ASSETS_DIR'], assetName, 'geo/objFiles')
+	destBJSON = os.path.join(os.environ['ASSETS_DIR'], assetName, 'geo/bjsonFiles')
+
+	if os.path.exists(destOBJ):
+		shutil.rmtree(destOBJ)
+	if os.path.exists(destBJSON):
+		shutil.rmtree(destBJSON)
+
+	print 'Copying '+srcOBJ+' to '+destOBJ
+	try:
+		shutil.copytree(srcOBJ, destOBJ)
+	except Exception as e:
+		print e
+
+	print 'Copying '+srcBJSON+' to '+destBJSON
+	try:
+		shutil.copytree(src=srcBJSON, dst=destBJSON)
+	except Exception as e:
+		print e
+
+	print 'Removing '+os.path.join(path, 'geo')
+	shutil.rmtree(os.path.join(path, 'geo'))
+
+	return True
+
+
+
+
 def generateGeometry(path=os.path.dirname(mc.file(q=True, sceneName=True))):	
 	'''
 		Function for generating geometry for Maya files.
@@ -120,14 +183,17 @@ def generateGeometry(path=os.path.dirname(mc.file(q=True, sceneName=True))):
 		@post: Missing filenames are printed out to both the Maya terminal as well
 				as presented in a Maya confirm dialog.
 	'''
-	
+	print 'generateGeometry start'
+	if not os.path.exists (os.path.join(path, 'geo')):
+		os.makedirs(os.path.join(path, 'geo'))
+
 	# Define output paths
 	OBJPATH = os.path.join(path, "geo/objFiles")
 	BJSONPATH = os.path.join(path, "geo/bjsonFiles")
 	
 	# Make initial selection
 	selection = mc.ls(geometry=True, visible=True)
-	
+
 	# Delete old obj and bjson folders
 	if os.path.exists(OBJPATH):
 		shutil.rmtree(OBJPATH)
