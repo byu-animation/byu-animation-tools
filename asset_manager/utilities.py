@@ -192,6 +192,14 @@ def isCheckedOut(dirPath):
 	cp.read(nodeInfo)
 	return cp.getboolean("Versioning", "locked")
 
+def checkedOutByMe(dirPath):
+	nodeInfo = os.path.join(dirPath, ".nodeInfo")
+	if not os.path.exists(nodeInfo):
+		return False
+	cp = ConfigParser()
+	cp.read(nodeInfo)
+	return cp.get("Versioning", "lastcheckoutuser") == getUsername()
+
 def getFilesCheckoutTime(filePath):
 	checkoutInfo = os.path.join(filePath, ".checkoutInfo")
 	#print checkoutInfo
@@ -210,6 +218,12 @@ def canCheckout(coPath):
 	if nodeInfo.get("Versioning", "locked") == "True":
 		result = False
 	return result
+
+def getCheckoutDest(coPath):
+	nodeInfo = ConfigParser()
+	nodeInfo.read(os.path.join(coPath, ".nodeInfo"))
+	version = nodeInfo.get("Versioning", "latestversion")
+	return os.path.join(getUserCheckoutDir(), os.path.basename(os.path.dirname(coPath))+"_"+os.path.basename(coPath)+"_"+version)
 
 def checkout(coPath, lock):
 	"""
@@ -230,7 +244,7 @@ def checkout(coPath, lock):
 	if nodeInfo.get("Versioning", "locked") == "False":
 		version = nodeInfo.get("Versioning", "latestversion")
 		toCopy = os.path.join(coPath, "src", "v"+version)
-		dest = os.path.join(getUserCheckoutDir(), os.path.basename(os.path.dirname(coPath))+"_"+os.path.basename(coPath)+"_"+version)
+		dest = getCheckoutDest(coPath)
 		
 		if(os.path.exists(toCopy)):
 			try:
