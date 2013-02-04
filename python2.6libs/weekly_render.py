@@ -1,8 +1,17 @@
 import shutil
+import string
 import os
 
 LIGHTING_DIR = os.environ['LIGHTING_DIR']
 DAILIES_DIR = os.environ['DAILIES_DIR']
+
+TMPDIR = os.path.join(DAILIES_DIR, 'tmp')
+RENDERDIR = os.path.join(DAILIES_DIR, 'renders')
+
+LIGHTING_PREFIX = "lighting_"
+HOUDINI_EXTENSION = ".hipnc"
+FRAME_SUFFIX = "_$F3"
+FILE_TYPE = ".tif"
 
 # Validation Functions #
 def _isValidTextFile(p):
@@ -14,14 +23,15 @@ def _isValidTextFile(p):
         return False
 
 # OS Functions #    
-def copyFileToTmp(filename, srcPath):
-    newfilepath = os.path.join(TMPDIR, filename)
-    oldfilepath = os.path.join(srcPath, filename)
-    copyfile(oldfilepath, newfilepath)
+def copyFileToTmp(shotname, srcPath):
+    newfilepath = TMPDIR
+    fileName = getHouFileName(shotname)
+    oldfilepath = os.path.join(srcPath, fileName)
+    shutil.copy(oldfilepath, newfilepath)
 
 # Parsing #
 def parseShotLine(line):
-    if line.startswith('#')
+    if line.startswith('#'):
         return False
     else:
         return line.split()
@@ -37,6 +47,14 @@ def parseDefinitionFile(filePath):
         if shotInfo:
             shotList.append(shotInfo)
     return shotList
+
+def getHouFileName(shotname):
+    fileName = LIGHTING_PREFIX + string.lower(shotname) + HOUDINI_EXTENSION
+    return fileName
+
+def getOutFileName(shotName):
+    fileName = string.lower(shotName) + FRAME_SUFFIX + FILE_TYPE
+    return fileName
 
 # Houdini UI #
 # Return the path to the .txt file to be read.
@@ -72,6 +90,26 @@ def getOutputDir(output = None):
     else:
         return hou.expandString(output)
 
+def setUpMantraNode(shotName, frameRange):
+    output = hou.node("/out")
+    man = output.createNode("mantra")
+    man.parm("picture").set(os.path.join(RENDERDIR, getOutFileName(shotName)))
+    man.parm("trange").set("normal")
+    man.parm("f1").set(frameRange[0])
+    man.parm("f2").set(frameRange[1])
+    man.parm("f3").set(1)
+    #man.parmTuple("f").set((frameRange[0], frameRange[1], 1))
+    # TODO which camera?!
+    # TODO other paramaters -PBR
+    return man
+
+def setUpHQueueNode(mantra):
+    output = hou.node("/out")
+    hq = output.createNode("hq_render")
+    hq.parm("hq_driver").set(mantra.path())
+    #TODO other parameters?
+    return hq
+
 def weeklyRender(shotList):
     '''
     TODO:
@@ -86,11 +124,27 @@ def weeklyRender(shotList):
     g. wait for completion?
     h. delete temp file in tmp dir.
     i. repeat
+    j. hperf (statistics)
     '''
+    for shot in shotList:
+        shotName = shot[0]
+        frameRange = (shot[1], shot[2])
+        copyFileToTmp(shotName, LIGHTING_DIR)
+        filePath = os.path.join(TMPDIR, getHouFileName(shotName))
+        try:
+            hou.hipFile.load(filePath, suppress_save_prompt = True)
+        except hou.OperationFailed:
+            hou.ui.displayMessage("Failed to open " + filePath + ". Moving on...")
+            continue
+        mantra = setUpMantraNode(shotName, getHouFileName(shotName))
+        hqueue = setUpHQueueNode(mantra)
+        hqueue.render() #TODO test
+        #cleanup
+        os.remove(os.path.join(TMPDIR, getHouFileName(shotName)))
 
 ## Hou Main ##
 inputFile = getInputFile()
-outputDir = getOutputDir(os.path.join(DAILIES_DIR, "renders"))
+outputDir = getOutputDir(RENDERDIR)
 shotList = parseDefinitionFile(inputFile)
 try:
     weeklyRender(shotList)
