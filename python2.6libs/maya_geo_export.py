@@ -20,7 +20,9 @@ def objExport(selected, path):
 	
 		@post: directory for 'path' is created if it wasn't already
 	'''
-	
+        # load the objExport plugin	
+        mc.loadPlugin("objExport")
+
 	# Create directory if it doesn't exist
 	if not os.path.exists(path):
 		os.makedirs(path)
@@ -139,19 +141,29 @@ def installGeometry(path=os.path.dirname(mc.file(q=True, sceneName=True))):
 	'''
 	assetName, assetType, version = decodeFileName()
 
-	srcOBJ = os.path.join(path, 'geo/objfiles')
-	srcBJSON = os.path.join(path, 'geo/bjsonfiles')
-	destOBJ = os.path.join(os.environ['ASSETS_DIR'], assetName, 'geo/objfiles')
-	destBJSON = os.path.join(os.environ['ASSETS_DIR'], assetName, 'geo/bjsonfiles')
+	srcOBJ = os.path.join(path, 'geo/objFiles')
+	srcBJSON = os.path.join(path, 'geo/bjsonFiles')
+	destOBJ = os.path.join(os.environ['ASSETS_DIR'], assetName, 'geo/objFiles')
+	destBJSON = os.path.join(os.environ['ASSETS_DIR'], assetName, 'geo/bjsonFiles')
 
 	if os.path.exists(destOBJ):
 		shutil.rmtree(destOBJ)
 	if os.path.exists(destBJSON):
 		shutil.rmtree(destBJSON)
 
-	shutil.copytree(src=srcOBJ, dst=destOBJ)
-	shutil.copytree(src=srcBJSON, dst=destBJSON)
+	print 'Copying '+srcOBJ+' to '+destOBJ
+	try:
+		shutil.copytree(srcOBJ, destOBJ)
+	except Exception as e:
+		print e
 
+	print 'Copying '+srcBJSON+' to '+destBJSON
+	try:
+		shutil.copytree(src=srcBJSON, dst=destBJSON)
+	except Exception as e:
+		print e
+
+	print 'Removing '+os.path.join(path, 'geo')
 	shutil.rmtree(os.path.join(path, 'geo'))
 
 	return True
@@ -173,8 +185,9 @@ def generateGeometry(path=os.path.dirname(mc.file(q=True, sceneName=True))):
 		@post: Missing filenames are printed out to both the Maya terminal as well
 				as presented in a Maya confirm dialog.
 	'''
-	
-	os.makedirs(os.path.join(path, 'geo'))
+	print 'generateGeometry start'
+	if not os.path.exists (os.path.join(path, 'geo')):
+		os.makedirs(os.path.join(path, 'geo'))
 
 	# Define output paths
 	OBJPATH = os.path.join(path, "geo/objFiles")
@@ -182,7 +195,7 @@ def generateGeometry(path=os.path.dirname(mc.file(q=True, sceneName=True))):
 	
 	# Make initial selection
 	selection = mc.ls(geometry=True, visible=True)
-	
+
 	# Delete old obj and bjson folders
 	if os.path.exists(OBJPATH):
 		shutil.rmtree(OBJPATH)

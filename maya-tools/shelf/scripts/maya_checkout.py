@@ -111,8 +111,22 @@ class CheckoutDialog(QDialog):
 		elif self.animation_radio.isChecked():
 			toCheckout = os.path.join(os.environ['ANIMATION_DIR'], asset_name)
 		
-		destpath = amu.checkout(toCheckout, True)
+		try:
+			destpath = amu.checkout(toCheckout, True)
+		except Exception as e:
+			if not amu.checkedOutByMe(toCheckout):
+				cmd.confirmDialog(  title          = 'Can Not Checkout'
+                                   , message       = str(e)
+                                   , button        = ['Ok']
+                                   , defaultButton = 'Ok'
+                                   , cancelButton  = 'Ok'
+                                   , dismissString = 'Ok')
+				return
+			else:
+				destpath = amu.getCheckoutDest(toCheckout)
+
 		toOpen = os.path.join(destpath, self.get_filename(toCheckout)+'.mb')
+		
 		# open the file
 		if os.path.exists(toOpen):
 			cmd.file(toOpen, force=True, open=True)

@@ -14,13 +14,16 @@ def showWarningDialog():
                                  , cancelButton  = 'No'
                                  , dismissString = 'No')
 
-def discard():
+def discard(filePath=cmds.file(q=True, sceneName=True)):
+        if not filePath:
+          return
+        print filePath
         dlgResult = showWarningDialog()
         if dlgResult == 'Yes':
                 toDiscard = os.path.dirname(filePath) # get discard directory before opening new file
                 cmds.file(force=True, new=True) #open new file
-                amu.Discard(toDiscard) # discard changes
-        else if dlgResult == 'Brent':
+                amu.discard(toDiscard) # discard changes
+        elif dlgResult == 'Brent':
                 brent.go()
         else:
                 cmds.confirmDialog(  title         = 'Discard Cancelled'
