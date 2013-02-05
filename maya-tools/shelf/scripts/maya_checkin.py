@@ -12,6 +12,11 @@ def isModelAsset():
         assetName, assetType, version = geo.decodeFileName()
         return assetType == 'model'
 
+def isRigAsset():
+        # unpack decoded entries and check if assetType is a 'rig'
+        assetName, assetType, version = geo.decodeFileName()
+        return assetType == 'rig'
+
 def saveGeo():
         # this is not a model asset. don't save objs
         if not isModelAsset():
@@ -43,9 +48,13 @@ def checkin():
         print 'filePath: '+filePath
         toCheckin = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(filePath)))
         print 'toCheckin: '+toCheckin
+        rig = isRigAsset()
         if amu.canCheckin(toCheckin) and saveGeo(): # objs must be saved before checkin
                 cmds.file(force=True, new=True) #open new file
-                amu.checkin(toCheckin) #checkin
+                dest = amu.checkin(toCheckin) #checkin
+                if rig:
+                    srcFile = amu.getAvailableInstallFiles(dest)[0]
+                    amu.install(dest, srcFile)
         else:
                 showFailDialog()
 
