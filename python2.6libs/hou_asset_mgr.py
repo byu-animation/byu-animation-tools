@@ -272,8 +272,8 @@ def listContainers():
                 dirlist.append(dir)
     return dirlist
 
-def newContainer():
-    templateNode = hou.node("/obj").createNode("containerTemplate")
+def newContainer(hpath):
+    templateNode = hou.node(hpath).createNode("containerTemplate")
     templateNode.hide(True)
     ok, resp = hou.ui.readInput("Enter the New Operator Label", buttons=('OK', 'Cancel'), title="OTL Label")
     if ok == 0 and resp.strip() != '':
@@ -285,15 +285,15 @@ def newContainer():
             amu.createNewAssetFolders(ASSETSDIR, filename)
             templateNode.type().definition().copyToHDAFile(newfilepath, new_name=filename, new_menu_name=name)
             hou.hda.installFile(newfilepath, change_oplibraries_file=True)
-            newnode = hou.node('/obj').createNode(filename)
+            newnode = hou.node(hpath).createNode(filename)
         else:
             hou.ui.displayMessage("Asset by that name already exists. Cannot create asset.", title='Asset Name', severity=hou.severityType.Error)
         
     # clean up
     templateNode.destroy()
 
-def newGeo():
-    templateNode = hou.node("/obj").createNode("geometryTemplate")
+def newGeo(hpath):
+    templateNode = hou.node(hpath).createNode("geometryTemplate")
     alist = listContainers()
     ok, resp = hou.ui.readInput("Enter the New Operator Label", buttons=('OK', 'Cancel'), title="OTL Label")
     filename = str()
@@ -303,7 +303,7 @@ def newGeo():
         templateNode.setName(filename, unique_name=True)
     answer = hou.ui.selectFromList(alist, exclusive=True, message='Select Container Asset this belongs to:')
     if not answer:
-        hou.ui.displayMessage("Geometry assets must be associated with a container asset! Geometry asset not created.", severity=hou.severityType.Error)
+        hou.ui.displayMessage("Geometry must be associated with a container asset! Geometry asset not created.", severity=hou.severityType.Error)
         templateNode.destroy()
         return
     answer = answer[0]
@@ -319,10 +319,14 @@ def new():
     updateDB()
     otb = ('Container', 'Geometry', 'Cancel')
     optype = hou.ui.displayMessage("Choose operator type.", buttons=otb, title='Asset Type')
+    hpane = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
+    hpath = hpane.pwd().path()
+    if not isinstance(hpane.pwd(), hou.ObjNode):
+        hpath = "/obj"
     if optype == 0:
-        newContainer()
+        newContainer(hpath)
     elif optype == 1:
-        newGeo()
+        newGeo(hpath)
 
 def add():
     """Adds the selected node. EXACTLY ONE node may be selected, and it MUST be a digital asset.

@@ -320,6 +320,11 @@ def discard(toDiscard):
 
 	shutil.rmtree(toDiscard)
 
+def getCheckinDest(toCheckin):
+	chkoutInfo = ConfigParser()
+	chkoutInfo.read(os.path.join(toCheckin, ".checkoutInfo"))
+	return chkoutInfo.get("Checkout", "checkedoutfrom")
+
 def checkin(toCheckin):
 	"""
 	Checks a folder back in as the newest version
@@ -358,6 +363,8 @@ def checkin(toCheckin):
 	shutil.rmtree(toCheckin)
 	os.remove(os.path.join(newVersionPath, ".checkoutInfo"))
 
+	return chkInDest
+
 ################################################################################
 # Install
 ################################################################################
@@ -375,6 +382,7 @@ def getAvailableInstallFiles(vDirPath):
 	latest = os.path.join(vDirPath, "src", "v"+version)
 	
 	files = glob.glob(os.path.join(latest,'*'))
+	print files
 	return files
 
 def _isHoudiniFile(filename):
@@ -401,6 +409,8 @@ def install(vDirPath, srcFilePath):
 	@postcondition: if setStable == True then stable symlink will point to filename
 	"""
 	print 'utilities, install'
+	print vDirPath
+	print srcFilePath
 	stableDir = os.path.join(vDirPath, "stable")
 	backupsDir = os.path.join(stableDir, 'backups')
 	numFiles = len(glob.glob(os.path.join(backupsDir, '*')))
@@ -413,13 +423,15 @@ def install(vDirPath, srcFilePath):
 		shutil.move(os.path.join(stableDir, stableName+srcExt), os.path.join(backupsDir, stableName+'_'+str(numFiles)+srcExt))
 	
 	newInstFilePath = os.path.join(stableDir, stableName+srcExt)
+	print newInstFilePath
 	
-	if _isHoudiniFile(newInstFilePath):
-		call([getHoudiniPython(), "installHoudiniFile.py", srcFilePath, newInstFilePath])
-	elif _isMayaFile(newInstFilePath):
-		call([getMayapy(), "installMayaFile.py", srcFilePath, newInstFilePath])
-	else:
-		#Just copy the file
-		print 'copying file...'
-		shutil.copy(srcFilePath, newInstFilePath)
+	#if _isHoudiniFile(newInstFilePath):
+	#	call([getHoudiniPython(), "installHoudiniFile.py", srcFilePath, newInstFilePath])
+	#elif _isMayaFile(newInstFilePath):
+	#	call([getMayapy(), "installMayaFile.py", srcFilePath, newInstFilePath])
+	#else:
+	#	#Just copy the file
+	#	print 'copying file...'
+	#	
+	shutil.copy(srcFilePath, newInstFilePath)
 	

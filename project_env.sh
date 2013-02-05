@@ -118,7 +118,7 @@ export HOUDINI_PYTHON_LIB=${PYTHONPATH}:${HOUDINI_PYTHON_LIB}
 export HOUDINI_TOOLBAR_PATH=${PROJECT_TOOLS}:${HOUDINI_PATH}
 
 # Add production and checkout otls to the OTL PATH.
-export HOUDINI_OTL_PATH=${OTLS_DIR}:${USER_DIR}/checkout/otls:${HOUDINI_PATH}
+export HOUDINI_OTL_PATH=${OTLS_DIR}:${USER_DIR}/otls:${HOUDINI_PATH}
 
 ###############################################################################
 # Maya specific environment
