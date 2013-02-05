@@ -91,8 +91,7 @@ def getOutputDir(output = None):
         return hou.expandString(output)
 
 def setUpMantraNode(shotName, frameRange):
-    output = hou.node("/out")
-    man = output.createNode("mantra")
+    man = hou.node("/out").createNode("mantra")
     man.parm("picture").set(os.path.join(RENDERDIR, getOutFileName(shotName)))
     man.parm("trange").set("normal")
     man.parm("f1").set(frameRange[0])
@@ -100,13 +99,12 @@ def setUpMantraNode(shotName, frameRange):
     man.parm("f3").set(1)
     #man.parmTuple("f").set((frameRange[0], frameRange[1], 1))
     # TODO which camera?!
-    # TODO other paramaters -PBR
+    # TODO other paramaters -PBR rendering
     return man
 
-def setUpHQueueNode(mantra):
-    output = hou.node("/out")
-    hq = output.createNode("hq_render")
-    hq.parm("hq_driver").set(mantra.path())
+def setUpHQueueNode(man):
+    hq = hou.node("/out").createNode("hq_render")
+    hq.parm("hq_driver").set(man.path())
     #TODO other parameters?
     return hq
 
@@ -129,16 +127,16 @@ def weeklyRender(shotList):
     for shot in shotList:
         shotName = shot[0]
         frameRange = (shot[1], shot[2])
-        copyFileToTmp(shotName, LIGHTING_DIR)
+        copyFileToTmp(shotName, os.path.join(LIGHTING_DIR, shotName))
         filePath = os.path.join(TMPDIR, getHouFileName(shotName))
         try:
             hou.hipFile.load(filePath, suppress_save_prompt = True)
         except hou.OperationFailed:
             hou.ui.displayMessage("Failed to open " + filePath + ". Moving on...")
             continue
-        mantra = setUpMantraNode(shotName, getHouFileName(shotName))
+        mantra = setUpMantraNode(shotName, frameRange)
         hqueue = setUpHQueueNode(mantra)
-        hqueue.render() #TODO test
+        #hqueue.render() #TODO test
         #cleanup
         os.remove(os.path.join(TMPDIR, getHouFileName(shotName)))
 
