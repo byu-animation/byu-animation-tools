@@ -1,5 +1,12 @@
+import maya.cmds as cmds
+
 def speak_brent():
-    print "We're in finish mode. Kay?"
+	cmds.confirmDialog(  title          = 'Speak Brent!'
+                       , message       = "We're in finish mode. Kay?"
+                       , button        = ['Ok']
+                       , defaultButton = 'Ok'
+                       , cancelButton  = 'Ok'
+                       , dismissString = 'Ok')
 
 ## The shelf will call this method each time
 ## the button is pressed. If you want something

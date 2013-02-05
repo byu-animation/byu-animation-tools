@@ -99,9 +99,10 @@ class CheckoutDialog(QDialog):
 	# SLOTS
 	########################################################################
 	def checkout(self):
-		curfilepath = cmd.file(query=True, list=True)[0].encode('utf-8')
-		if not os.path.basename(curfilepath) == 'untitled':
+		curfilepath = cmd.file(query=True, sceneName=True)
+		if not curfilepath == '':
 			cmd.file(save=True, force=True)
+
 		asset_name = str(self.current_item.text())
 		if self.model_radio.isChecked():
 			toCheckout = os.path.join(os.environ['ASSETS_DIR'], asset_name, 'model')
@@ -110,8 +111,22 @@ class CheckoutDialog(QDialog):
 		elif self.animation_radio.isChecked():
 			toCheckout = os.path.join(os.environ['ANIMATION_DIR'], asset_name)
 		
-		destpath = amu.checkout(toCheckout, True)
+		try:
+			destpath = amu.checkout(toCheckout, True)
+		except Exception as e:
+			if not amu.checkedOutByMe(toCheckout):
+				cmd.confirmDialog(  title          = 'Can Not Checkout'
+                                   , message       = str(e)
+                                   , button        = ['Ok']
+                                   , defaultButton = 'Ok'
+                                   , cancelButton  = 'Ok'
+                                   , dismissString = 'Ok')
+				return
+			else:
+				destpath = amu.getCheckoutDest(toCheckout)
+
 		toOpen = os.path.join(destpath, self.get_filename(toCheckout)+'.mb')
+		
 		# open the file
 		if os.path.exists(toOpen):
 			cmd.file(toOpen, force=True, open=True)
