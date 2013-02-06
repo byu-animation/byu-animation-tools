@@ -15,6 +15,7 @@ FRAME_SUFFIX = "_$F3"
 FILE_TYPE = ".tif"
 
 HQ_SERVER = "hqueue:5000"
+HQ_JOB_NAME = "${USER}_${OS}_${HIPNAME}"
 
 # Validation Functions #
 def _isValidTextFile(p):
@@ -118,22 +119,9 @@ def setUpHQueueNode(man):
     #TODO other parameters?
     return hq
 
-def weeklyRender(shotList):
-    '''
-    TODO:
-    for each shot
-    a. copy Lighting file (most recent one in the Lighting folder?) into my tmp dir
-    b. open it up (run in houdini?)
-    c. add a prescribed mantra node (settings all happy)
-    \   c.i. create shot folder in output dir?
-    d. set mantra frame range to that described in the file
-    e. create hqueue attached to that mantra
-    f. shoot off hqueue render
-    g. wait for completion?
-    h. delete temp file in tmp dir.
-    i. repeat
-    j. hperf (statistics)
-    '''
+# Main #
+def weeklyRender(inputFile):
+    shotList = parseDefinitionFile(inputFile)
     for shot in shotList:
         shotName = shot[0]
         frameRange = (shot[1], shot[2])
@@ -149,12 +137,3 @@ def weeklyRender(shotList):
         #hqueue.render() #TODO test
         #cleanup
         os.remove(os.path.join(TMPDIR, getHouFileName(shotName)))
-
-## Hou Main ##
-inputFile = getInputFile()
-outputDir = getOutputDir(RENDERDIR)
-shotList = parseDefinitionFile(inputFile)
-try:
-    weeklyRender(shotList)
-except SyntaxError:
-    print ("A syntax error occurred.")

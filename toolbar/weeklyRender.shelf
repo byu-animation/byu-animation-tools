@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
+  <tool name="weeklyRender" label="Weekly Render" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import weekly_render as wr
+
+try:
+    # Get Shot List file from user.
+    inputFile = wr.getInputFile()
+        
+    # Get Output Directory. Currently hardcoded. 
+    # (Remove param. for user choice)
+    outputDir = wr.getOutputDir(wr.RENDERDIR)
+    
+    # Generate geometry sequences    
+    weeklyRender(inputFile)
+
+except Exception as e:
+    print "Exiting: " + str(e)
+
+]]></script>
+  </tool>
+</shelfDocument>
