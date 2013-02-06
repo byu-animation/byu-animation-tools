@@ -109,7 +109,7 @@ fi
 export HOUDINI_USE_HFS_PYTHON=1
 
 # HSITE doesn't currently point to anything we can use right now...
-export HSITE=/grp5
+export HSITE=/groups
 
 # Include GLOBAL_DIR in Houdini path, so we will pick up project settings and assets.
 HOUDINI_PATH=${HOME}/houdini${HOUDINI_MAJOR_RELEASE}.${HOUDINI_MINOR_RELEASE}
