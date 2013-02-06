@@ -30,6 +30,7 @@ export PRODUCTION_DIR=${JOB}/PRODUCTION
 # User directory for checkout files, testing, ect.
 export USER_DIR=${JOB}/users/${USER}
 
+# Directory for dailies
 export DAILIES_DIR=${JOB}/dailies
 
 # Root directory for assets
@@ -80,6 +81,11 @@ buildProjectDirs()
     # Create Directory for otls
     if [ ! -d "$OTLS_DIR" ]; then
         mkdir -p "$OTLS_DIR"
+    fi
+
+    # Create tmp directory for ifds
+    if [ ! -d "$JOB"/tmp/ifds ]; then
+	mkdir -p "$JOB"/tmp/ifds
     fi
 
     cp -u ${PROJECT_TOOLS}/otl_templates/*.otl ${OTLS_DIR}
