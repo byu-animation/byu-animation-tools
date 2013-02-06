@@ -2,6 +2,7 @@ import shutil
 import string
 import os
 
+JOB_DIR = os.environ['JOB']
 LIGHTING_DIR = os.environ['LIGHTING_DIR']
 DAILIES_DIR = os.environ['DAILIES_DIR']
 
@@ -12,6 +13,8 @@ LIGHTING_PREFIX = "lighting_"
 HOUDINI_EXTENSION = ".hipnc"
 FRAME_SUFFIX = "_$F3"
 FILE_TYPE = ".tif"
+
+HQ_SERVER = "hqueue:5000"
 
 # Validation Functions #
 def _isValidTextFile(p):
@@ -91,20 +94,27 @@ def getOutputDir(output = None):
         return hou.expandString(output)
 
 def setUpMantraNode(shotName, frameRange):
-    man = hou.node("/out").createNode("mantra")
-    man.parm("picture").set(os.path.join(RENDERDIR, getOutFileName(shotName)))
+    man = hou.node("/out").createNode("ifd")
+    outputDir = RENDERDIR.replace(JOB_DIR, "$JOB")
+    outputLoc = os.path.join(outputDir, getOutFileName(shotName))
+
+    man.parm("vm_picture").set(outputLoc)
     man.parm("trange").set("normal")
+
     man.parm("f1").set(frameRange[0])
     man.parm("f2").set(frameRange[1])
     man.parm("f3").set(1)
-    #man.parmTuple("f").set((frameRange[0], frameRange[1], 1))
+    
+    man.parm("vm_renderengine").set("pbrraytrace")
     # TODO which camera?!
-    # TODO other paramaters -PBR rendering
+    # TODO other paramaters
     return man
 
 def setUpHQueueNode(man):
     hq = hou.node("/out").createNode("hq_render")
     hq.parm("hq_driver").set(man.path())
+    hq.parm("hq_server").set(HQ_SERVER)
+    hq.parm("hq_autosave").set(1)
     #TODO other parameters?
     return hq
 
