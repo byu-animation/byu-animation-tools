@@ -1,6 +1,13 @@
+'''
+Houdini weekly render script
+Author: Elizabeth Brayton
+Last Modified: 6 Feb 2013
+'''
+
 import shutil
 import string
 import os
+import hou
 
 JOB_DIR = os.environ['JOB']
 LIGHTING_DIR = os.environ['LIGHTING_DIR']
@@ -134,6 +141,6 @@ def weeklyRender(inputFile):
             continue
         mantra = setUpMantraNode(shotName, frameRange)
         hqueue = setUpHQueueNode(mantra)
-        #hqueue.render() #TODO test
+        hqueue.render() #TODO test
         #cleanup
         os.remove(os.path.join(TMPDIR, getHouFileName(shotName)))

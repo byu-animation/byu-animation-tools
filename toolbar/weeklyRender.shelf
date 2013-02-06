@@ -17,7 +17,7 @@ try:
     outputDir = wr.getOutputDir(wr.RENDERDIR)
     
     # Generate geometry sequences    
-    weeklyRender(inputFile)
+    wr.weeklyRender(inputFile)
 
 except Exception as e:
     print "Exiting: " + str(e)
