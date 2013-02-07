@@ -1,0 +1,10 @@
+# Global UI controls
+
+# Sizes may be Small, Compact, Normal or Large.
+general.ui.size := "Normal";
+colors.scheme := "Houdini Dark";
+ui.bright.val     := 1;
+ui.contrast.val   := 1;
+ui.gamma.val      := 1;
+ui.saturation.val := 1;
+general.filechooserstyle.menu := "Houdini Chooser Only";
