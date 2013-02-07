@@ -7,6 +7,9 @@ import sip
 import os, glob
 import utilities as amu
 
+CHECKOUT_WINDOW_WIDTH = 330
+CHECKOUT_WINDOW_HEIGHT = 600
+
 def maya_main_window():
 	ptr = omu.MQtUtil.mainWindow()
 	return sip.wrapinstance(long(ptr), QObject)
@@ -16,7 +19,7 @@ class CheckoutDialog(QDialog):
 	#def setup(self, parent):
 		QDialog.__init__(self, parent)
 		self.setWindowTitle('Checkout')
-		self.setFixedSize(330, 475)
+		self.setFixedSize(CHECKOUT_WINDOW_WIDTH, CHECKOUT_WINDOW_HEIGHT)
 		self.create_layout()
 		self.create_connections()
 		self.refresh()
@@ -24,15 +27,15 @@ class CheckoutDialog(QDialog):
 	def create_layout(self):
 		#Create the selected item list
 		self.selection_list = QListWidget()
-		
-		#Create Models, Rig, Animation
+		self.selection_list.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+				
+		#Create Models, Rig, Animation		
 		radio_button_group = QVBoxLayout()
 		self.model_radio = QRadioButton('Model')
 		self.rig_radio = QRadioButton('Rig')
 		self.animation_radio = QRadioButton('Animation')
 		self.model_radio.setChecked(True)
 		radio_button_group.setSpacing(2)
-		radio_button_group.addStretch()
 		radio_button_group.addWidget(self.model_radio)
 		radio_button_group.addWidget(self.rig_radio)
 		radio_button_group.addWidget(self.animation_radio)
@@ -52,7 +55,7 @@ class CheckoutDialog(QDialog):
 		main_layout = QVBoxLayout()
 		main_layout.setSpacing(2)
 		main_layout.setMargin(2)
-		main_layout.addWidget(self.selection_list)
+		main_layout.addWidget(self.selection_list)		
 		main_layout.addLayout(radio_button_group)
 		main_layout.addLayout(button_layout)
 		
