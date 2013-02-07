@@ -9,7 +9,7 @@ The tools are EXTREMELY connected in an attempt to unify maya and houdini into a
 
 #Want to contribute?
 If you want to help, you will first need to fork this repository.
-Then when you have made changes that you would like to be considered, to a Pull Request.
+Then when you have made changes that you would like to be considered, send a Pull Request.
 
 #CHAT
 We all need help now and then, and often there's nobody to ask!
