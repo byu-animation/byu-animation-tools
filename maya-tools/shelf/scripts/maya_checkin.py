@@ -59,5 +59,16 @@ def checkin():
                 showFailDialog()
 
 def go():
-        checkin()
+        try:
+                checkin()
+        except RuntimeException as ex:
+                msg = "RuntimeException:" + str(ex)
+                print msg
+                cmds.confirmDialog( title         = 'Uh Oh!'
+                                  , message       = 'An exception just occured!\r\nHere is the message: ' + msg
+                                  , button        = ['Dismiss']
+                                  , defaultButton = 'Dismiss'
+                                  , cancelButton  = 'Dismiss'
+                                  , dismissString = 'Dismiss'}
+                
 
