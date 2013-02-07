@@ -30,6 +30,7 @@ export PRODUCTION_DIR=${JOB}/PRODUCTION
 # User directory for checkout files, testing, ect.
 export USER_DIR=${JOB}/users/${USER}
 
+# Directory for dailies
 export DAILIES_DIR=${JOB}/dailies
 
 # Root directory for assets
@@ -82,6 +83,11 @@ buildProjectDirs()
         mkdir -p "$OTLS_DIR"
     fi
 
+    # Create tmp directory for ifds
+    if [ ! -d "$JOB"/tmp/ifds ]; then
+	mkdir -p "$JOB"/tmp/ifds
+    fi
+
     cp -u ${PROJECT_TOOLS}/otl_templates/*.otl ${OTLS_DIR}
 }
 
@@ -103,7 +109,7 @@ fi
 export HOUDINI_USE_HFS_PYTHON=1
 
 # HSITE doesn't currently point to anything we can use right now...
-export HSITE=/grp5
+export HSITE=/groups
 
 # Include GLOBAL_DIR in Houdini path, so we will pick up project settings and assets.
 HOUDINI_PATH=${HOME}/houdini${HOUDINI_MAJOR_RELEASE}.${HOUDINI_MINOR_RELEASE}
@@ -118,7 +124,7 @@ export HOUDINI_PYTHON_LIB=${PYTHONPATH}:${HOUDINI_PYTHON_LIB}
 export HOUDINI_TOOLBAR_PATH=${PROJECT_TOOLS}:${HOUDINI_PATH}
 
 # Add production and checkout otls to the OTL PATH.
-export HOUDINI_OTL_PATH=${OTLS_DIR}:${USER_DIR}/checkout/otls:${HOUDINI_PATH}
+export HOUDINI_OTL_PATH=${OTLS_DIR}:${USER_DIR}/otls:${HOUDINI_PATH}
 
 ###############################################################################
 # Maya specific environment
