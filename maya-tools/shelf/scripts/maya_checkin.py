@@ -69,6 +69,6 @@ def go():
                                   , button        = ['Dismiss']
                                   , defaultButton = 'Dismiss'
                                   , cancelButton  = 'Dismiss'
-                                  , dismissString = 'Dismiss'}
+                                  , dismissString = 'Dismiss')
                 
 
