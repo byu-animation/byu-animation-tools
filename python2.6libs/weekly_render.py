@@ -143,4 +143,4 @@ def weeklyRender(inputFile):
         hqueue = setUpHQueueNode(mantra)
         hqueue.render() #TODO test
         #cleanup
-        os.remove(os.path.join(TMPDIR, getHouFileName(shotName)))
+        #os.remove(os.path.join(TMPDIR, getHouFileName(shotName)))
