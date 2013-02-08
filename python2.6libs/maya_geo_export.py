@@ -20,7 +20,9 @@ def objExport(selected, path):
 	
 		@post: directory for 'path' is created if it wasn't already
 	'''
-	
+        # load the objExport plugin	
+        mc.loadPlugin("objExport")
+
 	# Create directory if it doesn't exist
 	if not os.path.exists(path):
 		os.makedirs(path)
@@ -38,6 +40,7 @@ def objExport(selected, path):
 		geoName = geo + ".obj"
 		geoName = geoName.replace("Shape", "")
 		geoName = geoName.replace(":", "_")
+		geoName = geoName.replace("|", "_")
 		filename = os.path.join(path, geoName)
 		print("Exporting \'" + filename + "\'...")
 		mc.file(filename, force=True, options=optionsStr, type=exportType, preserveReferences=True, exportSelected=True)
