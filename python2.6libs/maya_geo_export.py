@@ -40,6 +40,7 @@ def objExport(selected, path):
 		geoName = geo + ".obj"
 		geoName = geoName.replace("Shape", "")
 		geoName = geoName.replace(":", "_")
+		geoName = geoName.replace("|", "_")
 		filename = os.path.join(path, geoName)
 		print("Exporting \'" + filename + "\'...")
 		mc.file(filename, force=True, options=optionsStr, type=exportType, preserveReferences=True, exportSelected=True)
