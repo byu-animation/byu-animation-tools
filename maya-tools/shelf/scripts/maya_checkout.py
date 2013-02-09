@@ -83,6 +83,7 @@ class CheckoutDialog(QDialog):
 			item = QListWidgetItem(os.path.basename(s)) 
 			item.setText(os.path.basename(s))
 			self.selection_list.addItem(item)
+		self.selection_list.sortItems(0)
 	
 	def refresh(self):
 		if self.animation_radio.isChecked():
