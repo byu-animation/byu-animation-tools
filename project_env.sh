@@ -46,10 +46,10 @@ export LIGHTING_DIR=${PRODUCTION_DIR}/lighting
 export OTLS_DIR=${PRODUCTION_DIR}/otls
 
 # Directory for settings
-export HSETTINGS_DIR=${PROJECT_TOOLS}/hsettings
+export HTOOLS_DIR=${PROJECT_TOOLS}/houdini-tools
 
 # Append to python path so batch scripts can access our modules
-export PYTHONPATH=/usr/lib64/python2.6/site-packages:${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${HSETTINGS_DIR}/python2.6libs:${PYTHONPATH}
+export PYTHONPATH=/usr/lib64/python2.6/site-packages:${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${HTOOLS_DIR}/python2.6libs:${PYTHONPATH}
 
 # Function to build directory structure
 buildProjectDirs()
@@ -118,14 +118,14 @@ export HSITE=/groups
 # Include GLOBAL_DIR in Houdini path, so we will pick up project settings and assets.
 HOUDINI_PATH=${HOME}/houdini${HOUDINI_MAJOR_RELEASE}.${HOUDINI_MINOR_RELEASE}
 HOUDINI_PATH=${HOUDINI_PATH}:${HSITE}/byu-anim/houdini${HOUDINI_MAJOR_RELEASE}.${HOUDINI_MINOR_RELEASE}
-HOUDINI_PATH=${HOUDINI_PATH}:${HSETTINGS_DIR}:${HFS}/houdini
+HOUDINI_PATH=${HOUDINI_PATH}:${HTOOLS_DIR}:${HFS}/houdini
 export HOUDINI_PATH
 
 # Add our custom python scripts
 export HOUDINI_PYTHON_LIB=${PYTHONPATH}:${HOUDINI_PYTHON_LIB}
 
 # Add our custom shelf tools
-export HOUDINI_TOOLBAR_PATH=${PROJECT_TOOLS}:${HOUDINI_PATH}
+# export HOUDINI_TOOLBAR_PATH=${PROJECT_TOOLS}:${HOUDINI_PATH}
 
 # Add production and checkout otls to the OTL PATH.
 export HOUDINI_OTL_PATH=${USER_DIR}:${PRODUCTION_DIR}:${HOUDINI_PATH}
