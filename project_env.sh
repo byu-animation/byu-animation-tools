@@ -49,7 +49,7 @@ export OTLS_DIR=${PRODUCTION_DIR}/otls
 export HSETTINGS_DIR=${PROJECT_TOOLS}/hsettings
 
 # Append to python path so batch scripts can access our modules
-export PYTHONPATH=/usr/lib64/python2.6/site-packages:${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${PROJECT_TOOLS}/python2.6libs:${PYTHONPATH}
+export PYTHONPATH=/usr/lib64/python2.6/site-packages:${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${HSETTINGS_DIR}/python2.6libs:${PYTHONPATH}
 
 # Function to build directory structure
 buildProjectDirs()
