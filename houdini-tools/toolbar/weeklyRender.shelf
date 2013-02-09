@@ -16,8 +16,11 @@ try:
     # (Remove param. for user choice)
     outputDir = wr.getOutputDir(wr.RENDERDIR)
     
+    # Get Mantra or HQueue
+    local = wr.getRenderContext()
+    
     # Generate geometry sequences    
-    wr.weeklyRender(inputFile)
+    wr.weeklyRender(inputFile, local)
 
 except Exception as e:
     print "Exiting: " + str(e)

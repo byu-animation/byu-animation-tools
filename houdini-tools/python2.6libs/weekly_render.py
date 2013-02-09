@@ -101,6 +101,13 @@ def getOutputDir(output = None):
     else:
         return hou.expandString(output)
 
+def getRenderContext():
+    local = hou.ui.displayMessage("Render locally (Mantra) or on the farm (HQueue)?", 
+                                    buttons=('Local', 'Farm'),
+                                    default_choice=1, 
+                                    title="Render Mode")
+    return (local == 0)
+
 def setUpMantraNode(shotName, frameRange):
     man = hou.node("/out").createNode("ifd")
     outputDir = RENDERDIR.replace(JOB_DIR, "$JOB")
@@ -127,7 +134,7 @@ def setUpHQueueNode(man):
     return hq
 
 # Main #
-def weeklyRender(inputFile):
+def weeklyRender(inputFile, local):
     shotList = parseDefinitionFile(inputFile)
     for shot in shotList:
         shotName = shot[0]
@@ -139,8 +146,12 @@ def weeklyRender(inputFile):
         except hou.OperationFailed:
             hou.ui.displayMessage("Failed to open " + filePath + ". Moving on...")
             continue
+        
         mantra = setUpMantraNode(shotName, frameRange)
-        hqueue = setUpHQueueNode(mantra)
-        hqueue.render() #TODO test
+        if local:
+            mantra.render()
+        else:
+            hqueue = setUpHQueueNode(mantra)
+            hqueue.render()
         #cleanup
         #os.remove(os.path.join(TMPDIR, getHouFileName(shotName)))
