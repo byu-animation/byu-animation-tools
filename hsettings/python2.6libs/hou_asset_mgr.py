@@ -269,7 +269,8 @@ def listContainers():
             break
         else:
             for dir in dirs:
-                dirlist.append(dir)
+                dirlist.append(str(dir))
+    dirlist.sort()
     return dirlist
 
 def newContainer(hpath):
