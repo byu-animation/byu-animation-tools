@@ -74,7 +74,11 @@ def saveOTL(node):
     """If node is a digital asset,
         Saves node's operator type and marks node as the current defintion"""
     if isDigitalAsset(node):
-        node.type().definition().updateFromNode(node)
+        # try/except statement is needed for assets that generate code, like shaders.
+        try:
+            node.type().definition().updateFromNode(node)
+        except:
+            pass
         node.matchCurrentDefinition()
 
 def switchOPLibraries(oldfilepath, newfilepath):
@@ -183,6 +187,9 @@ def checkout():
         if not isDigitalAsset(node):
             hou.ui.displayMessage("Not a Digital Asset.")
         else:
+            if node.type().name() == "geometryTemplate":
+                hou.ui.displayMessage("Cannot checkout geometry template node.")
+                return False
             libraryPath = node.type().definition().libraryFilePath()
             filename = os.path.basename(libraryPath)
             info = getFileInfo(filename)
