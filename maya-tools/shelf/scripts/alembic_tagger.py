@@ -2,7 +2,6 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 from PyQt4 import uic
 from pymel.core import *
-import alembic_tagger_UI
 
 import os
 import maya.OpenMayaUI as omu
