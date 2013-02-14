@@ -74,7 +74,11 @@ def saveOTL(node):
     """If node is a digital asset,
         Saves node's operator type and marks node as the current defintion"""
     if isDigitalAsset(node):
-        node.type().definition().updateFromNode(node)
+        # try/except statement is needed for assets that generate code, like shaders.
+        try:
+            node.type().definition().updateFromNode(node)
+        except:
+            pass
         node.matchCurrentDefinition()
 
 def switchOPLibraries(oldfilepath, newfilepath):
@@ -183,6 +187,9 @@ def checkout():
         if not isDigitalAsset(node):
             hou.ui.displayMessage("Not a Digital Asset.")
         else:
+            if node.type().name() == "geometryTemplate":
+                hou.ui.displayMessage("Cannot checkout geometry template node.")
+                return False
             libraryPath = node.type().definition().libraryFilePath()
             filename = os.path.basename(libraryPath)
             info = getFileInfo(filename)
@@ -269,11 +276,12 @@ def listContainers():
             break
         else:
             for dir in dirs:
-                dirlist.append(dir)
+                dirlist.append(str(dir))
+    dirlist.sort()
     return dirlist
 
-def newContainer():
-    templateNode = hou.node("/obj").createNode("containerTemplate")
+def newContainer(hpath):
+    templateNode = hou.node(hpath).createNode("containerTemplate")
     templateNode.hide(True)
     ok, resp = hou.ui.readInput("Enter the New Operator Label", buttons=('OK', 'Cancel'), title="OTL Label")
     if ok == 0 and resp.strip() != '':
@@ -285,56 +293,92 @@ def newContainer():
             amu.createNewAssetFolders(ASSETSDIR, filename)
             templateNode.type().definition().copyToHDAFile(newfilepath, new_name=filename, new_menu_name=name)
             hou.hda.installFile(newfilepath, change_oplibraries_file=True)
-            newnode = hou.node('/obj').createNode(filename)
+            newnode = hou.node(hpath).createNode(filename)
         else:
             hou.ui.displayMessage("Asset by that name already exists. Cannot create asset.", title='Asset Name', severity=hou.severityType.Error)
         
     # clean up
     templateNode.destroy()
 
-def newGeo():
-    templateNode = hou.node("/obj").createNode("geometryTemplate")
-    templateNode.hide(True)
+def rename():
+    """Renames the selected node. EXACTLY ONE node may be selected, and it MUST be a digital asset.
+        The node must already exist in the database.
+    """
+    updateDB()
+    node = getSelectedNode()
+    if node != None:
+        if not isDigitalAsset(node):
+            hou.ui.displayMessage("Not a Digital Asset.")
+        else:
+            if isContainer(node):
+                oldlibraryPath = node.type().definition().libraryFilePath()
+                oldfilename = os.path.basename(oldlibraryPath)
+                oldAssetName = oldfilename.split('.')[0]
+                assetDirPath = os.path.join(ASSETSDIR, oldAssetName)
+                info = getFileInfo(oldfilename)
+                if not info[2]:
+                    ok, resp = hou.ui.readInput("Enter the New Operator Label", buttons=('OK', 'Cancel'), title="Rename OTL")
+                    if ok == 0 and resp.strip() != '':
+                        name = formatName(resp)
+                        newfilename = name.replace(' ', '_')
+                        newfilepath = os.path.join(OTLDIR, newfilename+'.otl')
+                        if os.path.exists(newfilepath):
+                            hou.ui.displayMessage("Asset by that name already exists. Cannot rename asset.", title='Asset Name', severity=hou.severityType.Error)
+                        elif not amu.canRename(assetDirPath, newfilename):
+                            hou.ui.displayMessage("Asset checked out in Maya. Cannot rename asset.", title='Asset Name', severity=hou.severityType.Error)
+                        else:
+                            node.type().definition().copyToHDAFile(newfilepath, new_name=newfilename, new_menu_name=name)
+                            hou.hda.installFile(newfilepath, change_oplibraries_file=True)
+                            newnode = hou.node(determineHPATH()).createNode(newfilename)
+                            node.destroy()
+                            hou.hda.uninstallFile(oldlibraryPath, change_oplibraries_file=False)
+                            os.system('rm -f '+oldlibraryPath)
+                            amu.renameAsset(assetDirPath, newfilename)
+                else:
+                    hou.ui.displayMessage("Locked By: "+info[3].encode('utf-8'))
+            
+    else:
+        hou.ui.displayMessage("Select EXACTLY one node.")
+
+def newGeo(hpath):
+    templateNode = hou.node(hpath).createNode("geometryTemplate")
+    alist = listContainers()
     ok, resp = hou.ui.readInput("Enter the New Operator Label", buttons=('OK', 'Cancel'), title="OTL Label")
+    filename = str()
     if ok == 0 and resp.strip() != '':
         name = formatName(resp)
         filename = name.replace(' ', '_')
-        newfilepath = os.path.join(OTLDIR, filename+'.otl')
-        if not os.path.exists(newfilepath):
-            alist = listContainers()
-            answer = hou.ui.selectFromList(alist, exclusive=True, message='Select Container Asset this belongs to:')[0]
-            if not answer:
-                hou.ui.displayMessage("Geometry assets must be associated with a container asset! Geometry asset not created.", severity=hou.severityType.Error)
-                templateNode.destroy()
-                return
-            templateNode.type().definition().copyToHDAFile(newfilepath, new_name=filename, new_menu_name=name)
-            hou.hda.installFile(newfilepath, change_oplibraries_file=True)
-            newnode = hou.node('/obj').createNode(filename)
-            sdir = '$JOB/PRODUCTION/assets/'
-            gfile = hou.ui.selectFile(start_directory=sdir + alist[answer]+'/geo', title='Choose Geometry', chooser_mode=hou.fileChooserMode.Read)
-            if len(gfile) > 4 and gfile[:4] != '$JOB':
-                hou.ui.displayMessage("Path must start with '$JOB'. Default geometry used.", title='Path Name', severity=hou.severityType.Error)
-                templateNode.destroy()
-                return
-            elif gfile != '':
-                ndef = newnode.type().definition()
-                newnode.allowEditingOfContents()
-                hou.parm(newnode.path() + '/read_file/file').set(gfile)
-                ndef.updateFromNode(newnode)
-                newnode.matchCurrentDefinition()
-        else:
-            hou.ui.displayMessage("Asset by that name already exists. Cannot create asset.", title='Asset Name', severity=hou.severityType.Error)
-    # clean up
-    templateNode.destroy()
+        templateNode.setName(filename, unique_name=True)
+    answer = hou.ui.selectFromList(alist, exclusive=True, message='Select Container Asset this belongs to:')
+    if not answer:
+        hou.ui.displayMessage("Geometry must be associated with a container asset! Geometry asset not created.", severity=hou.severityType.Error)
+        templateNode.destroy()
+        return
+    answer = answer[0]
+    sdir = '$JOB/PRODUCTION/assets/'
+    gfile = hou.ui.selectFile(start_directory=sdir + alist[answer]+'/geo', title='Choose Geometry', chooser_mode=hou.fileChooserMode.Read)
+    if len(gfile) > 4 and gfile[:4] != '$JOB':
+        hou.ui.displayMessage("Path must start with '$JOB'. Default geometry used instead.", title='Path Name', severity=hou.severityType.Error)
+        templateNode.destroy()
+    elif gfile != '':
+        hou.parm(templateNode.path() + '/read_file/file').set(gfile)
+
+def determineHPATH():
+    hpane = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
+    hpath = hpane.pwd().path()
+    if not isinstance(hpane.pwd(), hou.ObjNode):
+        hpath = "/obj"
+    return hpath
 
 def new():
     updateDB()
     otb = ('Container', 'Geometry', 'Cancel')
     optype = hou.ui.displayMessage("Choose operator type.", buttons=otb, title='Asset Type')
+    hpath = determineHPATH()
     if optype == 0:
-        newContainer()
+        newContainer(hpath)
     elif optype == 1:
-        newGeo()
+        newGeo(hpath)
 
 def add():
     """Adds the selected node. EXACTLY ONE node may be selected, and it MUST be a digital asset.

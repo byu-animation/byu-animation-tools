@@ -1,0 +1,11 @@
+# Global Color Correction controls
+ui.cc.lut.val     := "";
+ui.cc.gamma.val   := 2.2;
+ui.swatch.val     := 1;
+ui.view3d.val     := 1;
+ui.saveimage.val  := 1;
+ui.imageview.val  := 1;
+ui.flipbook.val   := 1;
+ui.render.val     := 1;
+ui.renderstate.val:= 1;
+

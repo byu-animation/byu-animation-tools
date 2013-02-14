@@ -1,0 +1,12 @@
+{
+version 0.8
+gspace	[ 0	locks=0 ]	(	10	10	)
+gcount	[ 0	locks=0 ]	(	40	40	)
+gruler	[ 0	locks=0 ]	(	10	10	)
+gorig	[ 0	locks=0 ]	(	"off"	)
+origin	[ 0	locks=0 ]	(	-200	0	-200	)
+normal	[ 0	locks=0 ]	(	0	1	0	)
+upvector	[ 0	locks=0 ]	(	0	0	1	)
+lockup	[ 0	locks=0 ]	(	"locknorm"	)
+default_xaxis	[ 0	locks=0 ]	(	0	0	1	)
+}

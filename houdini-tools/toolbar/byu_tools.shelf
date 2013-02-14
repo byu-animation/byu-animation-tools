@@ -13,5 +13,7 @@
     <memberTool name="make_geo_editable"/>
     <memberTool name="unlock DB"/>
     <memberTool name="abc2bjson"/>
+    <memberTool name="weeklyRender"/>
+    <memberTool name="rename"/>
   </toolshelf>
 </shelfDocument>

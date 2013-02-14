@@ -1,23 +1,25 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-#import maya.cmds as mc
-#import maya.OpenMayaUI as omu
+import maya.cmds as cmd
+import maya.OpenMayaUI as omu
 import sip
 import os, glob
 import utilities as amu
 
-#def maya_main_window():
-	#ptr = omu.MQtUil.mainWindow()
-	#return sip.wrapinstance(long(ptr), QObject)
-#	return QMainWindow()
+CHECKOUT_WINDOW_WIDTH = 330
+CHECKOUT_WINDOW_HEIGHT = 600
+
+def maya_main_window():
+	ptr = omu.MQtUtil.mainWindow()
+	return sip.wrapinstance(long(ptr), QObject)
 
 class CheckoutDialog(QDialog):
-	#def __init__(self, parent=maya_main_window()):
-	def setup(self, parent):
+	def __init__(self, parent=maya_main_window()):
+	#def setup(self, parent):
 		QDialog.__init__(self, parent)
 		self.setWindowTitle('Checkout')
-		self.setFixedSize(330, 475)
+		self.setFixedSize(CHECKOUT_WINDOW_WIDTH, CHECKOUT_WINDOW_HEIGHT)
 		self.create_layout()
 		self.create_connections()
 		self.refresh()
@@ -25,15 +27,15 @@ class CheckoutDialog(QDialog):
 	def create_layout(self):
 		#Create the selected item list
 		self.selection_list = QListWidget()
-		
-		#Create Models, Rig, Animation
+		self.selection_list.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+				
+		#Create Models, Rig, Animation		
 		radio_button_group = QVBoxLayout()
-		self.model_radio = QRadioButton('Model')#, self.radio_button_group)
-		self.rig_radio = QRadioButton('Rig')#, self.radio_button_group)
-		self.animation_radio = QRadioButton('Animation')#, self.radio_button_group)
+		self.model_radio = QRadioButton('Model')
+		self.rig_radio = QRadioButton('Rig')
+		self.animation_radio = QRadioButton('Animation')
 		self.model_radio.setChecked(True)
 		radio_button_group.setSpacing(2)
-		radio_button_group.addStretch()
 		radio_button_group.addWidget(self.model_radio)
 		radio_button_group.addWidget(self.rig_radio)
 		radio_button_group.addWidget(self.animation_radio)
@@ -53,7 +55,7 @@ class CheckoutDialog(QDialog):
 		main_layout = QVBoxLayout()
 		main_layout.setSpacing(2)
 		main_layout.setMargin(2)
-		main_layout.addWidget(self.selection_list)
+		main_layout.addWidget(self.selection_list)		
 		main_layout.addLayout(radio_button_group)
 		main_layout.addLayout(button_layout)
 		
@@ -78,8 +80,10 @@ class CheckoutDialog(QDialog):
 		
 		#Add the list to select from
 		for s in selection:
-			item = QListWidgetItem(os.path.basename(s)) #TODO might need to be basename
+			item = QListWidgetItem(os.path.basename(s)) 
+			item.setText(os.path.basename(s))
 			self.selection_list.addItem(item)
+		self.selection_list.sortItems(0)
 	
 	def refresh(self):
 		if self.animation_radio.isChecked():
@@ -99,6 +103,10 @@ class CheckoutDialog(QDialog):
 	# SLOTS
 	########################################################################
 	def checkout(self):
+		curfilepath = cmd.file(query=True, sceneName=True)
+		if not curfilepath == '':
+			cmd.file(save=True, force=True)
+
 		asset_name = str(self.current_item.text())
 		if self.model_radio.isChecked():
 			toCheckout = os.path.join(os.environ['ASSETS_DIR'], asset_name, 'model')
@@ -107,11 +115,31 @@ class CheckoutDialog(QDialog):
 		elif self.animation_radio.isChecked():
 			toCheckout = os.path.join(os.environ['ANIMATION_DIR'], asset_name)
 		
-		destpath = amu.checkout(toCheckout, True)
+		try:
+			destpath = amu.checkout(toCheckout, True)
+		except Exception as e:
+			if not amu.checkedOutByMe(toCheckout):
+				cmd.confirmDialog(  title          = 'Can Not Checkout'
+                                   , message       = str(e)
+                                   , button        = ['Ok']
+                                   , defaultButton = 'Ok'
+                                   , cancelButton  = 'Ok'
+                                   , dismissString = 'Ok')
+				return
+			else:
+				destpath = amu.getCheckoutDest(toCheckout)
+
 		toOpen = os.path.join(destpath, self.get_filename(toCheckout)+'.mb')
-		#TODO open the file
-		print toCheckout
-		print toOpen
+		
+		# open the file
+		if os.path.exists(toOpen):
+			cmd.file(toOpen, force=True, open=True)
+		else:
+			# create new file
+			cmd.file(force=True, new=True)
+			cmd.file(rename=toOpen)
+			cmd.file(save=True, force=True)
+		self.close_dialog()
 	
 	def close_dialog(self):
 		self.close()
@@ -121,14 +149,8 @@ class CheckoutDialog(QDialog):
 		
 
 def go():
-	import sys
-	app = QApplication(sys.argv)
-	MainWindow = QMainWindow()
 	dialog = CheckoutDialog()
-	dialog.setup(MainWindow)
-	#MainWindow.show()
 	dialog.show()
-	sys.exit(app.exec_())
 	
 if __name__ == '__main__':
 	go()

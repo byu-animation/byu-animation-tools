@@ -30,6 +30,9 @@ export PRODUCTION_DIR=${JOB}/PRODUCTION
 # User directory for checkout files, testing, ect.
 export USER_DIR=${JOB}/users/${USER}
 
+# Directory for dailies
+export DAILIES_DIR=${JOB}/dailies
+
 # Root directory for assets
 export ASSETS_DIR=${PRODUCTION_DIR}/assets
 
@@ -42,22 +45,25 @@ export LIGHTING_DIR=${PRODUCTION_DIR}/lighting
 # Directory for otls
 export OTLS_DIR=${PRODUCTION_DIR}/otls
 
+# Directory for settings
+export HTOOLS_DIR=${PROJECT_TOOLS}/houdini-tools
+
 # Append to python path so batch scripts can access our modules
-export PYTHONPATH=/usr/lib64/python2.6/site-packages:${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${PROJECT_TOOLS}/python2.6libs:${PYTHONPATH}
+export PYTHONPATH=/usr/lib64/python2.6/site-packages:${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${HTOOLS_DIR}/python2.6libs:${PYTHONPATH}
 
 # Function to build directory structure
-buildDirs()
+buildProjectDirs()
 {
+    # Create Dailies directory
+    if [ ! -d "$DAILIES_DIR" ]; then
+        mkdir -p "$DAILIES_DIR"
+	mkdir -p "$DAILIES_DIR"/tmp
+	mkdir -p "$DAILIES_DIR"/renders
+    fi
+    
     # Create Production directory
     if [ ! -d "$PRODUCTION_DIR" ]; then
         mkdir -p "$PRODUCTION_DIR"
-    fi
-
-    # Create User directory for checkout files, testing, ect.
-    if [ ! -d "$USER_DIR" ]; then
-        mkdir -p "$USER_DIR"
-        mkdir -p "$USER_DIR"/checkout
-        mkdir -p "$USER_DIR"/otls
     fi
 
     # Create Root directory for assets
@@ -79,9 +85,25 @@ buildDirs()
     if [ ! -d "$OTLS_DIR" ]; then
         mkdir -p "$OTLS_DIR"
     fi
+
+
+    # Create User directory for checkout files, testing, ect.
+    if [ ! -d "$USER_DIR" ]; then
+        mkdir -p "$USER_DIR"
+        mkdir -p "$USER_DIR"/checkout
+        mkdir -p "$USER_DIR"/otls
+    fi
+
+    # Create tmp directory for ifds
+    if [ ! -d "$JOB"/tmp/ifds ]; then
+        mkdir -p "$JOB"/tmp/ifds
+    fi
+
+    cp -u ${PROJECT_TOOLS}/otl_templates/*.otl ${OTLS_DIR}
 }
 
-buildDirs
+# Uncomment to build the project directories
+buildProjectDirs
 
 ###############################################################################
 # Houdini specific environment
@@ -91,22 +113,22 @@ buildDirs
 export HOUDINI_USE_HFS_PYTHON=1
 
 # HSITE doesn't currently point to anything we can use right now...
-export HSITE=/grp5
+export HSITE=/groups
 
 # Include GLOBAL_DIR in Houdini path, so we will pick up project settings and assets.
 HOUDINI_PATH=${HOME}/houdini${HOUDINI_MAJOR_RELEASE}.${HOUDINI_MINOR_RELEASE}
-HOUDINI_PATH=${HOUDINI_PATH}:${HSITE}/houdini${HOUDINI_MAJOR_RELEASE}.${HOUDINI_MINOR_RELEASE}
-HOUDINI_PATH=${HOUDINI_PATH}:${PRODUCTION_DIR}:${HFS}/houdini
+HOUDINI_PATH=${HOUDINI_PATH}:${HSITE}/byu-anim/houdini${HOUDINI_MAJOR_RELEASE}.${HOUDINI_MINOR_RELEASE}
+HOUDINI_PATH=${HOUDINI_PATH}:${HTOOLS_DIR}:${HFS}/houdini
 export HOUDINI_PATH
 
 # Add our custom python scripts
 export HOUDINI_PYTHON_LIB=${PYTHONPATH}:${HOUDINI_PYTHON_LIB}
 
 # Add our custom shelf tools
-export HOUDINI_TOOLBAR_PATH=${PROJECT_TOOLS}:${HOUDINI_PATH}
+# export HOUDINI_TOOLBAR_PATH=${PROJECT_TOOLS}:${HOUDINI_PATH}
 
 # Add production and checkout otls to the OTL PATH.
-export HOUDINI_OTL_PATH=${OTLS_DIR}:${USER_DIR}/checkout/otls:${HOUDINI_PATH}
+export HOUDINI_OTL_PATH=${USER_DIR}:${PRODUCTION_DIR}:${HOUDINI_PATH}
 
 ###############################################################################
 # Maya specific environment
@@ -116,3 +138,7 @@ export HOUDINI_OTL_PATH=${OTLS_DIR}:${USER_DIR}/checkout/otls:${HOUDINI_PATH}
 export MAYA_TOOLS_DIR=${PROJECT_TOOLS}/maya-tools
 export MAYA_SHELF_DIR=${MAYA_TOOLS_DIR}/shelf
 export MAYA_SCRIPT_PATH=${MAYA_SCRIPT_PATH}:${PYTHONPATH}:${MAYA_SHELF_DIR}
+
+###############################################################################
+# BEGIN AWESOMENESS!!!
+###############################################################################

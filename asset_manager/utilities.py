@@ -108,19 +108,41 @@ def removeFolder(dirPath):
 		raise Exception ("Can not Remove")
 	shutil.rmtree(dirPath)
 
-def canRename(dirPath):
-	if not hasInstalledChild(dirPath) and not isCheckedOut(dirPath):
+def canRename(assetDirPath, newName):
+	head, tail = os.path.split(assetDirPath)
+	dest = os.path.join(head, newName)
+	modelDir = os.path.join(assetDirPath, 'model')
+	rigDir = os.path.join(assetDirPath, 'rig')
+	if not isCheckedOut(modelDir) and not isCheckedOut(rigDir) and not os.path.exists(dest):
 		return True
 	return False
 
 def renameFolder(oldDir, newName):
-	if not canRename(oldDir):
-		raise Exception ("Can not rename")
 	head, tail = os.path.split(oldDir)
 	dest = os.path.join(head, newName)
 	if os.path.exists(dest):
 		raise Exception ("Folder already exists")
 	os.renames(oldDir, dest)
+
+def renameVersionedFiles(vDirPath, oldname, newName):
+	src = glob.glob(os.path.join(vDirPath, 'src', '*', '*.mb'))
+	stable = glob.glob(os.path.join(vDirPath, 'stable', '*', '*.mb'))
+	stable = stable+glob.glob(os.path.join(vDirPath, 'stable', '*.mb'))
+	for s in src+stable:
+		head, tail = os.path.split(s)
+		dest = os.path.join(head, newName+tail.split(oldname)[1])
+		os.renames(s, dest)
+
+def renameAsset(oldDirPath, newName):
+	if not canRename(oldDirPath, newName):
+		raise Exception ("Can not rename")
+	head, tail = os.path.split(oldDirPath)
+	dest = os.path.join(head, newName)
+	modelDir = os.path.join(oldDirPath, 'model')
+	rigDir = os.path.join(oldDirPath, 'rig')
+	renameVersionedFiles(modelDir, tail, newName)
+	renameVersionedFiles(rigDir, tail, newName)
+	os.renames(oldDirPath, dest)
 
 def hasInstalledChild(dirPath):
 	if isVersionedFolder(dirPath) and isInstalled(dirPath) or isCheckedOut(dirPath):
@@ -192,6 +214,14 @@ def isCheckedOut(dirPath):
 	cp.read(nodeInfo)
 	return cp.getboolean("Versioning", "locked")
 
+def checkedOutByMe(dirPath):
+	nodeInfo = os.path.join(dirPath, ".nodeInfo")
+	if not os.path.exists(nodeInfo):
+		return False
+	cp = ConfigParser()
+	cp.read(nodeInfo)
+	return cp.get("Versioning", "lastcheckoutuser") == getUsername()
+
 def getFilesCheckoutTime(filePath):
 	checkoutInfo = os.path.join(filePath, ".checkoutInfo")
 	#print checkoutInfo
@@ -210,6 +240,12 @@ def canCheckout(coPath):
 	if nodeInfo.get("Versioning", "locked") == "True":
 		result = False
 	return result
+
+def getCheckoutDest(coPath):
+	nodeInfo = ConfigParser()
+	nodeInfo.read(os.path.join(coPath, ".nodeInfo"))
+	version = nodeInfo.get("Versioning", "latestversion")
+	return os.path.join(getUserCheckoutDir(), os.path.basename(os.path.dirname(coPath))+"_"+os.path.basename(coPath)+"_"+version)
 
 def checkout(coPath, lock):
 	"""
@@ -230,7 +266,7 @@ def checkout(coPath, lock):
 	if nodeInfo.get("Versioning", "locked") == "False":
 		version = nodeInfo.get("Versioning", "latestversion")
 		toCopy = os.path.join(coPath, "src", "v"+version)
-		dest = os.path.join(getUserCheckoutDir(), os.path.basename(os.path.dirname(coPath))+"_"+os.path.basename(coPath)+"_"+version)
+		dest = getCheckoutDest(coPath)
 		
 		if(os.path.exists(toCopy)):
 			try:
@@ -306,6 +342,11 @@ def discard(toDiscard):
 
 	shutil.rmtree(toDiscard)
 
+def getCheckinDest(toCheckin):
+	chkoutInfo = ConfigParser()
+	chkoutInfo.read(os.path.join(toCheckin, ".checkoutInfo"))
+	return chkoutInfo.get("Checkout", "checkedoutfrom")
+
 def checkin(toCheckin):
 	"""
 	Checks a folder back in as the newest version
@@ -344,6 +385,8 @@ def checkin(toCheckin):
 	shutil.rmtree(toCheckin)
 	os.remove(os.path.join(newVersionPath, ".checkoutInfo"))
 
+	return chkInDest
+
 ################################################################################
 # Install
 ################################################################################
@@ -361,6 +404,7 @@ def getAvailableInstallFiles(vDirPath):
 	latest = os.path.join(vDirPath, "src", "v"+version)
 	
 	files = glob.glob(os.path.join(latest,'*'))
+	print files
 	return files
 
 def _isHoudiniFile(filename):
@@ -387,6 +431,8 @@ def install(vDirPath, srcFilePath):
 	@postcondition: if setStable == True then stable symlink will point to filename
 	"""
 	print 'utilities, install'
+	print vDirPath
+	print srcFilePath
 	stableDir = os.path.join(vDirPath, "stable")
 	backupsDir = os.path.join(stableDir, 'backups')
 	numFiles = len(glob.glob(os.path.join(backupsDir, '*')))
@@ -399,13 +445,15 @@ def install(vDirPath, srcFilePath):
 		shutil.move(os.path.join(stableDir, stableName+srcExt), os.path.join(backupsDir, stableName+'_'+str(numFiles)+srcExt))
 	
 	newInstFilePath = os.path.join(stableDir, stableName+srcExt)
+	print newInstFilePath
 	
-	if _isHoudiniFile(newInstFilePath):
-		call([getHoudiniPython(), "installHoudiniFile.py", srcFilePath, newInstFilePath])
-	elif _isMayaFile(newInstFilePath):
-		call([getMayapy(), "installMayaFile.py", srcFilePath, newInstFilePath])
-	else:
-		#Just copy the file
-		print 'copying file...'
-		shutil.copy(srcFilePath, newInstFilePath)
+	#if _isHoudiniFile(newInstFilePath):
+	#	call([getHoudiniPython(), "installHoudiniFile.py", srcFilePath, newInstFilePath])
+	#elif _isMayaFile(newInstFilePath):
+	#	call([getMayapy(), "installMayaFile.py", srcFilePath, newInstFilePath])
+	#else:
+	#	#Just copy the file
+	#	print 'copying file...'
+	#	
+	shutil.copy(srcFilePath, newInstFilePath)
 	
