@@ -12,7 +12,7 @@
 
 Once the asset has been checked in again, then another user may check it out. The locking feature is meant to prevent artists from overwriting eachothers work by accident.]]></helpText>
     <script scriptType="python"><![CDATA[# Author Brian Kingery
-# Digital Asset management for Chasm: Attempt to claim a Digital Asset and Edit it
+# Digital Asset management: Attempt to claim a Digital Asset and Edit it
 # If someone else has already claimed it for editing you will not be permitted to do so
 
 import hou_asset_mgr as mgr
