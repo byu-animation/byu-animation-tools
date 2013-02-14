@@ -16,7 +16,7 @@
 ####
 #### If you'd like to add a shelf button, you can add it to
 #### shelf.json. Follow the example of the other buttons in there.
-#### Remember, the icon must be a .xpm, and the python_file key
+#### Remember, the icon must be a 33X33 .xpm, and the python_file key
 #### must be the name of the file where your python script is 
 #### stored. (Careful, it's not an absolute path!)
 ####
@@ -27,7 +27,7 @@ import json
 
 #### CONSTANTS, Edit these for customization.
 PROJ = os.environ.get('PROJECT_NAME')
-SHELF_DIR = os.environ.get('BYU_MAYA_SHELF_DIR')
+SHELF_DIR = os.environ.get('MAYA_SHELF_DIR')
 ICON_DIR = os.path.join(SHELF_DIR, "icons")
 SCRIPT_DIR = os.path.join(SHELF_DIR, "scripts")
 ####
