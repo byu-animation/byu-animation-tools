@@ -135,6 +135,14 @@ def setUpHQueueNode(man):
 
 # Main #
 def weeklyRender(inputFile, local):
+    #cleanup tmp folder
+    for root, dirs, files in os.walk(TMPDIR):
+        for f in files:
+            os.unlink(os.path.join(root, f))
+        for d in dirs:
+            shutil.rmtree(os.path.join(root, d))
+    
+    #go through each shot in the list and run a render
     shotList = parseDefinitionFile(inputFile)
     for shot in shotList:
         shotName = shot[0]
@@ -153,5 +161,3 @@ def weeklyRender(inputFile, local):
         else:
             hqueue = setUpHQueueNode(mantra)
             hqueue.render()
-        #cleanup
-        #os.remove(os.path.join(TMPDIR, getHouFileName(shotName)))
