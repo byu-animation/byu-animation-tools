@@ -135,10 +135,10 @@ export HOUDINI_OTL_PATH=${USER_DIR}:${PRODUCTION_DIR}:${HOUDINI_PATH}
 ###############################################################################
 
 # Add our custom python scripts
-export BYU_MAYA_SHELF_DIR=${PROJECT_TOOLS}/maya-tools/shelf
-export MAYA_SCRIPT_PATH=${MAYA_SCRIPT_PATH}:${PYTHONPATH}:${BYU_MAYA_SHELF_DIR}
+export MAYA_TOOLS_DIR=${PROJECT_TOOLS}/maya-tools
+export MAYA_SHELF_DIR=${MAYA_TOOLS_DIR}/shelf
+export MAYA_SCRIPT_PATH=${MAYA_SCRIPT_PATH}:${PYTHONPATH}:${MAYA_SHELF_DIR}
 
 ###############################################################################
 # BEGIN AWESOMENESS!!!
 ###############################################################################
-
