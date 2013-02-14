@@ -300,6 +300,46 @@ def newContainer(hpath):
     # clean up
     templateNode.destroy()
 
+def rename():
+    """Renames the selected node. EXACTLY ONE node may be selected, and it MUST be a digital asset.
+        The node must already exist in the database.
+    """
+    updateDB()
+    node = getSelectedNode()
+    if node != None:
+        if not isDigitalAsset(node):
+            hou.ui.displayMessage("Not a Digital Asset.")
+        else:
+            if isContainer(node):
+                oldlibraryPath = node.type().definition().libraryFilePath()
+                oldfilename = os.path.basename(oldlibraryPath)
+                oldAssetName = oldfilename.split('.')[0]
+                assetDirPath = os.path.join(ASSETSDIR, oldAssetName)
+                info = getFileInfo(oldfilename)
+                if not info[2]:
+                    ok, resp = hou.ui.readInput("Enter the New Operator Label", buttons=('OK', 'Cancel'), title="Rename OTL")
+                    if ok == 0 and resp.strip() != '':
+                        name = formatName(resp)
+                        newfilename = name.replace(' ', '_')
+                        newfilepath = os.path.join(OTLDIR, newfilename+'.otl')
+                        if os.path.exists(newfilepath):
+                            hou.ui.displayMessage("Asset by that name already exists. Cannot rename asset.", title='Asset Name', severity=hou.severityType.Error)
+                        elif not amu.canRename(assetDirPath, newfilename):
+                            hou.ui.displayMessage("Asset checked out in Maya. Cannot rename asset.", title='Asset Name', severity=hou.severityType.Error)
+                        else:
+                            node.type().definition().copyToHDAFile(newfilepath, new_name=newfilename, new_menu_name=name)
+                            hou.hda.installFile(newfilepath, change_oplibraries_file=True)
+                            newnode = hou.node(determineHPATH()).createNode(newfilename)
+                            node.destroy()
+                            hou.hda.uninstallFile(oldlibraryPath, change_oplibraries_file=False)
+                            os.system('rm -f '+oldlibraryPath)
+                            amu.renameAsset(assetDirPath, newfilename)
+                else:
+                    hou.ui.displayMessage("Locked By: "+info[3].encode('utf-8'))
+            
+    else:
+        hou.ui.displayMessage("Select EXACTLY one node.")
+
 def newGeo(hpath):
     templateNode = hou.node(hpath).createNode("geometryTemplate")
     alist = listContainers()
@@ -323,14 +363,18 @@ def newGeo(hpath):
     elif gfile != '':
         hou.parm(templateNode.path() + '/read_file/file').set(gfile)
 
-def new():
-    updateDB()
-    otb = ('Container', 'Geometry', 'Cancel')
-    optype = hou.ui.displayMessage("Choose operator type.", buttons=otb, title='Asset Type')
+def determineHPATH():
     hpane = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
     hpath = hpane.pwd().path()
     if not isinstance(hpane.pwd(), hou.ObjNode):
         hpath = "/obj"
+    return hpath
+
+def new():
+    updateDB()
+    otb = ('Container', 'Geometry', 'Cancel')
+    optype = hou.ui.displayMessage("Choose operator type.", buttons=otb, title='Asset Type')
+    hpath = determineHPATH()
     if optype == 0:
         newContainer(hpath)
     elif optype == 1:

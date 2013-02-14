@@ -61,7 +61,7 @@ def checkin():
 def go():
         try:
                 checkin()
-        except RuntimeException as ex:
+        except Exception as ex:
                 msg = "RuntimeException:" + str(ex)
                 print msg
                 cmds.confirmDialog( title         = 'Uh Oh!'

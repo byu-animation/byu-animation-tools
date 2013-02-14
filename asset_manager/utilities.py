@@ -108,19 +108,41 @@ def removeFolder(dirPath):
 		raise Exception ("Can not Remove")
 	shutil.rmtree(dirPath)
 
-def canRename(dirPath):
-	if not hasInstalledChild(dirPath) and not isCheckedOut(dirPath):
+def canRename(assetDirPath, newName):
+	head, tail = os.path.split(assetDirPath)
+	dest = os.path.join(head, newName)
+	modelDir = os.path.join(assetDirPath, 'model')
+	rigDir = os.path.join(assetDirPath, 'rig')
+	if not isCheckedOut(modelDir) and not isCheckedOut(rigDir) and not os.path.exists(dest):
 		return True
 	return False
 
 def renameFolder(oldDir, newName):
-	if not canRename(oldDir):
-		raise Exception ("Can not rename")
 	head, tail = os.path.split(oldDir)
 	dest = os.path.join(head, newName)
 	if os.path.exists(dest):
 		raise Exception ("Folder already exists")
 	os.renames(oldDir, dest)
+
+def renameVersionedFiles(vDirPath, oldname, newName):
+	src = glob.glob(os.path.join(vDirPath, 'src', '*', '*.mb'))
+	stable = glob.glob(os.path.join(vDirPath, 'stable', '*', '*.mb'))
+	stable = stable+glob.glob(os.path.join(vDirPath, 'stable', '*.mb'))
+	for s in src+stable:
+		head, tail = os.path.split(s)
+		dest = os.path.join(head, newName+tail.split(oldname)[1])
+		os.renames(s, dest)
+
+def renameAsset(oldDirPath, newName):
+	if not canRename(oldDirPath, newName):
+		raise Exception ("Can not rename")
+	head, tail = os.path.split(oldDirPath)
+	dest = os.path.join(head, newName)
+	modelDir = os.path.join(oldDirPath, 'model')
+	rigDir = os.path.join(oldDirPath, 'rig')
+	renameVersionedFiles(modelDir, tail, newName)
+	renameVersionedFiles(rigDir, tail, newName)
+	os.renames(oldDirPath, dest)
 
 def hasInstalledChild(dirPath):
 	if isVersionedFolder(dirPath) and isInstalled(dirPath) or isCheckedOut(dirPath):
