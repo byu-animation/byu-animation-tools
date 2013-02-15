@@ -6,6 +6,11 @@
  a single file. -->
 
   <tool name="weeklyRender" label="Weekly Render" icon="PLASMA_App">
+    <helpText><![CDATA[= Run Weekly Render =
+
+"""Runs automated renders for dailies."""
+
+Runs automated renders for dailies. If you are running this tool, you probably know what you are doing.]]></helpText>
     <script scriptType="python"><![CDATA[import weekly_render as wr
 
 try:
