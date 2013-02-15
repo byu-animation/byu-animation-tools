@@ -5,6 +5,8 @@
 import sqlite3 as lite
 import os, glob
 import hou
+import subprocess as sp
+import tempfile
 
 import utilities as amu #asset manager utilites
 
@@ -178,6 +180,27 @@ def lockAsset(node, lockit):
         opts.setLockContents(lockit)
         ndef.setOptions(opts)
 
+def lockedBy(logname):
+    """Returns the true name of based on the login name passed in."""
+    tfd = tempfile.NamedTemporaryFile(mode='r+') # Create temp file to write to
+    myargs = ["/usr/bin/ldapsearch", "-LLL", "uid=" + str(logname), "cn"] # Command args
+    try:
+        sp.check_call(myargs, executable="ldapsearch", stdout=tfd)
+        tfd.seek(0) # Return to start of file
+        fstr = str(tfd.read()) # Read contents of file and cast to string
+        tfd.close() # Close and delete our temp file
+        fstr = fstr.strip() # Strip leading and trailing whitespace
+        lastline = fstr.splitlines()[-1] # Get last line
+        truename = lastline[4:] # Strip off first four characters of line
+
+        lockstr = "This asset is locked by the following user:\n\n"
+        lockstr += "User Name: " + logname + "\n"
+        lockstr += "Real Name: " + truename
+        return lockstr # Return lock string
+    except Exception as ex:
+        exstr = "Encountered exception: " + str(ex) + "\nUser's name not found."# Uh-oh... We jacked something up...
+        return exstr
+
 def checkout():
     """Checks out the selected node.  EXACTLY ONE node may be selected, and it MUST be a digital asset.
         The node must already exist in the database."""
@@ -203,7 +226,7 @@ def checkout():
                 lockOTL(filename)
                 hou.ui.displayMessage("Checkout Successful!")
             else:
-                hou.ui.displayMessage("Locked By: "+info[3].encode('utf-8'))
+                hou.ui.displayMessage(lockedBy(info[3].encode('utf-8')))
     else:
         hou.ui.displayMessage("Select EXACTLY one node.")
 
@@ -230,7 +253,7 @@ def checkin():
                     unlockOTL(filename)
                     hou.ui.displayMessage("Checkin Successful!")
                 else:
-                    hou.ui.displayMessage("Locked By: "+info[3].encode('utf-8'))
+                    hou.ui.displayMessage(lockedBy(info[3].encode('utf-8')))
             else:
                 hou.ui.displayMessage("Already checked in.")
     else:
@@ -335,7 +358,7 @@ def rename():
                             os.system('rm -f '+oldlibraryPath)
                             amu.renameAsset(assetDirPath, newfilename)
                 else:
-                    hou.ui.displayMessage("Locked By: "+info[3].encode('utf-8'))
+                    hou.ui.displayMessage(lockedBy(info[3].encode('utf-8')))
             
     else:
         hou.ui.displayMessage("Select EXACTLY one node.")

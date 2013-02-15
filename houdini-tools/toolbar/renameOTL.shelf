@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
+  <tool name="rename" label="Rename" icon="PLASMA_App">
+    <helpText><![CDATA[= Rename Asset =
+
+"""Rename the currently selected asset. Beware! This tool can (and probably will) break file paths. Use with caution."""
+
+This tool can break file paths and should be used with care!]]></helpText>
+    <script scriptType="python"><![CDATA[import hou_asset_mgr as mgr
+mgr.rename()]]></script>
+  </tool>
+</shelfDocument>
