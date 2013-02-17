@@ -340,6 +340,11 @@ def rename():
                 assetDirPath = os.path.join(ASSETSDIR, oldAssetName)
                 info = getFileInfo(oldfilename)
                 if not info[2]:
+                    pok, presp = hou.ui.readMultiInput("Enter the rename password...", input_labels=('Password:',), password_input_indices=(0,), buttons=('OK', 'Cancel'), title="Rename Password")
+                    presp = presp[0]
+                    if pok != 0 or presp != 'r3n@m3p@ssw0rd':
+                        hou.ui.displayMessage("Incorrect password. Better luck next time.", title='Incorrect Password', severity=hou.severityType.Error)
+                        return
                     ok, resp = hou.ui.readInput("Enter the New Operator Label", buttons=('OK', 'Cancel'), title="Rename OTL")
                     if ok == 0 and resp.strip() != '':
                         name = formatName(resp)
@@ -362,6 +367,52 @@ def rename():
             
     else:
         hou.ui.displayMessage("Select EXACTLY one node.")
+
+def deleteAsset():
+    """Deletes the selected node. EXACTLY ONE node may be selected, and it MUST be a digital asset.
+        The node must already exist in the database. It may not be already checked out in Houdini
+        or in Maya.
+    """
+    updateDB()
+    node = getSelectedNode()
+    if node != None:
+        if not isDigitalAsset(node):
+            hou.ui.displayMessage("Not a Digital Asset.", title='Non-Asset Node', severity=hou.severityType.Error)
+            return
+        else:
+            if isContainer(node):
+                oldlibraryPath = node.type().definition().libraryFilePath()
+                oldfilename = os.path.basename(oldlibraryPath)
+                oldAssetName = oldfilename.split('.')[0]
+                assetDirPath = os.path.join(ASSETSDIR, oldAssetName)
+                info = getFileInfo(oldfilename)
+                if not info[2]:
+                    ok, resp = hou.ui.readMultiInput("Enter the deletion password...", input_labels=('Password:',), password_input_indices=(0,), buttons=('OK', 'Cancel'), title="Delete Password")
+                    resp = resp[0]
+                    if ok == 0 and resp == 'd3l3t3p@ssw0rd':
+                        name = formatName(resp)
+                        if not amu.canRemove(assetDirPath):
+                            hou.ui.displayMessage("Asset currently checked out in Maya. Cannot delete asset.", title='Maya Lock', severity=hou.severityType.Error)
+                            return
+                        else:
+                            node.destroy()
+                            hou.hda.uninstallFile(oldlibraryPath, change_oplibraries_file=False)
+                            try:
+                                amu.removeFolder(assetDirPath)
+                                os.remove(oldlibraryPath)
+                                message = "The following paths and files were deleted:\n" + assetDirPath + "\n" + oldlibraryPath
+                                hou.ui.displayMessage(message, title='Asset Deleted', severity=hou.severityType.Message)
+                            except Exception as ex:
+                                hou.ui.displayMessage("The following exception occured:\n" + str(ex), title='Exception Occured', severity=hou.severityType.Error)
+                                return
+
+                else:
+                    hou.ui.displayMessage(lockedBy(info[3].encode('utf-8')), title='Asset Locked', severity=hou.severityType.Error)
+                    return
+    else:
+        hou.ui.displayMessage("Select EXACTLY one node.")
+        return
+
 
 def newGeo(hpath):
     templateNode = hou.node(hpath).createNode("geometryTemplate")
