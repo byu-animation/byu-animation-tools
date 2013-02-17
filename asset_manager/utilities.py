@@ -105,10 +105,10 @@ def canRemove(dirPath):
 
 def removeFolder(dirPath):
 	if not canRemove(dirPath):
-		raise Exception ("Can not Remove")
+		raise Exception ("Cannot remove directory: " + str(dirPath))
 	shutil.rmtree(dirPath)
 
-def canRename(assetDirPath, newName):
+def canRename(assetDirPath, newName='__null_asset_path'):
 	head, tail = os.path.split(assetDirPath)
 	dest = os.path.join(head, newName)
 	modelDir = os.path.join(assetDirPath, 'model')
