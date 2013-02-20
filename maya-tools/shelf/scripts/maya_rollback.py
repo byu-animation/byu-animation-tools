@@ -95,10 +95,10 @@ class RollbackDialog(QDialog):
 	    	filePath = cmd.file(query=True, sceneName=True)
 	    	dirPath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(filePath)))
 	    	print dirPath
-	        cmd.file(force=True, new=True)
+	    	cmd.file(force=True, new=True)
 	    	amu.setVersion(dirPath, int(version))
 		    self.close_dialog()
-	        maya_checkout.go()
+		    maya_checkout.go()
 	
 	def close_dialog(self):
 		self.close()
