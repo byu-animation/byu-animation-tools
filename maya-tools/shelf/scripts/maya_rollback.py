@@ -88,7 +88,7 @@ class RollbackDialog(QDialog):
 	# SLOTS
 	########################################################################
 	def rollback(self):
-		version = self.current_item.text()[-1]
+		version = self.current_item.text()[1:0]
 		filePath = cmd.file(query=True, sceneName=True)
 		dirPath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(filePath)))
 		print dirPath
