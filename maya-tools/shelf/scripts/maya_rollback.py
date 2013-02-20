@@ -92,7 +92,7 @@ class RollbackDialog(QDialog):
 		filePath = cmd.file(query=True, sceneName=True)
 		dirPath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(filePath)))
 		print dirPath
-		#amu.setVersion(dirPath, version)
+		amu.setVersion(dirPath, version)
 		self.close_dialog()
 	
 	def close_dialog(self):
