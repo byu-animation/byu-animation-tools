@@ -6,6 +6,7 @@ import maya.OpenMayaUI as omu
 import sip
 import os, glob
 import utilities as amu
+import maya_checkout
 
 CHECKOUT_WINDOW_WIDTH = 330
 CHECKOUT_WINDOW_HEIGHT = 400
@@ -88,12 +89,16 @@ class RollbackDialog(QDialog):
 	# SLOTS
 	########################################################################
 	def rollback(self):
-		version = self.current_item.text()[1:]
-		filePath = cmd.file(query=True, sceneName=True)
-		dirPath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(filePath)))
-		print dirPath
-		amu.setVersion(dirPath, version)
-		self.close_dialog()
+        dialogResult = showWarningDialog()
+        if dialogResult == 'Yes'
+		    version = self.current_item.text()[1:]
+	    	filePath = cmd.file(query=True, sceneName=True)
+	    	dirPath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(filePath)))
+	    	print dirPath
+            cmd.file(force=True, new=True)
+	    	amu.setVersion(dirPath, int(version))
+		    self.close_dialog()
+            maya_checkout.go()
 	
 	def close_dialog(self):
 		self.close()
@@ -101,7 +106,16 @@ class RollbackDialog(QDialog):
 	def set_current_item(self, item):
 		self.current_item = item
 		
-
+    def showWarningDialog():
+        return cmd.confirmDialog()( title   = 'WARNING!'
+                                  , message = 'YOU ARE ABOUT TO DELETE ALL VERSIONS OF THIS ASSET '
+                                              'NEWER THAN THE VERSION YOU SELECTED. Are absolutely '
+                                              'sure that this is what you want to do?'
+                                  , button  = ['Yes', 'No']
+                                  , defaultButton = 'No'
+                                  , cancelButton  = 'No'
+                                  , dismissString = 'No')
+ 
 def go():
 	dialog = RollbackDialog()
 	dialog.show()
