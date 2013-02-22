@@ -1,7 +1,7 @@
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-#import pyqt_houdini
+import pyqt_houdini
 import os, glob
 
 class NewTextureDialog(QDialog):
@@ -45,9 +45,12 @@ class NewTextureDialog(QDialog):
         self.setLayout(main_layout)
 
 def go():
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication(['houdini'])
     dialog = NewTextureDialog()
     dialog.show()
-    #pyqt_houdini.exec_(app, dialog)
+    pyqt_houdini.exec_(app, dialog)
     
 if __name__ == '__main__':
     go()
