@@ -198,6 +198,42 @@ def getVersionedFolderInfo(dirPath):
 		nodeInfo.append("")
 	return nodeInfo
 
+def setVersion(dirPath, version):	
+    """
+    Sets the 'latest version' as the specified version and deletes later versions
+    @precondition: dirPath is a valid path
+    @precondition: version is an existing version
+    @precondition: the folder has been checked out by the user
+
+    @postcondition: the folder will be checked in and unlocked
+    """
+
+    chkoutInfo = ConfigParser()
+    chkoutInfo.read(os.path.join(dirPath, ".checkoutInfo"))
+    chkInDest = chkoutInfo.get("Checkout", "checkedoutfrom")
+    lockedbyme = chkoutInfo.getboolean("Checkout", "lockedbyme")
+    
+    nodeInfo = ConfigParser()
+    nodeInfo.read(os.path.join(chkInDest, ".nodeInfo"))
+    newVersionPath = os.path.join(chkInDest, "src", "v"+str(version))
+
+    if lockedbyme == False:
+        print "Cannot overwrite locked folder."
+        raise Exception("Can not overwrite locked folder.")
+        
+    # Set version
+    timestamp = time.strftime("%a, %d %b %Y %I:%M:%S %p", time.localtime())
+    nodeInfo.set("Versioning", "lastcheckintime", timestamp)
+    nodeInfo.set("Versioning", "lastcheckinuser", getUsername())
+    nodeInfo.set("Versioning", "latestversion", str(version))
+    nodeInfo.set("Versioning", "locked", "False")
+    _writeConfigFile(os.path.join(chkInDest, ".nodeInfo"), nodeInfo)
+    
+    # Clean up
+    purgeAfter(os.path.join(chkInDest, "src"), version)
+    shutil.rmtree(dirPath)
+    #os.remove(os.path.join(newVersionPath, ".checkoutInfo"))
+
 #################################################################################
 # Checkout
 #################################################################################
@@ -335,6 +371,15 @@ def purge(dirPath, upto):
 	for f in files:
 		if int(os.path.basename(f).split('v')[1]) < upto:
 			shutil.rmtree(f)
+
+def purgeAfter(dirPath, after):
+    """
+    purges all folders in dirPath with a version higher than after
+    """
+    files = glob.glob(os.path.join(dirPath, '*'))
+    for f in files:
+        if int(os.path.basename(f).split('v')[1]) > after:
+            shutil.rmtree(f)
 
 def discard(toDiscard):
 	"""
