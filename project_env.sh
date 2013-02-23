@@ -36,11 +36,8 @@ export DAILIES_DIR=${JOB}/dailies
 # Root directory for assets
 export ASSETS_DIR=${PRODUCTION_DIR}/assets
 
-# Root directory for animation
-export ANIMATION_DIR=${PRODUCTION_DIR}/animation
-
-# Root directory for lighting files
-export LIGHTING_DIR=${PRODUCTION_DIR}/lighting
+# Root directory for sequences
+export SHOTS_DIR=${PRODUCTION_DIR}/shots
 
 # Directory for otls
 export OTLS_DIR=${PRODUCTION_DIR}/otls
@@ -72,13 +69,8 @@ buildProjectDirs()
     fi
 
     # Create Root directory for animation
-    if [ ! -d "$ANIMATION_DIR" ]; then
-        mkdir -p "$ANIMATION_DIR"
-    fi
-
-    # Create Root directory for lighting files
-    if [ ! -d "$LIGHTING_DIR" ]; then
-        mkdir -p "$LIGHTING_DIR"
+    if [ ! -d "$SHOTS_DIR" ]; then
+        mkdir -p "$SHOTS_DIR"
     fi
 
     # Create Directory for otls

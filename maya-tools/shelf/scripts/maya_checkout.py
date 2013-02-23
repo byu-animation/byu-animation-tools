@@ -14,6 +14,17 @@ def maya_main_window():
 	ptr = omu.MQtUtil.mainWindow()
 	return sip.wrapinstance(long(ptr), QObject)
 
+class NewAnimationDialog(QDialog):
+	"""docstring for NewAnimationDialog"""
+	def __init__(self, parent):
+		QDialog.__init__(self, parent)
+		self.setWindowTitle('Checkout')
+		#self.setFixedSize(CHECKOUT_WINDOW_WIDTH, CHECKOUT_WINDOW_HEIGHT)
+		self.create_layout()
+		self.create_connections()
+		self.refresh()
+		
+
 class CheckoutDialog(QDialog):
 	def __init__(self, parent=maya_main_window()):
 	#def setup(self, parent):
@@ -28,7 +39,7 @@ class CheckoutDialog(QDialog):
 		#Create the selected item list
 		self.selection_list = QListWidget()
 		self.selection_list.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-				
+
 		#Create Models, Rig, Animation		
 		radio_button_group = QVBoxLayout()
 		self.model_radio = QRadioButton('Model')
@@ -39,6 +50,9 @@ class CheckoutDialog(QDialog):
 		radio_button_group.addWidget(self.model_radio)
 		radio_button_group.addWidget(self.rig_radio)
 		radio_button_group.addWidget(self.animation_radio)
+
+		#Create New Animation button
+		self.new_animation_button = QPushButton('New Animation')
 		
 		#Create Select and Cancel buttons
 		self.select_button = QPushButton('Select')
@@ -57,6 +71,7 @@ class CheckoutDialog(QDialog):
 		main_layout.setMargin(2)
 		main_layout.addWidget(self.selection_list)		
 		main_layout.addLayout(radio_button_group)
+		main_layout.addWidget(self.new_animation_button)
 		main_layout.addLayout(button_layout)
 		
 		self.setLayout(main_layout)
@@ -71,6 +86,7 @@ class CheckoutDialog(QDialog):
 		self.connect(self.model_radio, SIGNAL('clicked()'), self.refresh)
 		self.connect(self.rig_radio, SIGNAL('clicked()'), self.refresh)
 		self.connect(self.animation_radio, SIGNAL('clicked()'), self.refresh)
+		self.connect(self.new_animation_button, SIGNAL('clicked()'), self.new_animation)
 		self.connect(self.select_button, SIGNAL('clicked()'), self.checkout)
 		self.connect(self.cancel_button, SIGNAL('clicked()'), self.close_dialog)
 	
@@ -87,11 +103,21 @@ class CheckoutDialog(QDialog):
 	
 	def refresh(self):
 		if self.animation_radio.isChecked():
-			selections = glob.glob(os.path.join(os.environ['ANIMATION_DIR'], '*'))
+			self.new_animation_button.setEnabled(True)
+			selections = glob.glob(os.path.join(os.environ['SHOTS_DIR'], '*'))
 		else:
+			self.new_animation_button.setEnabled(False)
 			selections = glob.glob(os.path.join(os.environ['ASSETS_DIR'], '*'))
 		self.update_selection(selections)
 	
+	def new_animation(self):
+		text, ok = QInputDialog.getText(self, 'New Animation', 'Enter seq_shot (ie: A_01)')
+		if ok:
+			text = str(text)
+			amu.createNewShotFolders(os.environ['SHOTS_DIR'], text)
+		self.refresh()
+		return
+
 	def get_checkout_mode(self):
 		if self.animation_radio.isChecked():
 			return ''
@@ -113,7 +139,7 @@ class CheckoutDialog(QDialog):
 		elif self.rig_radio.isChecked():
 			toCheckout = os.path.join(os.environ['ASSETS_DIR'], asset_name, 'rig')
 		elif self.animation_radio.isChecked():
-			toCheckout = os.path.join(os.environ['ANIMATION_DIR'], asset_name)
+			toCheckout = os.path.join(os.environ['SHOTS_DIR'], asset_name, 'animation')
 		
 		try:
 			destpath = amu.checkout(toCheckout, True)
