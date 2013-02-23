@@ -15,5 +15,6 @@
     <memberTool name="delete"/>
     <memberTool name="abc2bjson"/>
     <memberTool name="weeklyRender"/>
+    <memberTool name="new_texture"/>
   </toolshelf>
 </shelfDocument>

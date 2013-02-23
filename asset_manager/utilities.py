@@ -97,6 +97,16 @@ def createNewAssetFolders(parent, name):
 	os.makedirs(os.path.join(new_dir, "images"))
 	return new_dir
 
+def createNewShotFolders(parent, name):
+	if parent != os.environ['SHOTS_DIR']:
+		raise Exception("Shot folders must be created in "+os.environ['SHOTS_DIR'])
+	
+	new_dir = os.path.join(parent, name)
+	addProjectFolder(parent, name)
+	addVersionedFolder(new_dir, 'animation')
+	addVersionedFolder(new_dir, 'lighting')
+	addVersionedFolder(new_dir, 'compositing')
+
 def isEmptyFolder(dirPath):
 	return not bool(glob.glob(os.path.join(dirPath, '*')))
 

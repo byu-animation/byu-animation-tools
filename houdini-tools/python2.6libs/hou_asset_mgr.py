@@ -201,6 +201,48 @@ def lockedBy(logname):
         exstr = "Encountered exception: " + str(ex) + "\nUser's name not found."# Uh-oh... We jacked something up...
         return exstr
 
+def get_filename(parentdir):
+    return os.path.basename(os.path.dirname(parentdir))+'_'+os.path.basename(parentdir)
+
+def checkoutLightingFile():
+    shotPaths = glob.glob(os.path.join(os.environ['SHOTS_DIR'], '*'))
+    selections = []
+    for sp in shotPaths:
+        selections.append(os.path.basename(sp))
+    selections.sort()
+    answer = hou.ui.selectFromList(selections, exclusive=True, message='Select shot file to checkout:')
+    if answer:
+        answer = answer[0]
+        toCheckout = os.path.join(os.environ['SHOTS_DIR'], selections[answer], 'lighting')
+
+        try:
+            destpath = amu.checkout(toCheckout, True)
+        except Exception as e:
+            if not amu.checkedOutByMe(toCheckout):
+                hou.ui.displayMessage('Can Not Checkout: '+str(e))
+                return
+            else:
+                destpath = amu.getCheckoutDest(toCheckout)
+
+        toOpen = os.path.join(destpath, get_filename(toCheckout)+'.hipnc')
+
+        if os.path.exists(toOpen):
+            hou.hipFile.load(toOpen)
+        else:
+            hou.hipFile.clear()
+            hou.hipFile.save(toOpen)
+
+def checkinLightingFile():
+    print 'checkin lighting file'
+    filepath = hou.hipFile.path()
+    toCheckin = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(filepath)))
+    if amu.canCheckin(toCheckin):
+        hou.hipFile.save()
+        hou.hipFile.clear()
+        dest = amu.checkin(toCheckin)
+    else:
+        hou.ui.displayMessage('Checkin Failed')
+
 def checkout():
     """Checks out the selected node.  EXACTLY ONE node may be selected, and it MUST be a digital asset.
         The node must already exist in the database."""
@@ -228,7 +270,8 @@ def checkout():
             else:
                 hou.ui.displayMessage(lockedBy(info[3].encode('utf-8')))
     else:
-        hou.ui.displayMessage("Select EXACTLY one node.")
+        #hou.ui.displayMessage("Select EXACTLY one node.")
+        checkoutLightingFile()
 
 def checkin():
     """Checks in the selected node.  EXACTLY ONE node may be selected, and it MUST be a digital asset.
@@ -257,7 +300,8 @@ def checkin():
             else:
                 hou.ui.displayMessage("Already checked in.")
     else:
-        hou.ui.displayMessage("Select EXACTLY one node.")
+        #hou.ui.displayMessage("Select EXACTLY one node.")
+        checkinLightingFile()
 
 def revertChanges():
     updateDB()
