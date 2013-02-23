@@ -188,7 +188,7 @@ def getVersionedFolderInfo(dirPath):
 		nodeInfo.append("")
 	return nodeInfo
 
-def setVersion(dirPath, version)
+def setVersion(dirPath, version):	
     """
     Sets the 'latest version' as the specified version and deletes later versions
     @precondition: dirPath is a valid path
@@ -197,16 +197,17 @@ def setVersion(dirPath, version)
 
     @postcondition: the folder will be checked in and unlocked
     """
+
     chkoutInfo = ConfigParser()
     chkoutInfo.read(os.path.join(dirPath, ".checkoutInfo"))
     chkInDest = chkoutInfo.get("Checkout", "checkedoutfrom")
     lockedbyme = chkoutInfo.getboolean("Checkout", "lockedbyme")
-
+    
     nodeInfo = ConfigParser()
     nodeInfo.read(os.path.join(chkInDest, ".nodeInfo"))
     newVersionPath = os.path.join(chkInDest, "src", "v"+str(version))
 
-    if lockedbyme == False
+    if lockedbyme == False:
         print "Cannot overwrite locked folder."
         raise Exception("Can not overwrite locked folder.")
         
@@ -361,13 +362,13 @@ def purge(dirPath, upto):
 		if int(os.path.basename(f).split('v')[1]) < upto:
 			shutil.rmtree(f)
 
-def purgeAfter(dirPath, after)
+def purgeAfter(dirPath, after):
     """
     purges all folders in dirPath with a version higher than after
     """
     files = glob.glob(os.path.join(dirPath, '*'))
     for f in files:
-        if int(os.path.basename(f).split('v')[1] > after:
+        if int(os.path.basename(f).split('v')[1]) > after:
             shutil.rmtree(f)
 
 def discard(toDiscard):
