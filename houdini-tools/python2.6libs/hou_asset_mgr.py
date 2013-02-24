@@ -367,6 +367,39 @@ def newContainer(hpath):
     # clean up
     templateNode.destroy()
 
+def printList(pList, ws=4):
+    indent = ' '*ws
+    result = ''
+    for l in pList:
+        result += indent + str(l) + '\n'
+    return result
+
+def getAssetDependents(assetName):
+    dependents = []
+    otls = glob.glob(os.path.join(OTLDIR, 'owned*.otl'))
+    for o in otls:
+        ndef = hou.hda.definitionsInFile(o)[0]
+        contents = ndef.sections()['CreateScript'].contents().splitlines()
+        for c in contents:
+            if 'opadd -e -n' in c:
+                c = c.split(' ')
+                d = os.path.basename(o).split('.')[0]
+                if c[3] == assetName and d not in dependents:
+                    dependents.append(d)
+    return dependents
+
+def enterPassword(message, password):
+    resp = ''
+    ok = 0
+    first = True
+    while ok == 0 and resp != password:
+        if not first:
+            hou.ui.displayMessage('You Suck!\nTry Again.')
+        ok, resp = hou.ui.readMultiInput(message, input_labels=('Password:',), password_input_indices=(0,), buttons=('OK', 'Cancel'), title="Enter Password")
+        resp = resp[0]
+        first = False
+    return ok == 0
+
 def rename():
     """Renames the selected node. EXACTLY ONE node may be selected, and it MUST be a digital asset.
         The node must already exist in the database.
@@ -384,31 +417,26 @@ def rename():
                 assetDirPath = os.path.join(ASSETSDIR, oldAssetName)
                 info = getFileInfo(oldfilename)
                 if not info[2]:
-                    pok, presp = hou.ui.readMultiInput("Enter the rename password...", input_labels=('Password:',), password_input_indices=(0,), buttons=('OK', 'Cancel'), title="Rename Password")
-                    presp = presp[0]
-                    if pok != 0 or presp != 'r3n@m3p@ssw0rd':
-                        hou.ui.displayMessage("Incorrect password. Better luck next time.", title='Incorrect Password', severity=hou.severityType.Error)
-                        return
-                    ok, resp = hou.ui.readInput("Enter the New Operator Label", buttons=('OK', 'Cancel'), title="Rename OTL")
-                    if ok == 0 and resp.strip() != '':
-                        name = formatName(resp)
-                        newfilename = name.replace(' ', '_')
-                        newfilepath = os.path.join(OTLDIR, newfilename+'.otl')
-                        if os.path.exists(newfilepath):
-                            hou.ui.displayMessage("Asset by that name already exists. Cannot rename asset.", title='Asset Name', severity=hou.severityType.Error)
-                        elif not amu.canRename(assetDirPath, newfilename):
-                            hou.ui.displayMessage("Asset checked out in Maya. Cannot rename asset.", title='Asset Name', severity=hou.severityType.Error)
-                        else:
-                            node.type().definition().copyToHDAFile(newfilepath, new_name=newfilename, new_menu_name=name)
-                            hou.hda.installFile(newfilepath, change_oplibraries_file=True)
-                            newnode = hou.node(determineHPATH()).createNode(newfilename)
-                            node.destroy()
-                            hou.hda.uninstallFile(oldlibraryPath, change_oplibraries_file=False)
-                            os.system('rm -f '+oldlibraryPath)
-                            amu.renameAsset(assetDirPath, newfilename)
+                    if enterPassword('Enter the rename password...', 'r3n@m3p@ssw0rd'):
+                        ok, resp = hou.ui.readInput("Enter the New Operator Label", buttons=('OK', 'Cancel'), title="Rename OTL")
+                        if ok == 0 and resp.strip() != '':
+                            name = formatName(resp)
+                            newfilename = name.replace(' ', '_')
+                            newfilepath = os.path.join(OTLDIR, newfilename+'.otl')
+                            if os.path.exists(newfilepath):
+                                hou.ui.displayMessage("Asset by that name already exists. Cannot rename asset.", title='Asset Name', severity=hou.severityType.Error)
+                            elif not amu.canRename(assetDirPath, newfilename):
+                                hou.ui.displayMessage("Asset checked out in Maya. Cannot rename asset.", title='Asset Name', severity=hou.severityType.Error)
+                            else:
+                                node.type().definition().copyToHDAFile(newfilepath, new_name=newfilename, new_menu_name=name)
+                                hou.hda.installFile(newfilepath, change_oplibraries_file=True)
+                                newnode = hou.node(determineHPATH()).createNode(newfilename)
+                                node.destroy()
+                                hou.hda.uninstallFile(oldlibraryPath, change_oplibraries_file=False)
+                                os.system('rm -f '+oldlibraryPath)
+                                amu.renameAsset(assetDirPath, newfilename)
                 else:
                     hou.ui.displayMessage(lockedBy(info[3].encode('utf-8')))
-            
     else:
         hou.ui.displayMessage("Select EXACTLY one node.")
 
@@ -429,34 +457,36 @@ def deleteAsset():
                 oldfilename = os.path.basename(oldlibraryPath)
                 oldAssetName = oldfilename.split('.')[0]
                 assetDirPath = os.path.join(ASSETSDIR, oldAssetName)
-                info = getFileInfo(oldfilename)
-                if not info[2]:
-                    ok, resp = hou.ui.readMultiInput("Enter the deletion password...", input_labels=('Password:',), password_input_indices=(0,), buttons=('OK', 'Cancel'), title="Delete Password")
-                    resp = resp[0]
-                    if ok == 0 and resp == 'd3l3t3p@ssw0rd':
-                        name = formatName(resp)
-                        if not amu.canRemove(assetDirPath):
-                            hou.ui.displayMessage("Asset currently checked out in Maya. Cannot delete asset.", title='Maya Lock', severity=hou.severityType.Error)
-                            return
-                        else:
-                            node.destroy()
-                            hou.hda.uninstallFile(oldlibraryPath, change_oplibraries_file=False)
-                            try:
-                                amu.removeFolder(assetDirPath)
-                                os.remove(oldlibraryPath)
-                                message = "The following paths and files were deleted:\n" + assetDirPath + "\n" + oldlibraryPath
-                                hou.ui.displayMessage(message, title='Asset Deleted', severity=hou.severityType.Message)
-                            except Exception as ex:
-                                hou.ui.displayMessage("The following exception occured:\n" + str(ex), title='Exception Occured', severity=hou.severityType.Error)
-                                return
+                dependents = getAssetDependents(oldAssetName)
 
-                else:
+                if dependents:
+                    hou.ui.displayMessage('The follow assets are depenent on this: \n\n'+printList(dependents)+'\nModify theses assets first!!', title='Can NOT delete!', severity=hou.severityType.Error)
+                    return
+
+                info = getFileInfo(oldfilename)
+                if info[2]:
                     hou.ui.displayMessage(lockedBy(info[3].encode('utf-8')), title='Asset Locked', severity=hou.severityType.Error)
                     return
+
+                if not amu.canRemove(assetDirPath):
+                    hou.ui.displayMessage("Asset currently checked out in Maya. Cannot delete asset.", title='Maya Lock', severity=hou.severityType.Error)
+                    return
+
+                message = "The following paths and files will be deleted:\n" + assetDirPath + "\n" + oldlibraryPath
+                hou.ui.displayMessage(message, title='Asset Deleted', severity=hou.severityType.Message)
+
+                if enterPassword('Enter the deletion password ...', 'd3l3t3p@ssw0rd'):
+                    node.destroy()
+                    hou.hda.uninstallFile(oldlibraryPath, change_oplibraries_file=False)
+                    try:
+                        amu.removeFolder(assetDirPath)
+                        os.remove(oldlibraryPath)
+                    except Exception as ex:
+                        hou.ui.displayMessage("The following exception occured:\n" + str(ex), title='Exception Occured', severity=hou.severityType.Error)
+                        return
     else:
         hou.ui.displayMessage("Select EXACTLY one node.")
         return
-
 
 def newGeo(hpath):
     templateNode = hou.node(hpath).createNode("geometryTemplate")
