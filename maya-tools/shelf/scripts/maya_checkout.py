@@ -12,18 +12,7 @@ CHECKOUT_WINDOW_HEIGHT = 600
 
 def maya_main_window():
 	ptr = omu.MQtUtil.mainWindow()
-	return sip.wrapinstance(long(ptr), QObject)
-
-class NewAnimationDialog(QDialog):
-	"""docstring for NewAnimationDialog"""
-	def __init__(self, parent):
-		QDialog.__init__(self, parent)
-		self.setWindowTitle('Checkout')
-		#self.setFixedSize(CHECKOUT_WINDOW_WIDTH, CHECKOUT_WINDOW_HEIGHT)
-		self.create_layout()
-		self.create_connections()
-		self.refresh()
-		
+	return sip.wrapinstance(long(ptr), QObject)		
 
 class CheckoutDialog(QDialog):
 	def __init__(self, parent=maya_main_window()):
@@ -111,7 +100,7 @@ class CheckoutDialog(QDialog):
 		self.update_selection(selections)
 	
 	def new_animation(self):
-		text, ok = QInputDialog.getText(self, 'New Animation', 'Enter seq_shot (ie: A_01)')
+		text, ok = QInputDialog.getText(self, 'New Animation', 'Enter seq_shot (ie: a01)')
 		if ok:
 			text = str(text)
 			amu.createNewShotFolders(os.environ['SHOTS_DIR'], text)
