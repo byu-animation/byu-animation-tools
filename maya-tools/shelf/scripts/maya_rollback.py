@@ -75,7 +75,7 @@ class RollbackDialog(QDialog):
         self.selection_list.sortItems(0)
 
     def refresh(self):
-        filePath = os.path.split(ORIGINAL_FILE_NAME)[0]
+        filePath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(ORIGINAL_FILE_NAME)))
         checkInDest = amu.getCheckinDest(filePath)
         versionFolders = os.path.join(checkInDest, "src")
         selections = glob.glob(os.path.join(versionFolders, '*'))
@@ -94,7 +94,7 @@ class RollbackDialog(QDialog):
         dialogResult = self.showWarningDialog()
         if dialogResult == 'Yes':
             version = str(self.current_item.text())[1:]
-            dirPath = os.path.split(ORIGINAL_FILE_NAME)[0]
+            dirPath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(ORIGINAL_FILE_NAME)))
             print dirPath
             cmd.file(force=True, new=True)
             amu.setVersion(dirPath, int(version))
@@ -125,7 +125,7 @@ class RollbackDialog(QDialog):
                                    , dismissString = 'Ok')
 
     def open_version(self):
-        filePath = os.path.split(ORIGINAL_FILE_NAME)[0]
+        filePath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(ORIGINAL_FILE_NAME)))
         checkInDest = amu.getCheckinDest(filePath)
         v = str(self.current_item.text())
         checkinPath = os.path.join(checkInDest, "src", v)
@@ -141,6 +141,14 @@ def go():
     dialog.show()
     
 if __name__ == '__main__':
-    if ORIGINAL_FILE_NAME != '':
+    filePath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(ORIGINAL_FILE_NAME)))
+    if(amu.isCheckedOutCopyFolder(filePath)):
         cmd.file(save=True, force=True)
         go()
+    else:
+        cmd.confirmDialog(  title         = 'Invalid Command'
+                           , message       = 'This is not a checked out file. There is nothing to rollback.'
+                           , button        = ['Ok']
+                           , defaultButton = 'Ok'
+                           , cancelButton  = 'Ok'
+                           , dismissString = 'Ok')
