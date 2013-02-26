@@ -176,6 +176,12 @@ def isVersionedFolder(dirPath):
 	else:
 		return False
 
+def isCheckedOutCopyFolder(dirPath):
+	if os.path.exists(os.path.join(dirPath, ".checkoutInfo")):
+		return True
+	else:
+		return False
+
 def isInstalled(dirPath):
 	return bool(glob.glob(os.path.join(dirPath, 'stable', '*stable*')))
 
