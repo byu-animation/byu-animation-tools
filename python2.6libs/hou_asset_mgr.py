@@ -517,6 +517,43 @@ def new():
     elif optype == 1:
         newGeo(hpath)
 
+def getAssetName(node):
+    lpath = node.type().definition().libraryFilePath()
+    filename = os.path.basename(lpath)
+    return filename.split('.')[0]
+
+def refresh():
+    updateDB()
+    node = getSelectedNode()
+    
+    if node == None:
+        ui.infoWindow("Select EXACTLY one node.")
+        return
+
+    nodeName = getAssetName(node)
+    if isDigitalAsset(node) and isContainer(node):
+        
+        # Get children and change to containerTemplate
+        children = node.children()
+        nameLookup = list(children)
+        for i in range(len(children)):
+            c = children[i]
+            if isContainer(c):
+                nameLookup[i] = getAssetName(c)
+                c.changeNodeType('containerTemplate', keep_network_contents=False)
+
+        # Update children and change back
+        children = node.children()
+        for i in range(len(children)):
+            c = children[i]
+            if isContainer(c):
+                c.changeNodeType(nameLookup[i], keep_network_contents=False)
+
+        # Change the top level node
+        node.changeNodeType('containerTemplate', keep_network_contents=False)
+        node = getSelectedNode()
+        node.changeNodeType(nodeName, keep_network_contents=False)
+
 def add():
     """Adds the selected node. EXACTLY ONE node may be selected, and it MUST be a digital asset.
         The node CAN NOT already exist in the database."""
