@@ -164,6 +164,9 @@ def getFileInfo(filename):
     return info
 
 def isContainer(node):
+    if not isDigitalAsset(node):
+        return False
+
     ndef = node.type().definition()
     nsec = ndef.sections()['Tools.shelf']
     contents = str(nsec.contents())
@@ -520,7 +523,7 @@ def new():
 def getAssetName(node):
     lpath = node.type().definition().libraryFilePath()
     filename = os.path.basename(lpath)
-    return filename.split('.')[0]
+    return str(filename.split('.')[0].replace("'", "_")) 
 
 def refresh():
     updateDB()
@@ -531,7 +534,7 @@ def refresh():
         return
 
     nodeName = getAssetName(node)
-    if isDigitalAsset(node) and isContainer(node):
+    if isContainer(node):
         
         # Get children and change to containerTemplate
         children = node.children()
@@ -539,20 +542,27 @@ def refresh():
         for i in range(len(children)):
             c = children[i]
             if isContainer(c):
-                nameLookup[i] = getAssetName(c)
+                assetName = getAssetName(c)
+                print assetName
+                nameLookup[i] = assetName
                 c.changeNodeType('containerTemplate', keep_network_contents=False)
 
+        print '\n'
         # Update children and change back
         children = node.children()
         for i in range(len(children)):
             c = children[i]
             if isContainer(c):
-                c.changeNodeType(nameLookup[i], keep_network_contents=False)
+                name = nameLookup[i]
+                print name
+                c.changeNodeType(name, keep_network_contents=False)
 
         # Change the top level node
         node.changeNodeType('containerTemplate', keep_network_contents=False)
         node = getSelectedNode()
         node.changeNodeType(nodeName, keep_network_contents=False)
+    else:
+        ui.infoWindow('Not a container')
 
 def add():
     """Adds the selected node. EXACTLY ONE node may be selected, and it MUST be a digital asset.
