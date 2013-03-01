@@ -25,14 +25,6 @@ def getMayapy():
 	"""precondition: MAYA_LOCATION environment variable is set correctly"""
 	return os.path.join(os.environ['MAYA_LOCATION'], "bin", "mayapy")
 
-#def getNullReference():
-#	"""@returns: The path to the .nullReference file used for symlinks"""
-#	if not os.path.exists(os.path.join(getProductionDir(), '.nullReference')):
-#		nullRef = open(os.path.join(getProductionDir(), '.nullReference'), "w")
-#		nullRef.write("#This is a null reference for symlinks.\n#Nothing has been installed.")
-#		nullRef.close()
-#	return os.path.join(getProductionDir(), '.nullReference')
-
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Folder Management
 
 def _writeConfigFile(filePath, configParser):
@@ -101,6 +93,7 @@ def createNewShotFolders(parent, name):
 		raise Exception("Shot folders must be created in "+os.environ['SHOTS_DIR'])
 	
 	new_dir = os.path.join(parent, name)
+	print 'creating :'+new_dir
 	addProjectFolder(parent, name)
 	addVersionedFolder(new_dir, 'animation')
 	addVersionedFolder(new_dir, 'lighting')
@@ -519,4 +512,9 @@ def install(vDirPath, srcFilePath):
 	#	print 'copying file...'
 	#	
 	shutil.copy(srcFilePath, newInstFilePath)
-	
+
+def runAlembicConverter(vDirPath, srcFilePath):
+	filename, ext = os.path.splitext(os.path.basename(srcFilePath))
+	dest_path = os.path.join(os.path.dirname(vDirPath), 'animation_cache', 'abc', filename+'.abc')
+	converter = os.path.join(os.environ['MAYA_TOOLS_DIR'], 'alembic', 'alembicconvert.py')
+	os.system('python'+' '+converter+' '+srcFilePath+' '+dest_path)
