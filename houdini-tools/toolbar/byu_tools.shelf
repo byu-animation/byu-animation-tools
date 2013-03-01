@@ -10,10 +10,12 @@
     <memberTool name="CheckoutOTL"/>
     <memberTool name="CheckinOTL"/>
     <memberTool name="RevertChanges"/>
-    <memberTool name="make_geo_editable"/>
     <memberTool name="unlock DB"/>
+    <memberTool name="rename"/>
+    <memberTool name="delete"/>
     <memberTool name="abc2bjson"/>
     <memberTool name="weeklyRender"/>
-    <memberTool name="rename"/>
+    <memberTool name="new_texture"/>
+    <memberTool name="refreshOTL"/>
   </toolshelf>
 </shelfDocument>

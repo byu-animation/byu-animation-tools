@@ -93,9 +93,21 @@ def createNewAssetFolders(parent, name):
 	addVersionedFolder(new_dir, 'model')
 	addVersionedFolder(new_dir, 'rig')
 	os.makedirs(os.path.join(new_dir, "geo"))
-	os.makedirs(os.path.join(new_dir, "abc"))
 	os.makedirs(os.path.join(new_dir, "images"))
 	return new_dir
+
+def createNewShotFolders(parent, name):
+	if parent != os.environ['SHOTS_DIR']:
+		raise Exception("Shot folders must be created in "+os.environ['SHOTS_DIR'])
+	
+	new_dir = os.path.join(parent, name)
+	addProjectFolder(parent, name)
+	addVersionedFolder(new_dir, 'animation')
+	addVersionedFolder(new_dir, 'lighting')
+	addVersionedFolder(new_dir, 'compositing')
+	addProjectFolder(new_dir, 'animation_cache')
+	addProjectFolder(os.path.join(new_dir, 'animation_cache'), 'abc')
+	addProjectFolder(os.path.join(new_dir, 'animation_cache'), 'geo_sequences')
 
 def isEmptyFolder(dirPath):
 	return not bool(glob.glob(os.path.join(dirPath, '*')))
@@ -105,10 +117,10 @@ def canRemove(dirPath):
 
 def removeFolder(dirPath):
 	if not canRemove(dirPath):
-		raise Exception ("Can not Remove")
+		raise Exception ("Cannot remove directory: " + str(dirPath))
 	shutil.rmtree(dirPath)
 
-def canRename(assetDirPath, newName):
+def canRename(assetDirPath, newName='__null_asset_path'):
 	head, tail = os.path.split(assetDirPath)
 	dest = os.path.join(head, newName)
 	modelDir = os.path.join(assetDirPath, 'model')
@@ -164,6 +176,12 @@ def isVersionedFolder(dirPath):
 	else:
 		return False
 
+def isCheckedOutCopyFolder(dirPath):
+	if os.path.exists(os.path.join(dirPath, ".checkoutInfo")):
+		return True
+	else:
+		return False
+
 def isInstalled(dirPath):
 	return bool(glob.glob(os.path.join(dirPath, 'stable', '*stable*')))
 
@@ -187,6 +205,42 @@ def getVersionedFolderInfo(dirPath):
 		nodeInfo.append("No")
 		nodeInfo.append("")
 	return nodeInfo
+
+def setVersion(dirPath, version):	
+    """
+    Sets the 'latest version' as the specified version and deletes later versions
+    @precondition: dirPath is a valid path
+    @precondition: version is an existing version
+    @precondition: the folder has been checked out by the user
+
+    @postcondition: the folder will be checked in and unlocked
+    """
+
+    chkoutInfo = ConfigParser()
+    chkoutInfo.read(os.path.join(dirPath, ".checkoutInfo"))
+    chkInDest = chkoutInfo.get("Checkout", "checkedoutfrom")
+    lockedbyme = chkoutInfo.getboolean("Checkout", "lockedbyme")
+    
+    nodeInfo = ConfigParser()
+    nodeInfo.read(os.path.join(chkInDest, ".nodeInfo"))
+    newVersionPath = os.path.join(chkInDest, "src", "v"+str(version))
+
+    if lockedbyme == False:
+        print "Cannot overwrite locked folder."
+        raise Exception("Can not overwrite locked folder.")
+        
+    # Set version
+    timestamp = time.strftime("%a, %d %b %Y %I:%M:%S %p", time.localtime())
+    nodeInfo.set("Versioning", "lastcheckintime", timestamp)
+    nodeInfo.set("Versioning", "lastcheckinuser", getUsername())
+    nodeInfo.set("Versioning", "latestversion", str(version))
+    nodeInfo.set("Versioning", "locked", "False")
+    _writeConfigFile(os.path.join(chkInDest, ".nodeInfo"), nodeInfo)
+    
+    # Clean up
+    purgeAfter(os.path.join(chkInDest, "src"), version)
+    shutil.rmtree(dirPath)
+    #os.remove(os.path.join(newVersionPath, ".checkoutInfo"))
 
 #################################################################################
 # Checkout
@@ -325,6 +379,15 @@ def purge(dirPath, upto):
 	for f in files:
 		if int(os.path.basename(f).split('v')[1]) < upto:
 			shutil.rmtree(f)
+
+def purgeAfter(dirPath, after):
+    """
+    purges all folders in dirPath with a version higher than after
+    """
+    files = glob.glob(os.path.join(dirPath, '*'))
+    for f in files:
+        if int(os.path.basename(f).split('v')[1]) > after:
+            shutil.rmtree(f)
 
 def discard(toDiscard):
 	"""

@@ -7,6 +7,8 @@
 DIR=`dirname $0`
 source ${DIR}/project_env.sh
 
+export CURRENT_PROG='Maya'
+
 echo "Starting Maya..."
 maya -script ${MAYA_SHELF_DIR}/byu_shelf.mel &
 
