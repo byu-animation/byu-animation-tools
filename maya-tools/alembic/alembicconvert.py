@@ -1,7 +1,15 @@
 from pymel.core import *
 import sys
 
-openFile(sys.argv[1])
+src_path = sys.argv[1]
+dest_path = sys.argv[2]
+print src_path
+print dest_path
+
+openFile(src_path)
+
+def exportTo():
+    parent = os.path.dir
 
 def get_root_nodes():
     root_nodes = ls(assemblies=True)
@@ -38,7 +46,7 @@ def build_alembic_command():
         roots_string = " ".join([roots_string, "-root %s"%(node.name())])
     start_frame = playbackOptions(q=1, minTime=True) - 5
     end_frame = playbackOptions(q=1, maxTime=True) + 5
-    file_name = "/tmp/test.abc" # Replace me!
+    file_name = dest_path
     command = 'AbcExport -j "%s -frameRange %s %s -step 0.25 -writeVisibility -file %s"'%(
                                     roots_string, 
                                     str(start_frame), 

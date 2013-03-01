@@ -106,10 +106,6 @@ class CheckoutDialog(QDialog):
 			amu.createNewShotFolders(os.environ['SHOTS_DIR'], text)
 		self.refresh()
 		return
-
-	def get_checkout_mode(self):
-		if self.animation_radio.isChecked():
-			return ''
 	
 	def get_filename(self, parentdir):
 		return os.path.basename(os.path.dirname(parentdir))+'_'+os.path.basename(parentdir)
