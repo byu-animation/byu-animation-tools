@@ -1,8 +1,9 @@
 import maya.cmds as cmds
 import random
+import os
 
 def getQuote():
-        with open('brent_quotes.txt', 'r') as f:
+        with open(os.path.join(os.environ['MAYA_SHELF_DIR'], 'scripts', 'brent_quotes.txt'), 'r') as f:
                 quotes = f.readlines()
         f.closed
         index = random.randint(0, len(quotes)-1)
