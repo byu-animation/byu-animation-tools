@@ -6,9 +6,9 @@
  a single file. -->
 
   <tool name="new_texture" label="New Texture" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[import new_texture
+    <script scriptType="python"><![CDATA[import hou_asset_mgr as mgr
 
-new_texture.go()]]></script>
+mgr.newTexture()]]></script>
   </tool>
 
   <tool name="new_texture0" label="New Texture" icon="PLASMA_App">

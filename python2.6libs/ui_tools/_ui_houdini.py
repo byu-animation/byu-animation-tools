@@ -65,11 +65,11 @@ parameter and false otherwise.'''
         first = False
     return ok == 0
 
-def fileChooser(start_dir=None, wtitle=None, mode=fm.ReadAndWrite, extensions=None):
+def fileChooser(start_dir=None, wtitle=None, mode=fm.ReadAndWrite, extensions=None, image=False):
     '''Pop up a file chooser window
 
 Extensions is a comma separated string of extensions prepended with * (e.g. "*.png, *.exr").'''
-    return hou.ui.selectFile(start_directory=start_dir, title=wtitle, chooser_mode=_hfcm(mode), pattern=extensions)
+    return hou.ui.selectFile(start_directory=start_dir, title=wtitle, chooser_mode=_hfcm(mode), pattern=extensions, image_chooser=image)
 
 shotDialog = _ui_base.shotDialog
 
