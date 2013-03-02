@@ -1,7 +1,7 @@
 # Digital Asset management
 # Provides New, Add, Checkin, Checkout, Revert, and other functionality for .otl files
 # Author: Brian Kingery
-
+import shutil
 import sqlite3 as lite
 import os, glob
 import hou
@@ -585,4 +585,65 @@ def add():
                 ui.infoWindow("Already Added")
     else:
         ui.infoWindow("Select EXACTLY one node.")
+
+
+def newTexture():
+    # "What asset does this texture belong to?"
+    # Select asset
+
+
+    #1) get a list of assets 
+    # RETURN LIST OF EVERYTHING IN DIRECTORY
+    assetList = glob.glob(os.path.join(os.environ['ASSETS_DIR'], '*'))
+    selections = []
+    for aL in assetList:
+        selections.append(os.path.basename(aL)) # basename takes the last folder in the path.
+    selections.sort()
+    answer = ui.listWindow(selections, wmessage='What asset does this texture belong to?')
+    if answer:
+        answer = answer[0]
+        assetName = selections[answer]
+        assetImageDir = os.path.join(os.environ['ASSETS_DIR'], assetName, 'images')
+
+        sdir = '$JOB/PRODUCTION/assets/'+assetName+'/geo/bjsonFiles'
+        geoPath = ui.fileChooser(start_dir=sdir, wtitle='Choose Asset Geometry for Texture', mode=fileMode.Read, extensions='*.bjson, *.obj')
+        geoName, ext = os.path.splitext(os.path.basename(geoPath))
+
+        # "What attribute does this map apply to?"
+        # Choose shading pass 
+        shadingPassList = ['diffuse','specular','bump','scalar displacement','vector displacement', 'opacity', 'single SSS', 'multi SSS', 'other']
+        answer = ui.listWindow(shadingPassList, wmessage='Which texture will you be updating?')
+        if answer: 
+            answer = answer[0]
+            shadingPass = shadingPassList[answer]
+
+            # "Select your texture map file " 
+            userDirectory = os.environ['USER_DIR']
+            userTextureMap = ui.fileChooser(start_dir=userDirectory, wtitle='Browse to the Texture Map in your User Directory', image=True, extensions='*.jpeg,*.tiff,*.png,*.exr')
+            #rename their texture map. add on shadingPassList
+            userTextureMapName, ext = os.path.splitext(os.path.basename(userTextureMap))
+
+            newTextureName = assetName +'_'+ geoName +'_'+ shadingPass + ext
+
+            newfilepath = os.path.join(assetImageDir,newTextureName)
+            shutil.copy(userTextureMap, newfilepath)
+
+            ui.infoWindow('Your texture was saved to: ' +newfilepath)
+            
+            #copy the file to /tmp and then copy that file to .exr
+            # 
+
+def updateTexture():
+    # "What asset does this texture belong to?"
+    # Select asset
+
+    # "What attribute does this map apply to?"
+
+    # instead of going into the geo folder just go into the images folder and it will replace it. 
+
+    # Select file you will update 
+
+    # "Select your texture map file " 
+    return
+
 
