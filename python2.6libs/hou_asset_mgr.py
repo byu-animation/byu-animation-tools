@@ -1,7 +1,7 @@
 # Digital Asset management
 # Provides New, Add, Checkin, Checkout, Revert, and other functionality for .otl files
 # Author: Brian Kingery
-
+import shutil
 import sqlite3 as lite
 import os, glob
 import hou
@@ -164,6 +164,9 @@ def getFileInfo(filename):
     return info
 
 def isContainer(node):
+    if not isDigitalAsset(node):
+        return False
+
     ndef = node.type().definition()
     nsec = ndef.sections()['Tools.shelf']
     contents = str(nsec.contents())
@@ -517,6 +520,50 @@ def new():
     elif optype == 1:
         newGeo(hpath)
 
+def getAssetName(node):
+    lpath = node.type().definition().libraryFilePath()
+    filename = os.path.basename(lpath)
+    return str(filename.split('.')[0].replace("'", "_")) 
+
+def refresh():
+    updateDB()
+    node = getSelectedNode()
+    
+    if node == None:
+        ui.infoWindow("Select EXACTLY one node.")
+        return
+
+    nodeName = getAssetName(node)
+    if isContainer(node):
+        
+        # Get children and change to containerTemplate
+        children = node.children()
+        nameLookup = list(children)
+        for i in range(len(children)):
+            c = children[i]
+            if isContainer(c):
+                assetName = getAssetName(c)
+                print assetName
+                nameLookup[i] = assetName
+                c.changeNodeType('containerTemplate', keep_network_contents=False)
+
+        print '\n'
+        # Update children and change back
+        children = node.children()
+        for i in range(len(children)):
+            c = children[i]
+            if isContainer(c):
+                name = nameLookup[i]
+                print name
+                c.changeNodeType(name, keep_network_contents=False)
+
+        # Change the top level node
+        node.changeNodeType('containerTemplate', keep_network_contents=False)
+        node = getSelectedNode()
+        node.changeNodeType(nodeName, keep_network_contents=False)
+    else:
+        ui.infoWindow('Not a container')
+
 def add():
     """Adds the selected node. EXACTLY ONE node may be selected, and it MUST be a digital asset.
         The node CAN NOT already exist in the database."""
@@ -538,4 +585,65 @@ def add():
                 ui.infoWindow("Already Added")
     else:
         ui.infoWindow("Select EXACTLY one node.")
+
+
+def newTexture():
+    # "What asset does this texture belong to?"
+    # Select asset
+
+
+    #1) get a list of assets 
+    # RETURN LIST OF EVERYTHING IN DIRECTORY
+    assetList = glob.glob(os.path.join(os.environ['ASSETS_DIR'], '*'))
+    selections = []
+    for aL in assetList:
+        selections.append(os.path.basename(aL)) # basename takes the last folder in the path.
+    selections.sort()
+    answer = ui.listWindow(selections, wmessage='What asset does this texture belong to?')
+    if answer:
+        answer = answer[0]
+        assetName = selections[answer]
+        assetImageDir = os.path.join(os.environ['ASSETS_DIR'], assetName, 'images')
+
+        sdir = '$JOB/PRODUCTION/assets/'+assetName+'/geo/bjsonFiles'
+        geoPath = ui.fileChooser(start_dir=sdir, wtitle='Choose Asset Geometry for Texture', mode=fileMode.Read, extensions='*.bjson, *.obj')
+        geoName, ext = os.path.splitext(os.path.basename(geoPath))
+
+        # "What attribute does this map apply to?"
+        # Choose shading pass 
+        shadingPassList = ['diffuse','specular','bump','scalar displacement','vector displacement', 'opacity', 'single SSS', 'multi SSS', 'other']
+        answer = ui.listWindow(shadingPassList, wmessage='Which texture will you be updating?')
+        if answer: 
+            answer = answer[0]
+            shadingPass = shadingPassList[answer]
+
+            # "Select your texture map file " 
+            userDirectory = os.environ['USER_DIR']
+            userTextureMap = ui.fileChooser(start_dir=userDirectory, wtitle='Browse to the Texture Map in your User Directory', image=True, extensions='*.jpeg,*.tiff,*.png,*.exr')
+            #rename their texture map. add on shadingPassList
+            userTextureMapName, ext = os.path.splitext(os.path.basename(userTextureMap))
+
+            newTextureName = assetName +'_'+ geoName +'_'+ shadingPass + ext
+
+            newfilepath = os.path.join(assetImageDir,newTextureName)
+            shutil.copy(userTextureMap, newfilepath)
+
+            ui.infoWindow('Your texture was saved to: ' +newfilepath)
+            
+            #copy the file to /tmp and then copy that file to .exr
+            # 
+
+def updateTexture():
+    # "What asset does this texture belong to?"
+    # Select asset
+
+    # "What attribute does this map apply to?"
+
+    # instead of going into the geo folder just go into the images folder and it will replace it. 
+
+    # Select file you will update 
+
+    # "Select your texture map file " 
+    return
+
 

@@ -46,7 +46,7 @@ export OTLS_DIR=${PRODUCTION_DIR}/otls
 export HTOOLS_DIR=${PROJECT_TOOLS}/houdini-tools
 
 # Append to python path so batch scripts can access our modules
-export PYTHONPATH=/usr/lib64/python2.6/site-packages:${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${PROJECT_TOOLS}/python2.6libs:${PYTHONPATH}
+export PYTHONPATH=/usr/autodesk/maya2012-x64/lib/python2.6/site-packages/:/usr/lib64/python2.6/site-packages:${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${PROJECT_TOOLS}/python2.6libs:${PYTHONPATH}
 
 # Function to build directory structure
 buildProjectDirs()
@@ -70,7 +70,8 @@ buildProjectDirs()
 
     # Create Root directory for animation
     if [ ! -d "$SHOTS_DIR" ]; then
-        mkdir -p "$SHOTS_DIR"
+        echo "making shots dir"
+	mkdir -p "$SHOTS_DIR"
     fi
 
     # Create Directory for otls
