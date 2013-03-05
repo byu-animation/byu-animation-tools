@@ -45,6 +45,7 @@ class CheckoutDialog(QDialog):
 		
 		#Create Select and Cancel buttons
 		self.select_button = QPushButton('Select')
+		self.info_button = QPushButton('Get Info')
 		self.cancel_button = QPushButton('Cancel')
 		
 		#Create button layout
@@ -52,6 +53,7 @@ class CheckoutDialog(QDialog):
 		button_layout.setSpacing(2)
 		button_layout.addStretch()
 		button_layout.addWidget(self.select_button)
+		button_layout.addWidget(self.info_button)
 		button_layout.addWidget(self.cancel_button)
 		
 		#Create main layout
@@ -77,6 +79,7 @@ class CheckoutDialog(QDialog):
 		self.connect(self.animation_radio, SIGNAL('clicked()'), self.refresh)
 		self.connect(self.new_animation_button, SIGNAL('clicked()'), self.new_animation)
 		self.connect(self.select_button, SIGNAL('clicked()'), self.checkout)
+		self.connect(self.info_button, SIGNAL('clicked()'), self.show_node_info)
 		self.connect(self.cancel_button, SIGNAL('clicked()'), self.close_dialog)
 	
 	def update_selection(self, selection):
@@ -158,7 +161,28 @@ class CheckoutDialog(QDialog):
 	def set_current_item(self, item):
 		self.current_item = item
 		
-
+	def show_node_info(self):
+		asset_name = str(self.current_item.text())
+		if self.model_radio.isChecked():
+			filePath = os.path.join(os.environ['ASSETS_DIR'], asset_name, 'model')
+		elif self.rig_radio.isChecked():
+			filePath = os.path.join(os.environ['ASSETS_DIR'], asset_name, 'rig')
+		elif self.animation_radio.isChecked():
+			filePath = os.path.join(os.environ['SHOTS_DIR'], asset_name, 'animation')
+		node_info = amu.getVersionedFolderInfo(filePath)
+		checkout_str = node_info[0]
+		if(checkout_str ==''):
+			checkout_str = 'Not checked out. '
+		else:
+			checkout_str = 'Checked out by '+node_info[0]+'. '
+		checkin_str = 'Last checked in by '+node_info[1]+' on '+node_info[2]
+		cmd.confirmDialog(  title          = asset_name+" Info"
+                                   , message       = checkout_str+checkin_str
+                                   , button        = ['Ok']
+                                   , defaultButton = 'Ok'
+                                   , cancelButton  = 'Ok'
+                                   , dismissString = 'Ok')
+		
 def go():
 	dialog = CheckoutDialog()
 	dialog.show()
