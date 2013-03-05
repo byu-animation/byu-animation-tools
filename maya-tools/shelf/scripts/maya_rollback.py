@@ -9,15 +9,16 @@ import utilities as amu
 
 CHECKOUT_WINDOW_WIDTH = 330
 CHECKOUT_WINDOW_HEIGHT = 400
-ORIGINAL_FILE_NAME = cmd.file(query=True, sceneName=True)
 
 def maya_main_window():
     ptr = omu.MQtUtil.mainWindow()
     return sip.wrapinstance(long(ptr), QObject)
 
 class RollbackDialog(QDialog):
+    ORIGINAL_FILE_NAME = cmd.file(query=True, sceneName=True)
     def __init__(self, parent=maya_main_window()):
     #def setup(self, parent):
+        self.ORIGINAL_FILE_NAME = cmd.file(query=True, sceneName=True)
         QDialog.__init__(self, parent)
         self.setWindowTitle('Rollback')
         self.setFixedSize(CHECKOUT_WINDOW_WIDTH, CHECKOUT_WINDOW_HEIGHT)
@@ -75,7 +76,7 @@ class RollbackDialog(QDialog):
         self.selection_list.sortItems(0)
 
     def refresh(self):
-        filePath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(ORIGINAL_FILE_NAME)))
+        filePath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(self.ORIGINAL_FILE_NAME)))
         checkInDest = amu.getCheckinDest(filePath)
         versionFolders = os.path.join(checkInDest, "src")
         selections = glob.glob(os.path.join(versionFolders, '*'))
@@ -94,15 +95,15 @@ class RollbackDialog(QDialog):
         dialogResult = self.showWarningDialog()
         if dialogResult == 'Yes':
             version = str(self.current_item.text())[1:]
-            dirPath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(ORIGINAL_FILE_NAME)))
+            dirPath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(self.ORIGINAL_FILE_NAME)))
             print dirPath
             cmd.file(force=True, new=True)
             amu.setVersion(dirPath, int(version))
             self.close()
                 
     def close_dialog(self):
-        print ORIGINAL_FILE_NAME
-        cmd.file(ORIGINAL_FILE_NAME, force=True, open=True)
+        print self.ORIGINAL_FILE_NAME
+        cmd.file(self.ORIGINAL_FILE_NAME, force=True, open=True)
         self.close()
 
     def set_current_item(self, item):
@@ -125,11 +126,11 @@ class RollbackDialog(QDialog):
                                    , dismissString = 'Ok')
 
     def open_version(self):
-        filePath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(ORIGINAL_FILE_NAME)))
+        filePath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(self.ORIGINAL_FILE_NAME)))
         checkInDest = amu.getCheckinDest(filePath)
         v = str(self.current_item.text())
         checkinPath = os.path.join(checkInDest, "src", v)
-        checkinName = os.path.join(checkinPath, os.path.basename(ORIGINAL_FILE_NAME))
+        checkinName = os.path.join(checkinPath, os.path.basename(self.ORIGINAL_FILE_NAME))
         print checkinName
         if os.path.exists(checkinName):
             cmd.file(checkinName, force=True, open=True)
@@ -137,14 +138,12 @@ class RollbackDialog(QDialog):
             self.show_no_file_dialog()
 
 def go():
-    dialog = RollbackDialog()
-    dialog.show()
-    
-if __name__ == '__main__':
-    filePath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(ORIGINAL_FILE_NAME)))
+    currentFile = cmd.file(query=True, sceneName=True)
+    filePath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(currentFile)))
     if(amu.isCheckedOutCopyFolder(filePath)):
         cmd.file(save=True, force=True)
-        go()
+        dialog = RollbackDialog()
+        dialog.show()
     else:
         cmd.confirmDialog(  title         = 'Invalid Command'
                            , message       = 'This is not a checked out file. There is nothing to rollback.'
@@ -152,3 +151,7 @@ if __name__ == '__main__':
                            , defaultButton = 'Ok'
                            , cancelButton  = 'Ok'
                            , dismissString = 'Ok')
+    
+if __name__ == '__main__':
+    go()
+    
