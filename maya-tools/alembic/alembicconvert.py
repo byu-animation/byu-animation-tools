@@ -1,5 +1,5 @@
 from pymel.core import *
-import sys
+import sys, os
 
 src_path = sys.argv[1]
 dest_path = sys.argv[2]
@@ -58,3 +58,4 @@ loadPlugin("AbcExport")
 command = build_alembic_command()
 print command
 Mel.eval(command)
+os._exit(0)
