@@ -517,5 +517,6 @@ def runAlembicConverter(vDirPath, srcFilePath):
 	filename, ext = os.path.splitext(os.path.basename(srcFilePath))
 	dest_path = os.path.join(os.path.dirname(vDirPath), 'animation_cache', 'abc', filename+'.abc')
 	converter = os.path.join(os.environ['MAYA_TOOLS_DIR'], 'alembic', 'alembicconvert.py')
-	os.remove(dest_path)
+	if os.path.exists(dest_path):
+		os.remove(dest_path)
 	os.system(getMayapy()+' '+converter+' '+srcFilePath+' '+dest_path)
