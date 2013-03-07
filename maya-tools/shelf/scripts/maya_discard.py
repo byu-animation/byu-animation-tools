@@ -14,7 +14,8 @@ def showWarningDialog():
                                  , cancelButton  = 'No'
                                  , dismissString = 'No')
 
-def discard(filePath=cmds.file(q=True, sceneName=True)):
+def discard():
+        filePath=cmds.file(q=True, sceneName=True)
         if not filePath:
           return
         print filePath
