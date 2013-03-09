@@ -12,6 +12,9 @@
 
 This tool can break asset dependencies and should be used with care! Be sure to make sure that other assets no longer depend on the asset you are deleting.]]></helpText>
     <script scriptType="python"><![CDATA[import hou_asset_mgr as mgr
-mgr.deleteAsset()]]></script>
+
+node = mgr.getSelectedNode()
+
+mgr.deleteAsset(node)]]></script>
   </tool>
 </shelfDocument>

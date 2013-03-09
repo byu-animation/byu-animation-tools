@@ -24,11 +24,11 @@ def _hfcm(fmode):
     elif fmode == fm.ReadAndWrite:
         return hou.fileChooserMode.ReadAndWrite
 
-def infoWindow(message, wtitle=None, wbuttons=('Ok',), msev=ms.Message):
+def infoWindow(wmessage, wtitle=None, wbuttons=('Ok',), msev=ms.Message):
     '''Pop up an informational window with various buttons
 
 This function returns the index of the button pressed.'''
-    return hou.ui.displayMessage(message, buttons=wbuttons, title=wtitle, severity=_hsev(msev))
+    return hou.ui.displayMessage(wmessage, buttons=wbuttons, title=wtitle, severity=_hsev(msev))
 
 def listWindow(dlist, wtitle=None, wmessage=None, multi_select=False):
     '''Pop up an window with a list of options to choose from

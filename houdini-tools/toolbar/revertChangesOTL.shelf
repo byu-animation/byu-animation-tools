@@ -13,6 +13,9 @@
 NOTE:
     This tool is still under construction and may not work exactly as expected yet.]]></helpText>
     <script scriptType="python"><![CDATA[import hou_asset_mgr as mgr
-mgr.revertChanges()]]></script>
+
+node = mgr.getSelectedNode()
+
+mgr.revertChanges(node)]]></script>
   </tool>
 </shelfDocument>
