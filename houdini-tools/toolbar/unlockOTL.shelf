@@ -13,17 +13,9 @@
 This tool is dangerous and should be used with caution!]]></helpText>
     <script scriptType="python"><![CDATA[import hou_asset_mgr as mgr
 
-message = 'WARNING! You are unlocking the Database! \n If you are being dumb, please click \n CANCEL!'
-b = ('OK', 'Cancel')
-ok = -1
-ok = hou.ui.displayMessage(message, b)
-if ok == 0:
-    ok = hou.ui.displayMessage('Last chance to be safe. \n You can still click CANCEL!', b)
-    if ok == 0:
-        mgr.unlockOTL1()
-    else:
-        hou.ui.displayMessage('Thank you for being safe. \n If you have question please talk to Brian, Morgan, or Ethan')
-else:
-    hou.ui.displayMessage('Thank you for being safe. \n If you have question please talk to a Technical Lead')]]></script>
+node = mgr.getSelectedNode()
+
+mgr.unlockOTLbyNode(node)
+]]></script>
   </tool>
 </shelfDocument>

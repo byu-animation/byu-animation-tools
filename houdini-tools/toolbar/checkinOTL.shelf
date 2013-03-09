@@ -17,6 +17,9 @@ NOTE:
 # Checkin a Digital Asset and releas it for others use
 
 import hou_asset_mgr as mgr
-mgr.checkin()]]></script>
+
+node = mgr.getSelectedNode()
+
+mgr.checkin(node)]]></script>
   </tool>
 </shelfDocument>

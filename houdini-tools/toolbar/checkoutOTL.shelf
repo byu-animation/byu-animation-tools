@@ -16,6 +16,9 @@ Once the asset has been checked in again, then another user may check it out. Th
 # If someone else has already claimed it for editing you will not be permitted to do so
 
 import hou_asset_mgr as mgr
-mgr.checkout()]]></script>
+
+node = mgr.getSelectedNode()
+
+mgr.checkout(node)]]></script>
   </tool>
 </shelfDocument>

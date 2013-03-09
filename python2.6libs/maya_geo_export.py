@@ -7,6 +7,7 @@ import subprocess as sp
 import sys
 import shutil
 
+from ui_tools import ui, messageSeverity, fileMode
 
 def objExport(selected, path):
 	'''
@@ -104,7 +105,8 @@ def checkFiles(files):
 			errorMessage += "MISSING FILE: " + f + "\n"
 		print(errorMessage)
 		errorMessage = str(len(missingFiles)) + " Files Missing:\n\n" + errorMessage
-		mc.confirmDialog(title="Error exporting files", message=errorMessage)
+		#mc.confirmDialog(title="Error exporting files", message=errorMessage)
+		ui.infoWindow(errorMessage, wtitle="Error exporting files", msev=messageSeverity.Error)
 	
 	return missingFiles
 

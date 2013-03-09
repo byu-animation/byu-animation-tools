@@ -8,6 +8,8 @@
   <tool name="refreshOTL" label="Refresh" icon="PLASMA_App">
     <script scriptType="python"><![CDATA[import hou_asset_mgr as mgr
 
-mgr.refresh()]]></script>
+node = mgr.getSelectedNode()
+
+mgr.refresh(node)]]></script>
   </tool>
 </shelfDocument>

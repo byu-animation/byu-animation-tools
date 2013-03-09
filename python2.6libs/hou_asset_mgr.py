@@ -122,17 +122,21 @@ def lockOTL(filename):
         con.commit()
     con.close()
 
-def unlockOTL1():
+def unlockOTLbyNode(node = None):
     """Calls unlockOTL with the selected node"""
-    node = getSelectedNode()
     if node != None:
         if not isDigitalAsset(node):
             ui.infoWindow("Not a Digital Asset.")
         else:
-            libraryPath = node.type().definition().libraryFilePath()
-            filename = os.path.basename(libraryPath)
-            #TODO save this somewhere
-            unlockOTL(filename)
+            reply = ui.infoWindow('WARNING! You are unlocking the Database! \n If you are being dumb, please click \n CANCEL!')
+            if reply == 0:
+                libraryPath = node.type().definition().libraryFilePath()
+                filename = os.path.basename(libraryPath)
+                #TODO save this somewhere
+                unlockOTL(filename)
+            else:
+                ui.infoWindow('Thank you for being safe. \n If you have question please talk to someone in charge.')
+                
 
 def unlockOTL(filename):
     """Updates the database entry specified by filename to locked=0 and lockedby=''"""
@@ -247,11 +251,10 @@ def checkinLightingFile():
     else:
         ui.infoWindow('Checkin Failed')
 
-def checkout():
+def checkout(node = None):
     """Checks out the selected node.  EXACTLY ONE node may be selected, and it MUST be a digital asset.
         The node must already exist in the database."""
     updateDB()
-    node = getSelectedNode()
     if node != None:
         if not isDigitalAsset(node):
             ui.infoWindow("Not a Digital Asset.")
@@ -277,11 +280,10 @@ def checkout():
         #ui.infoWindow("Select EXACTLY one node.")
         checkoutLightingFile()
 
-def checkin():
+def checkin(node = None):
     """Checks in the selected node.  EXACTLY ONE node may be selected, and it MUST be a digital asset.
         The node must already exist in the database, and USERNAME must have the lock."""
     updateDB()
-    node = getSelectedNode()
     if node != None:
         if not isDigitalAsset(node):
             ui.infoWindow("Not a Digital Asset.")
@@ -307,9 +309,8 @@ def checkin():
         #ui.infoWindow("Select EXACTLY one node.")
         checkinLightingFile()
 
-def revertChanges():
+def revertChanges(node = None):
     updateDB()
-    node= getSelectedNode()
     if node != None:
         if not isDigitalAsset(node):
             ui.infoWindow("Not a Digital Asset.")
@@ -392,12 +393,11 @@ def getAssetDependents(assetName):
                     dependents.append(d)
     return dependents
 
-def rename():
+def rename(node = None):
     """Renames the selected node. EXACTLY ONE node may be selected, and it MUST be a digital asset.
         The node must already exist in the database.
     """
     updateDB()
-    node = getSelectedNode()
     if node != None:
         if not isDigitalAsset(node):
             ui.infoWindow("Not a Digital Asset.")
@@ -432,13 +432,12 @@ def rename():
     else:
         ui.infoWindow("Select EXACTLY one node.")
 
-def deleteAsset():
+def deleteAsset(node = None):
     """Deletes the selected node. EXACTLY ONE node may be selected, and it MUST be a digital asset.
         The node must already exist in the database. It may not be already checked out in Houdini
         or in Maya.
     """
     updateDB()
-    node = getSelectedNode()
     if node != None:
         if not isDigitalAsset(node):
             ui.infoWindow("Not a Digital Asset.", wtitle='Non-Asset Node', msev=messageSeverity.Error)
@@ -525,9 +524,8 @@ def getAssetName(node):
     filename = os.path.basename(lpath)
     return str(filename.split('.')[0].replace("'", "_")) 
 
-def refresh():
+def refresh(node = None):
     updateDB()
-    node = getSelectedNode()
     
     if node == None:
         ui.infoWindow("Select EXACTLY one node.")
@@ -558,17 +556,16 @@ def refresh():
                 c.changeNodeType(name, keep_network_contents=False)
 
         # Change the top level node
-        node.changeNodeType('containerTemplate', keep_network_contents=False)
-        node = getSelectedNode()
-        node.changeNodeType(nodeName, keep_network_contents=False)
+        tempnode = node.changeNodeType('containerTemplate', keep_network_contents=False)
+        tempnode.changeNodeType(nodeName, keep_network_contents=False)
     else:
         ui.infoWindow('Not a container')
 
-def add():
+# TODO: This function probably needs to be removed.
+def add(node = None):
     """Adds the selected node. EXACTLY ONE node may be selected, and it MUST be a digital asset.
         The node CAN NOT already exist in the database."""
     updateDB()
-    node = getSelectedNode()
     if node != None:
         if node.type().definition() is None:
             ui.infoWindow("Not a Digital Asset.")
@@ -611,6 +608,7 @@ def newTexture():
 
         # "What attribute does this map apply to?"
         # Choose shading pass 
+        # TODO: Replace spaces in shading passes with underscores
         shadingPassList = ['diffuse','specular','bump','scalar displacement','vector displacement', 'opacity', 'single SSS', 'multi SSS', 'other']
         answer = ui.listWindow(shadingPassList, wmessage='Which texture will you be updating?')
         if answer: 

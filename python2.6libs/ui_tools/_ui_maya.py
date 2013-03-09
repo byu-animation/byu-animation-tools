@@ -1,9 +1,16 @@
 import _ui_base
+import maya.cmds as mc
 
 # TODO: Everything!
 
 # Make local functions aliases of the functions we ought to use
-infoWindow = _ui_base.infoWindow
+def infoWindow(wmessage, wtitle=None, wbuttons=('Ok',), msev=ms.Message):
+    '''Pop up an informational window with various buttons
+
+This function returns the index of the button pressed.'''
+    retval = mc.confirmDialog(message=wmessage, title=wtitle, button=wbutton)
+    return False # Put real logic here
+
 listWindow = _ui_base.listWindow
 inputWindow = _ui_base.inputWindow
 passwordWindow = _ui_base.passwordWindow
