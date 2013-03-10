@@ -5,6 +5,8 @@ This module contains functionality to manage the animation project.
 
 import os, time, shutil, glob
 from ConfigParser import ConfigParser
+import tempfile
+import subprocess
 from subprocess import call
 
 def getProjectName():
@@ -294,6 +296,28 @@ def getCheckoutDest(coPath):
 	version = nodeInfo.get("Versioning", "latestversion")
 	return os.path.join(getUserCheckoutDir(), os.path.basename(os.path.dirname(coPath))+"_"+os.path.basename(coPath)+"_"+version)
 
+def lockedBy(logname):
+    """Returns a tuple of the logname and the real name based on the login name passed in.
+
+Raises an exception with a tuple of the logname and an exception if an error occurs."""
+    tfd = tempfile.NamedTemporaryFile(mode='r+') # Create temp file to write to
+    myargs = ["/usr/bin/ldapsearch", "-LLL", "uid=" + str(logname), "cn"] # Command args
+    try:
+        subprocess.check_call(myargs, executable="ldapsearch", stdout=tfd)
+        tfd.seek(0) # Return to start of file
+        fstr = str(tfd.read()) # Read contents of file and cast to string
+        tfd.close() # Close and delete our temp file
+        fstr = fstr.strip() # Strip leading and trailing whitespace
+        lastline = fstr.splitlines()[-1] # Get last line
+        truename = lastline[4:] # Strip off first four characters of line
+
+        lockstr = "This asset is locked by the following user:\n\n"
+        lockstr += "User Name: " + logname + "\n"
+        lockstr += "Real Name: " + truename
+        return logname, truename # Return lock string
+    except Exception as ex:
+        return logname, "Real name not found." # Uh-oh... We jacked something up...
+
 def checkout(coPath, lock):
 	"""
 	Copies the 'latest version' from the src folder into the local directory
@@ -333,7 +357,9 @@ def checkout(coPath, lock):
 	else:
 		whoLocked = nodeInfo.get("Versioning", "lastcheckoutuser")
 		whenLocked = nodeInfo.get("Versioning", "lastcheckouttime")
-		raise Exception("Can not checkout. Folder is locked by "+whoLocked+" at "+whenLocked)
+		logname, realname = lockedBy(whoLocked)
+		whoLocked = 'User Name: ' + logname + '\nReal Name: ' + realname + '\n'
+		raise Exception("Can not checkout. Folder is locked by:\n\n"+ whoLocked+"\nat "+ whenLocked)
 	return dest
 
 ################################################################################
