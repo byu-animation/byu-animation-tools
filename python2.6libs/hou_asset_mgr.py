@@ -588,7 +588,7 @@ def newTexture():
     # "What asset does this texture belong to?"
     # Select asset
 
-
+    # DO THIS ... 
     #1) get a list of assets 
     # RETURN LIST OF EVERYTHING IN DIRECTORY
     assetList = glob.glob(os.path.join(os.environ['ASSETS_DIR'], '*'))
