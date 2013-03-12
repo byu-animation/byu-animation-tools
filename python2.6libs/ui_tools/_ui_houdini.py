@@ -24,17 +24,16 @@ def _hfcm(fmode):
     elif fmode == fm.ReadAndWrite:
         return hou.fileChooserMode.ReadAndWrite
 
-def infoWindow(wmessage, wtitle=None, wbuttons=('Ok',), msev=ms.Message):
+def infoWindow(wmessage, wtitle=None, wbuttons=('Ok',), wdefault_choice=0, msev=ms.Message):
     '''Pop up an informational window with various buttons
-
-This function returns the index of the button pressed.'''
-    return hou.ui.displayMessage(wmessage, buttons=wbuttons, title=wtitle, severity=_hsev(msev))
+    This function returns the index of the button pressed.'''
+    return hou.ui.displayMessage(wmessage, buttons=wbuttons, default_choice=wdefault_choice, title=wtitle, severity=_hsev(msev))
 
 def listWindow(dlist, wtitle=None, wmessage=None, multi_select=False):
     '''Pop up an window with a list of options to choose from
-
-This function returns a tuple of indices that were selected. When cancel is 
-pressed, the return value will be 'None'. '''
+    This function returns a tuple of indices that were selected. When cancel is 
+    pressed, the return value will be 'None'. '''
+    print "listWindow"
     multi = not multi_select
     return hou.ui.selectFromList(dlist, title=wtitle, message=wmessage, exclusive=multi) 
 
