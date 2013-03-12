@@ -280,6 +280,43 @@ def checkout(node):
             errstr = 'Cannot checkout asset. Locked by: \n\n' + whoLocked
             ui.infoWindow(errstr, wtitle='Asset Locked', msev=messageSeverity.Error)
 
+def isCameraAsset(node):
+    return 'cameras' in node.name()
+
+def writeToAlembic(outDir, filename, rootObject, objects='*', startFrame=1, endFrame=240, stepSize=1):
+    if not os.path.exists(outDir):
+        os.makedirs(outDir)
+
+    # Create alembic ROP
+    abcROP = hou.node('/out').createNode('alembic')
+
+    # Set parameters
+    parms = {}
+    parms['trange'] = 'normal'
+    parms['f1'] = startFrame
+    parms['f2'] = endFrame
+    parms['f3'] = stepSize
+    parms['filename'] = os.path.join(outDir, filename)
+    parms['root'] = rootObject.path()
+    parms['objects'] = objects
+    abcROP.setParms(parms)
+
+    # Render ROP
+    abcROP.render()
+    #abcROP.destroy()
+
+def writeCamerasToAlembic(node):
+    sequence = node.name().split('_')[2][0]
+    children = node.children()
+    for c in children:
+        name = c.name()
+        if 'shot' in name:
+            shot = name.split('_')[1]
+            camDir = os.path.join(os.environ['SHOTS_DIR'], sequence+shot, 'camera')
+            abcName = sequence+shot+'_camera'+'.abc'
+            writeToAlembic(camDir, abcName, node, objects=c.path())
+
+
 def checkin(node = None):
     """Checks in the selected node.  EXACTLY ONE node may be selected, and it MUST be a digital asset.
         The node must already exist in the database, and USERNAME must have the lock."""
@@ -300,6 +337,8 @@ def checkin(node = None):
                     saveOTL(node)
                     moveToOtlDir(node, filename)
                     unlockOTL(filename)
+                    if isCameraAsset(node):
+                        writeCamerasToAlembic(node)
                     ui.infoWindow("Checkin Successful!")
                 else:
                     logname, realname = amu.lockedBy(info[3].encode('utf-8'))
