@@ -19,7 +19,9 @@ NOTE:
 import hou_asset_mgr as mgr
 
 node = mgr.getSelectedNode()
-
-mgr.checkin(node)]]></script>
+if node != None:
+    mgr.checkin(node)
+else:
+    mgr.checkinLightingFile()]]></script>
   </tool>
 </shelfDocument>
