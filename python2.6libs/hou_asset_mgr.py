@@ -303,7 +303,7 @@ def writeToAlembic(outDir, filename, rootObject, objects='*', startFrame=1, endF
 
     # Render ROP
     abcROP.render()
-    #abcROP.destroy()
+    abcROP.destroy()
 
 def writeCamerasToAlembic(node):
     sequence = node.name().split('_')[2][0]
