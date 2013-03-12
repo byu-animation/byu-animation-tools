@@ -15,7 +15,9 @@ NOTE:
     <script scriptType="python"><![CDATA[import hou_asset_mgr as mgr
 
 node = mgr.getSelectedNode()
-
-mgr.revertChanges(node)]]></script>
+if node != None:
+    mgr.discard(node)
+else:
+    mgr.discardLightingFile()]]></script>
   </tool>
 </shelfDocument>

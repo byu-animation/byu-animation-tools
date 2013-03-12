@@ -18,7 +18,9 @@ Once the asset has been checked in again, then another user may check it out. Th
 import hou_asset_mgr as mgr
 
 node = mgr.getSelectedNode()
-
-mgr.checkout(node)]]></script>
+if node != None:
+    mgr.checkout(node)
+else:
+    mgr.checkoutLightingFile()]]></script>
   </tool>
 </shelfDocument>

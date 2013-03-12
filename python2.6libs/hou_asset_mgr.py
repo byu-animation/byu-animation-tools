@@ -191,12 +191,15 @@ def get_filename(parentdir):
     return os.path.basename(os.path.dirname(parentdir))+'_'+os.path.basename(parentdir)
 
 def checkoutLightingFile():
+    print "checkoutLightingFile"
     shotPaths = glob.glob(os.path.join(os.environ['SHOTS_DIR'], '*'))
     selections = []
     for sp in shotPaths:
         selections.append(os.path.basename(sp))
     selections.sort()
+    print 'Im calling ui'
     answer = ui.listWindow(selections, wmessage='Select shot file to checkout:')
+    print 'Im done calling ui'
     if answer:
         answer = answer[0]
         toCheckout = os.path.join(os.environ['SHOTS_DIR'], selections[answer], 'lighting')
@@ -229,37 +232,53 @@ def checkinLightingFile():
     else:
         ui.infoWindow('Checkin Failed')
 
-def checkout(node = None):
+def discardLightingFile():
+    filepath = hou.hipFile.path()
+    #TODO
+    print filepath
+    if ui.infoWindow('YOU ARE ABOUT TO IRREVOKABLY DISCARD ALL CHANGES YOU HAVE MADE. '
+                        'Please think this through very carefully.\n\nNow that we have '
+                        'gotten that straightened out, are you sure you want to discard '
+                        'your changes?'
+                        , wbuttons=('Yes','No',)
+                        , wdefault_choice=1
+                        , wtitle='Discard Confirmation') == 0:
+        toDiscard = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(filepath)))
+        if amu.isCheckedOutCopyFolder(toDiscard):
+            hou.hipFile.clear()
+            amu.discard(toDiscard)
+        else:
+            ui.infoWindow('This is not a checked out file.  There is nothing to discard', wtitle='Invalid Command')
+    else:
+        ui.infoWindow('Thank you for being responsible.', wtitle='Discard Cancelled')
+
+def checkout(node):
     """Checks out the selected node.  EXACTLY ONE node may be selected, and it MUST be a digital asset.
         The node must already exist in the database."""
     updateDB()
-    if node != None:
-        if not isDigitalAsset(node):
-            ui.infoWindow("Not a Digital Asset.")
-        else:
-            if node.type().name() == "geometryTemplate":
-                ui.infoWindow("Cannot checkout geometry template node.")
-                return False
-            libraryPath = node.type().definition().libraryFilePath()
-            filename = os.path.basename(libraryPath)
-            info = getFileInfo(filename)
-            if info == None:
-                ui.infoWindow("Add OTL First.")
-            elif not info[2]: #or (info[2] and info[3] == USERNAME):
-                copyToUsrDir(node, filename)
-                lockAsset(node, True)
-                saveOTL(node)
-                node.allowEditingOfContents()
-                lockOTL(filename)
-                ui.infoWindow("Checkout Successful!", wtitle='Success!')
-            else:
-                logname, realname = amu.lockedBy(info[3].encode('utf-8'))
-                whoLocked = 'User Name: ' + logname + '\nReal Name: ' + realname + '\n'
-                errstr = 'Cannot checkout asset. Locked by: \n\n' + whoLocked
-                ui.infoWindow(errstr, wtitle='Asset Locked', msev=messageSeverity.Error)
+    if not isDigitalAsset(node):
+        ui.infoWindow("Not a Digital Asset.")
     else:
-        #ui.infoWindow("Select EXACTLY one node.")
-        checkoutLightingFile()
+        if node.type().name() == "geometryTemplate":
+            ui.infoWindow("Cannot checkout geometry template node.")
+            return False
+        libraryPath = node.type().definition().libraryFilePath()
+        filename = os.path.basename(libraryPath)
+        info = getFileInfo(filename)
+        if info == None:
+            ui.infoWindow("Add OTL First.")
+        elif not info[2]: #or (info[2] and info[3] == USERNAME):
+            copyToUsrDir(node, filename)
+            lockAsset(node, True)
+            saveOTL(node)
+            node.allowEditingOfContents()
+            lockOTL(filename)
+            ui.infoWindow("Checkout Successful!", wtitle='Success!')
+        else:
+            logname, realname = amu.lockedBy(info[3].encode('utf-8'))
+            whoLocked = 'User Name: ' + logname + '\nReal Name: ' + realname + '\n'
+            errstr = 'Cannot checkout asset. Locked by: \n\n' + whoLocked
+            ui.infoWindow(errstr, wtitle='Asset Locked', msev=messageSeverity.Error)
 
 def checkin(node = None):
     """Checks in the selected node.  EXACTLY ONE node may be selected, and it MUST be a digital asset.
@@ -293,30 +312,27 @@ def checkin(node = None):
         #ui.infoWindow("Select EXACTLY one node.")
         checkinLightingFile()
 
-def revertChanges(node = None):
+def discard(node = None):
     updateDB()
-    if node != None:
-        if not isDigitalAsset(node):
-            ui.infoWindow("Not a Digital Asset.")
-        else:
-            libraryPath = node.type().definition().libraryFilePath()
-            filename = os.path.basename(libraryPath)
-            info = getFileInfo(filename)
-            if info == None:
-                ui.infoWindow("OTL not in globals folder. Can not revert.")
-            elif info[2]:
-                if not node.isLocked() and info[3] == USERNAME:
-                    newfilepath = os.path.join(OTLDIR, filename)
-                    oldfilepath = os.path.join(USERDIR, filename)
-                    switchOPLibraries(oldfilepath, newfilepath)
-                    os.remove(oldfilepath)
-                    createMe = node.type().name()
-                    node.destroy()
-                    hou.node('/obj').createNode(createMe)
-                    unlockOTL(filename)
-                    ui.infoWindow("Revert Successful!")
+    if not isDigitalAsset(node):
+        ui.infoWindow("Not a Digital Asset.")
     else:
-        ui.infoWindow("Select EXACTLY one node.")
+        libraryPath = node.type().definition().libraryFilePath()
+        filename = os.path.basename(libraryPath)
+        info = getFileInfo(filename)
+        if info == None:
+            ui.infoWindow("OTL not in globals folder. Can not revert.")
+        elif info[2]:
+            if not node.isLocked() and info[3] == USERNAME:
+                newfilepath = os.path.join(OTLDIR, filename)
+                oldfilepath = os.path.join(USERDIR, filename)
+                switchOPLibraries(oldfilepath, newfilepath)
+                os.remove(oldfilepath)
+                createMe = node.type().name()
+                node.destroy()
+                hou.node('/obj').createNode(createMe)
+                unlockOTL(filename)
+                ui.infoWindow("Revert Successful!")
 
 def formatName(name):
     name = name.strip()
