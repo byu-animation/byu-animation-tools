@@ -284,8 +284,8 @@ def isCameraAsset(node):
     return 'cameras' in node.name()
 
 def isSetAsset(node):
-    sets = ('owned_abby_familyroom', 'owned_jeff_appartment')
-    return node.name() in sets
+    sets = ('owned_abby_family_room', 'owned_jeffs_apartment')
+    return getAssetName(node) in sets
 
 def writeToAlembic(outDir, filename, rootObject, objects='*', trange='off', startFrame=1, endFrame=240, stepSize=1):
     if not os.path.exists(outDir):
