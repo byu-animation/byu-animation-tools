@@ -283,7 +283,11 @@ def checkout(node):
 def isCameraAsset(node):
     return 'cameras' in node.name()
 
-def writeToAlembic(outDir, filename, rootObject, objects='*', startFrame=1, endFrame=240, stepSize=1):
+def isSetAsset(node):
+    sets = ('owned_abby_familyroom', 'owned_jeff_appartment')
+    return node.name() in sets
+
+def writeToAlembic(outDir, filename, rootObject, objects='*', trange='off', startFrame=1, endFrame=240, stepSize=1):
     if not os.path.exists(outDir):
         os.makedirs(outDir)
 
@@ -292,7 +296,7 @@ def writeToAlembic(outDir, filename, rootObject, objects='*', startFrame=1, endF
 
     # Set parameters
     parms = {}
-    parms['trange'] = 'normal'
+    parms['trange'] = trange
     parms['f1'] = startFrame
     parms['f2'] = endFrame
     parms['f3'] = stepSize
@@ -314,42 +318,53 @@ def writeCamerasToAlembic(node):
             shot = name.split('_')[1]
             camDir = os.path.join(os.environ['SHOTS_DIR'], sequence+shot, 'camera')
             abcName = sequence+shot+'_camera'+'.abc'
-            writeToAlembic(camDir, abcName, node, objects=c.path())
+            sFrame, eFrame = hou.playbar.playbackRange()
+            sSize = hou.playbar.frameIncrement()
+            writeToAlembic(camDir, abcName, node
+                           , objects=c.path()
+                           , trange='normal'
+                           , startFrame=sFrame
+                           , endFrame=eFrame
+                           , stepSize=sSize)
+
+def writeSetToAlembic(node):
+    assetName = getAssetName(node)
+    abcName = assetName+'.abc'
+    setDir = os.path.join(os.environ['PRODUCTION_DIR'], 'set_cache', assetName)
+    writeToAlembic(setDir, abcName, node)
 
 
 def checkin(node = None):
     """Checks in the selected node.  EXACTLY ONE node may be selected, and it MUST be a digital asset.
         The node must already exist in the database, and USERNAME must have the lock."""
     updateDB()
-    if node != None:
-        if not isDigitalAsset(node):
-            ui.infoWindow("Not a Digital Asset.")
-        else:
-            libraryPath = node.type().definition().libraryFilePath()
-            filename = os.path.basename(libraryPath)
-            info = getFileInfo(filename)
-            if info == None:
-                ui.infoWindow("Add the OTL first")
-            elif info[2]:
-                if not node.isLocked() and info[3] == USERNAME:
-                    saveOTL(node) # This save is not strictly necessary since we save again two lines down
-                    lockAsset(node, False)
-                    saveOTL(node)
-                    moveToOtlDir(node, filename)
-                    unlockOTL(filename)
-                    if isCameraAsset(node):
-                        writeCamerasToAlembic(node)
-                    ui.infoWindow("Checkin Successful!")
-                else:
-                    logname, realname = amu.lockedBy(info[3].encode('utf-8'))
-                    whoLocked = 'User Name: ' + logname + '\nReal Name: ' + realname + '\n'
-                    errstr = 'Cannot checkin asset. Locked by: \n\n' + whoLocked
-                    ui.infoWindow(errstr, wtitle='Asset Locked', msev=messageSeverity.Error)
-            else:
-                ui.infoWindow("Already checked in.")
+    if not isDigitalAsset(node):
+        ui.infoWindow("Not a Digital Asset.")
     else:
-        #ui.infoWindow("Select EXACTLY one node.")
-        checkinLightingFile()
+        libraryPath = node.type().definition().libraryFilePath()
+        filename = os.path.basename(libraryPath)
+        info = getFileInfo(filename)
+        if info == None:
+            ui.infoWindow("Add the OTL first")
+        elif info[2]:
+            if not node.isLocked() and info[3] == USERNAME:
+                saveOTL(node) # This save is not strictly necessary since we save again two lines down
+                lockAsset(node, False)
+                saveOTL(node)
+                moveToOtlDir(node, filename)
+                unlockOTL(filename)
+                if isCameraAsset(node):
+                    writeCamerasToAlembic(node)
+                if isSetAsset(node):
+                    writeSetToAlembic(node)
+                ui.infoWindow("Checkin Successful!")
+            else:
+                logname, realname = amu.lockedBy(info[3].encode('utf-8'))
+                whoLocked = 'User Name: ' + logname + '\nReal Name: ' + realname + '\n'
+                errstr = 'Cannot checkin asset. Locked by: \n\n' + whoLocked
+                ui.infoWindow(errstr, wtitle='Asset Locked', msev=messageSeverity.Error)
+        else:
+            ui.infoWindow("Already checked in.")
 
 def discard(node = None):
     updateDB()
