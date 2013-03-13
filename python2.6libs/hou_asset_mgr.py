@@ -616,8 +616,8 @@ def refresh(node = None):
                 c.changeNodeType(name, keep_network_contents=False)
 
         # Change the top level node
-        tempnode = node.changeNodeType('containerTemplate', keep_network_contents=False)
-        tempnode.changeNodeType(nodeName, keep_network_contents=False)
+        #tempnode = node.changeNodeType('containerTemplate', keep_network_contents=False)
+        #tempnode.changeNodeType(nodeName, keep_network_contents=False)
     else:
         ui.infoWindow('Not a container')
 
