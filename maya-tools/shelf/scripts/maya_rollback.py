@@ -158,10 +158,6 @@ class RollbackDialog(QDialog):
             
             latestVersion = amu.tempSetVersion(toCheckout, version)
             amu.discard(filePath)
-            #PROBLEMS: file is already locked by this user
-            #               discard changes?
-            #          amu.checkout will only checkout the latest version
-            #               write tempSetVersion method in utilities so checkout will open the desired version ?
             try:
                 destpath = amu.checkout(toCheckout, True)
             except Exception as e:
