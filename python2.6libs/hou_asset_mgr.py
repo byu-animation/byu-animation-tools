@@ -328,8 +328,9 @@ def writeCamerasToAlembic(node):
                            , stepSize=sSize)
 
 def writeSetToAlembic(node):
-    abcName = getAssetName(node)+'.abc'
-    setDir = os.path.join(os.environ['SHOTS_DIR'], 'set_cache')
+    assetName = getAssetName(node)
+    abcName = assetName+'.abc'
+    setDir = os.path.join(os.environ['PRODUCTION_DIR'], 'set_cache', assetName)
     writeToAlembic(setDir, abcName, node)
 
 
