@@ -6,7 +6,7 @@ dest_path = sys.argv[2]
 print src_path
 print dest_path
 
-openFile(src_path)
+openFile(src_path, force=True)
 
 def exportTo():
     parent = os.path.dir
