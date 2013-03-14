@@ -291,6 +291,8 @@ def writeToAlembic(outDir, filename, rootObject, objects='*', trange='off', star
     if not os.path.exists(outDir):
         os.makedirs(outDir)
 
+    abcFilePath = os.path.join(outDir, filename)
+
     # Create alembic ROP
     abcROP = hou.node('/out').createNode('alembic')
 
@@ -300,7 +302,7 @@ def writeToAlembic(outDir, filename, rootObject, objects='*', trange='off', star
     parms['f1'] = startFrame
     parms['f2'] = endFrame
     parms['f3'] = stepSize
-    parms['filename'] = os.path.join(outDir, filename)
+    parms['filename'] = abcFilePath
     parms['root'] = rootObject.path()
     parms['objects'] = objects
     abcROP.setParms(parms)
@@ -308,6 +310,8 @@ def writeToAlembic(outDir, filename, rootObject, objects='*', trange='off', star
     # Render ROP
     abcROP.render()
     abcROP.destroy()
+
+    return abcFilePath
 
 def writeCamerasToAlembic(node):
     sequence = node.name().split('_')[2][0]
@@ -320,18 +324,33 @@ def writeCamerasToAlembic(node):
             abcName = sequence+shot+'_camera'+'.abc'
             sFrame, eFrame = hou.playbar.playbackRange()
             sSize = hou.playbar.frameIncrement()
-            writeToAlembic(camDir, abcName, node
-                           , objects=c.path()
-                           , trange='normal'
-                           , startFrame=sFrame
-                           , endFrame=eFrame
-                           , stepSize=sSize)
+            abcFilePath = writeToAlembic(camDir, abcName, node
+                                        , objects=c.path()
+                                        , trange='normal'
+                                        , startFrame=sFrame
+                                        , endFrame=eFrame
+                                        , stepSize=sSize)
+            mayaFilePath = os.path.join(camDir, sequence+shot+'_camera'+'.mb')
+            if os.path.exists(mayaFilePath):
+                os.remove(mayaFilePath)
+            amu.mayaImportAlembicFile(mayaFilePath, abcFilePath)
 
 def writeSetToAlembic(node):
+    exclude_objects = ('owned_jeff_couch', 'owned_jeffs_controller', 'owned_abby_controller', 'owned_cyclopes_toy')
     assetName = getAssetName(node)
+    print assetName
     abcName = assetName+'.abc'
     setDir = os.path.join(os.environ['PRODUCTION_DIR'], 'set_cache', assetName)
-    writeToAlembic(setDir, abcName, node)
+    include_objects = ''
+    for c in node.children():
+        name = getAssetName(c)
+        if name != None and name not in exclude_objects and 'wall' not in name and 'layout' not in name:
+            include_objects += ' '+c.path()
+    abcFilePath = writeToAlembic(setDir, abcName, node, objects=include_objects)
+    mayaFilePath = os.path.join(setDir, assetName+'.mb')
+    if os.path.exists(mayaFilePath):
+        os.remove(mayaFilePath)
+    amu.mayaImportAlembicFile(mayaFilePath, abcFilePath)
 
 
 def checkin(node = None):
@@ -580,9 +599,12 @@ def new():
         newGeo(hpath)
 
 def getAssetName(node):
-    lpath = node.type().definition().libraryFilePath()
-    filename = os.path.basename(lpath)
-    return str(filename.split('.')[0].replace("'", "_")) 
+    if isDigitalAsset(node):
+        lpath = node.type().definition().libraryFilePath()
+        filename = os.path.basename(lpath)
+        return str(filename.split('.')[0].replace("'", "_"))
+    else:
+        return None
 
 def refresh(node = None):
     updateDB()
