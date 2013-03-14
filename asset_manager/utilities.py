@@ -546,3 +546,7 @@ def runAlembicConverter(vDirPath, srcFilePath):
 	if os.path.exists(dest_path):
 		os.remove(dest_path)
 	os.system(getMayapy()+' '+converter+' '+srcFilePath+' '+dest_path)
+
+def mayaImportAlembicFile(maya_file, abc_file):
+	importer = os.path.join(os.environ['MAYA_TOOLS_DIR'], 'alembic', 'alembicImport.py')
+	os.system(getMayapy()+' '+importer+' '+maya_file+' '+abc_file)
