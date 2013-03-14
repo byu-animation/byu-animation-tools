@@ -575,63 +575,61 @@ def add(node = None):
 
 
 def newTexture():
-    # "What asset does this texture belong to?"
-    # Select asset
-
-    # DO THIS ... Do it again
-    #1) get a list of assets 
-    # RETURN LIST OF EVERYTHING IN DIRECTORY
+    # Get a list of assets 
     assetList = glob.glob(os.path.join(os.environ['ASSETS_DIR'], '*'))
     selections = []
     for aL in assetList:
-        selections.append(os.path.basename(aL)) # basename takes the last folder in the path.
+        # basename takes last folder in path.
+        selections.append(os.path.basename(aL)) 
+        # sort alphabetically
     selections.sort()
-    answer = ui.listWindow(selections, wmessage='What asset does this texture belong to?')
+    answer = ui.listWindow(selections, wmessage='Choose an asset to add/update textures for')
     if answer:
         answer = answer[0]
         assetName = selections[answer]
         assetImageDir = os.path.join(os.environ['ASSETS_DIR'], assetName, 'images')
 
+        # Direct user to geometry file path and have them choose the correct one
         sdir = '$JOB/PRODUCTION/assets/'+assetName+'/geo/bjsonFiles'
         geoPath = ui.fileChooser(start_dir=sdir, wtitle='Choose Asset Geometry for Texture', mode=fileMode.Read, extensions='*.bjson, *.obj')
         geoName, ext = os.path.splitext(os.path.basename(geoPath))
 
-        # "What attribute does this map apply to?"
-        # Choose shading pass 
-        # TODO: Replace spaces in shading passes with underscores
-        shadingPassList = ['diffuse','specular','bump','scalar displacement','vector displacement', 'opacity', 'single SSS', 'multi SSS', 'other']
-        answer = ui.listWindow(shadingPassList, wmessage='Which texture will you be updating?')
+        # Show a list of shading passes
+        shadingPassList = ['diffuse','specular','bump','scalar_displacement','vector_displacement', 'opacity', 'single_SSS', 'multi_SSS', 'other']
+        answer = ui.listWindow(shadingPassList, wmessage='Which texture will you be creating/updating?')
         if answer: 
             answer = answer[0]
             shadingPass = shadingPassList[answer]
 
-            # "Select your texture map file " 
+            # Allow user to choose texture map in user local directory   
             userDirectory = os.environ['USER_DIR']
-            userTextureMap = ui.fileChooser(start_dir=userDirectory, wtitle='Browse to the Texture Map in your User Directory', image=True, extensions='*.jpeg,*.tiff,*.png,*.exr')
-            #rename their texture map. add on shadingPassList
-            userTextureMapName, ext = os.path.splitext(os.path.basename(userTextureMap))
+            userTextureMap = ui.fileChooser(start_dir=userDirectory, wtitle='Browse to the Texture Map in your User Directory', image=True, extensions='*.jpg,*.jpeg,*.tiff,*.tif,*.png,*.exr') 
+            #Allow user to search for texture in any directory
+            userTextureMap = os.path.expandvars(userTextureMap)
 
-            newTextureName = assetName +'_'+ geoName +'_'+ shadingPass + ext
+            # Set Variables for texture paths
+            newTexture = '/tmp/newTexture.png'
+            convertedTexture = '/tmp/convertedTexture.png'
+            finalTexture = '/tmp/finalTexture.exr'
 
-            newfilepath = os.path.join(assetImageDir,newTextureName)
-            shutil.copy(userTextureMap, newfilepath)
-
-            ui.infoWindow('Your texture was saved to: ' +newfilepath)
+            # Change to 16 bits and convert to png 
+            os.system('iconvert -d 16 ' +userTextureMap+ newTexture)
+        
+            # Gamma correct for linear workflow
+            if shadingPass == 'diffuse' or shadingPass == 'specular' or shadingPass == 'single_SSS' or shadingPass == 'multi_SSS' or shadingPass == 'other':
+                os.system('icomposite' +convertedTexture +'= gamma 0.4545454545' +newTexture) 
             
-            #copy the file to /tmp and then copy that file to .exr
-            # 
+            # Convert to .exr with otimized settings
+            os.system('iconvert -d half '+convertedTexture+finalTexture+' storage tile 64 tiley 65 compression zip')
+            
+            # Seperate extension from filename and rename texture to production pipeline name 
+            finalTextureName, ext = os.path.splitext(os.path.basename(finalTexture))
 
-def updateTexture():
-    # "What asset does this texture belong to?"
-    # Select asset
+            newTextureName = assetName+'_'+geoName+'_'+shadingPass+ext
+ 
+            newfilepath = os.path.join(assetImageDir,newTextureName)
 
-    # "What attribute does this map apply to?"
+            shutil.copy(finalTexture,newfilepath)
 
-    # instead of going into the geo folder just go into the images folder and it will replace it. 
-
-    # Select file you will update 
-
-    # "Select your texture map file " 
-    return
-
-
+            # Output final success message
+            ui.infoWindow('Your texture was saved to: '+newfilepath+' as a .exr image file')
