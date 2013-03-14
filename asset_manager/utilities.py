@@ -201,6 +201,19 @@ def getVersionedFolderInfo(dirPath):
 		nodeInfo.append("")
 	return nodeInfo
 
+def tempSetVersion(chkInDest, version):
+    """
+    Temporarily sets the 'latest version' as the specified version without deleting later versions
+    Returns the version number that we override
+    @precondition 'chkInDest' is a valid versioned folder
+    """
+    nodeInfo = ConfigParser()
+    nodeInfo.read(os.path.join(chkInDest, ".nodeInfo"))
+    latestVersion = nodeInfo.get("Versioning", "latestversion")
+    nodeInfo.set("Versioning", "latestversion", str(version))
+    _writeConfigFile(os.path.join(chkInDest, ".nodeInfo"), nodeInfo)
+    return latestVersion
+
 def setVersion(dirPath, version):	
     """
     Sets the 'latest version' as the specified version and deletes later versions
