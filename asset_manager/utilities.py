@@ -7,7 +7,6 @@ import os, time, shutil, glob
 from ConfigParser import ConfigParser
 import tempfile
 import subprocess
-from subprocess import call
 
 def getProjectName():
 	return os.environ['PROJECT_NAME']
@@ -310,26 +309,20 @@ def getCheckoutDest(coPath):
 	return os.path.join(getUserCheckoutDir(), os.path.basename(os.path.dirname(coPath))+"_"+os.path.basename(coPath)+"_"+version)
 
 def lockedBy(logname):
-    """Returns a tuple of the logname and the real name based on the login name passed in.
+    """
+    Returns a tuple containing the logname and the real name
 
-Raises an exception with a tuple of the logname and an exception if an error occurs."""
-    tfd = tempfile.NamedTemporaryFile(mode='r+') # Create temp file to write to
-    myargs = ["/usr/bin/ldapsearch", "-LLL", "uid=" + str(logname), "cn"] # Command args
+    Raises a generic exception if real name cannot be determined.
+    """
+    cmdargs = ["/usr/bin/getent", "passwd", str(logname)] # Command args
     try:
-        subprocess.check_call(myargs, executable="ldapsearch", stdout=tfd)
-        tfd.seek(0) # Return to start of file
-        fstr = str(tfd.read()) # Read contents of file and cast to string
-        tfd.close() # Close and delete our temp file
-        fstr = fstr.strip() # Strip leading and trailing whitespace
-        lastline = fstr.splitlines()[-1] # Get last line
-        truename = lastline[4:] # Strip off first four characters of line
+        p = subprocess.Popen(cmdargs, stdout=subprocess.PIPE)
+        if p.wait(): raise Exception("getent command returned non-zero")
+        rlist = p.stdout.read().strip().split(':') # Strip and split string
+    except Exception as e:
+        raise Exception("Real name not found: " + str(e))
 
-        lockstr = "This asset is locked by the following user:\n\n"
-        lockstr += "User Name: " + logname + "\n"
-        lockstr += "Real Name: " + truename
-        return logname, truename # Return lock string
-    except Exception as ex:
-        return logname, "Real name not found." # Uh-oh... We jacked something up...
+    return tuple(rlist[:1] + rlist[4:]) # Return lockedBy tuple
 
 def checkout(coPath, lock):
 	"""
@@ -543,9 +536,9 @@ def install(vDirPath, srcFilePath):
 	print newInstFilePath
 	
 	#if _isHoudiniFile(newInstFilePath):
-	#	call([getHoudiniPython(), "installHoudiniFile.py", srcFilePath, newInstFilePath])
+	#	subprocess.call([getHoudiniPython(), "installHoudiniFile.py", srcFilePath, newInstFilePath])
 	#elif _isMayaFile(newInstFilePath):
-	#	call([getMayapy(), "installMayaFile.py", srcFilePath, newInstFilePath])
+	#	subprocess.call([getMayapy(), "installMayaFile.py", srcFilePath, newInstFilePath])
 	#else:
 	#	#Just copy the file
 	#	print 'copying file...'
