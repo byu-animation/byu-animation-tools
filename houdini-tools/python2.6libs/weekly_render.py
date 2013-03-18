@@ -1,7 +1,7 @@
 '''
 Houdini weekly render script
 Author: Elizabeth Brayton
-Last Modified: 6 Feb 2013
+Last Modified: 18 mar 2013
 '''
 
 import shutil
@@ -109,6 +109,7 @@ def getRenderContext():
     return (local == 0)
 
 def setUpMantraNode(shotName, frameRange):
+    cameraPattern = "/obj/owned_cameras_%s1/shot_%s" % (shotName[0], shotName[1:])
     man = hou.node("/out").createNode("ifd")
     outputDir = RENDERDIR.replace(JOB_DIR, "$JOB")
     outputLoc = os.path.join(outputDir, getOutFileName(shotName))
@@ -121,8 +122,8 @@ def setUpMantraNode(shotName, frameRange):
     man.parm("f3").set(1)
     
     man.parm("vm_renderengine").set("pbrraytrace")
-    # TODO which camera?!
-    # TODO other paramaters
+    man.parm("camera").set(cameraPattern)
+    # TODO other paramaters?
     return man
 
 def setUpHQueueNode(man):
