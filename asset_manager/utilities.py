@@ -322,7 +322,7 @@ def lockedBy(logname):
     except Exception as e:
         raise Exception("Real name not found: " + str(e))
 
-    return tuple(rlist[:1] + rlist[4:]) # Return lockedBy tuple
+    return rlist[0], rlist[4] # Return lockedBy tuple
 
 def checkout(coPath, lock):
 	"""
