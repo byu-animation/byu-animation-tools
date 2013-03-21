@@ -127,7 +127,7 @@ def unlockOTLbyNode(node = None):
         if not isDigitalAsset(node):
             ui.infoWindow("Not a Digital Asset.")
         else:
-            reply = ui.infoWindow('WARNING! You are unlocking the Database! \n If you are being dumb, please click \n CANCEL!')
+            reply = ui.warningWindow('WARNING! You are unlocking the Database! \n If you are being dumb, please click \n CANCEL!')
             if reply == 0:
                 libraryPath = node.type().definition().libraryFilePath()
                 filename = os.path.basename(libraryPath)
