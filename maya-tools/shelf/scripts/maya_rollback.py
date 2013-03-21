@@ -135,18 +135,29 @@ class RollbackDialog(QDialog):
                                    , defaultButton = 'No'
                                    , cancelButton  = 'No'
                                    , dismissString = 'No')
+    def verify_open_version_dialog(self):
+        return cmd.confirmDialog(  title           = 'Read Only File'
+                                   , message       = 'This is meant to be a read only file and should not be edited. If you want to edit this version, please click the \'Checkout Version\' button.'
+                                   , button        = ['Ok']
+                                   , defaultButton = 'Ok'
+                                   , cancelButton  = 'Ok'
+                                   , dismissString = 'Ok'
+                                   , backgroundColor = [1.0, 0, 0])
+
 
     def open_version(self):
-        filePath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(self.ORIGINAL_FILE_NAME)))
-        checkInDest = amu.getCheckinDest(filePath)
-        v = str(self.current_item.text())
-        checkinPath = os.path.join(checkInDest, "src", v)
-        checkinName = os.path.join(checkinPath, os.path.basename(self.ORIGINAL_FILE_NAME))
-        print checkinName
-        if os.path.exists(checkinName):
-            cmd.file(checkinName, force=True, open=True)
-        else:
-            self.show_no_file_dialog()
+        dialogResult = self.verify_open_version_dialog()
+        if (dialogResult == 'Ok'):
+            filePath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(self.ORIGINAL_FILE_NAME)))
+            checkInDest = amu.getCheckinDest(filePath)
+            v = str(self.current_item.text())
+            checkinPath = os.path.join(checkInDest, "src", v)
+            checkinName = os.path.join(checkinPath, os.path.basename(self.ORIGINAL_FILE_NAME))
+            print checkinName
+            if os.path.exists(checkinName):
+                cmd.file(checkinName, force=True, open=True)
+            else:
+                self.show_no_file_dialog()
 
     def checkout_version(self):
         dialogResult = self.verify_checkout_dialog()
