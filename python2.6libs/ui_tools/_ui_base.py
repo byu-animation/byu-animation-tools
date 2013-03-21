@@ -7,7 +7,13 @@ import fileMode as fm
 def infoWindow(message, wtitle=None, wbuttons=('Ok',), msev=ms.Message):
     '''Pop up an informational window with various buttons
     This function returns the index of the button pressed.'''
-    raise NotImplementedError 
+    raise NotImplementedError
+
+def warningWindow(message, wtitle='Warning', wbuttons=('Ok','Cancel',), msev=ms.Warning):
+    '''Pop up a warning window with an Ok and Cancel button
+    This function returns the index of the button pressed.'''
+    raise NotImplementedError
+
 
 def listWindow(dlist, wtitle=None, wmessage=None, multi_select=False):
     '''Pop up an window with a list of options to choose from

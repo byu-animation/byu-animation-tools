@@ -21,6 +21,7 @@ except:
 
 # Make local functions aliases of the functions we ought to use
 infoWindow = _ui.infoWindow
+warningWindow = _ui.warningWindow
 listWindow = _ui.listWindow
 inputWindow = _ui.inputWindow
 passwordWindow = _ui.passwordWindow
