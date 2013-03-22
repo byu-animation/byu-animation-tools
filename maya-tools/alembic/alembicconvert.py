@@ -47,7 +47,7 @@ def build_alembic_command():
     start_frame = playbackOptions(q=1, minTime=True) - 5
     end_frame = playbackOptions(q=1, maxTime=True) + 5
     file_name = dest_path
-    command = 'AbcExport -j "%s -frameRange %s %s -step 0.25 -writeVisibility -file %s"'%(
+    command = 'AbcExport -j "%s -frameRange %s %s -step 0.25 -writeVisibility -nn -uv -file %s"'%(
                                     roots_string, 
                                     str(start_frame), 
                                     str(end_frame), 
