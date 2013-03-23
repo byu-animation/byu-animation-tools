@@ -3,10 +3,8 @@ This module contains functionality to manage the animation project.
 @author: Morgan Strong, Brian Kingery
 """
 
-import os, time, shutil, glob
+import os, time, shutil, glob, pwd, tempfile
 from ConfigParser import ConfigParser
-import tempfile
-import subprocess
 
 def getProjectName():
 	return os.environ['PROJECT_NAME']
@@ -314,15 +312,17 @@ def lockedBy(logname):
 
     Raises a generic exception if real name cannot be determined.
     """
-    cmdargs = ["/usr/bin/getent", "passwd", str(logname)] # Command args
-    try:
-        p = subprocess.Popen(cmdargs, stdout=subprocess.PIPE)
-        if p.wait(): raise Exception("getent command returned non-zero")
-        rlist = p.stdout.read().strip().split(':') # Strip and split string
-    except Exception as e:
-        raise Exception("Real name not found: " + str(e))
 
+<<<<<<< HEAD
+    try: # Throws KeyError exception when the name cannot be found
+        p = pwd.getpwnam( str(logname) )
+    except KeyError as ke: # Re-throws KeyError as generic exception
+        raise Exception( str(ke) )
+
+    return p.pw_name, p.pw_gecos # Return lockedBy tuple
+=======
     return rlist[0], rlist[4] # Return lockedBy tuple
+>>>>>>> 81ae907681fc24227e4bbc1f4226934849d454f5
 
 def checkout(coPath, lock):
 	"""
@@ -535,14 +535,6 @@ def install(vDirPath, srcFilePath):
 	newInstFilePath = os.path.join(stableDir, stableName+srcExt)
 	print newInstFilePath
 	
-	#if _isHoudiniFile(newInstFilePath):
-	#	subprocess.call([getHoudiniPython(), "installHoudiniFile.py", srcFilePath, newInstFilePath])
-	#elif _isMayaFile(newInstFilePath):
-	#	subprocess.call([getMayapy(), "installMayaFile.py", srcFilePath, newInstFilePath])
-	#else:
-	#	#Just copy the file
-	#	print 'copying file...'
-	#	
 	shutil.copy(srcFilePath, newInstFilePath)
 
 def runAlembicConverter(vDirPath, srcFilePath):
