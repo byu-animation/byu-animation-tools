@@ -313,16 +313,12 @@ def lockedBy(logname):
     Raises a generic exception if real name cannot be determined.
     """
 
-<<<<<<< HEAD
     try: # Throws KeyError exception when the name cannot be found
         p = pwd.getpwnam( str(logname) )
     except KeyError as ke: # Re-throws KeyError as generic exception
         raise Exception( str(ke) )
 
     return p.pw_name, p.pw_gecos # Return lockedBy tuple
-=======
-    return rlist[0], rlist[4] # Return lockedBy tuple
->>>>>>> 81ae907681fc24227e4bbc1f4226934849d454f5
 
 def checkout(coPath, lock):
 	"""
