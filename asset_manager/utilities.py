@@ -3,7 +3,7 @@ This module contains functionality to manage the animation project.
 @author: Morgan Strong, Brian Kingery
 """
 
-import os, time, shutil, glob, pwd, tempfile
+import os, time, shutil, glob, pwd, tempfile, maya_geo_export
 from ConfigParser import ConfigParser
 
 def getProjectName():
@@ -463,7 +463,9 @@ def checkin(toCheckin):
 	_writeConfigFile(os.path.join(chkInDest, ".nodeInfo"), nodeInfo)
 	
 	#print glob.glob(os.path.join(chkInDest, "src", "*"))
-	purge(os.path.join(chkInDest, "src"), newVersion - 5)
+	assetName, assetType, version = maya_geo_export.decodeFileName()
+	if(assetType!='animation')
+		purge(os.path.join(chkInDest, "src"), newVersion - 5)
 
 	# Clean up
 	shutil.rmtree(toCheckin)
