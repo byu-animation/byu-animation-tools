@@ -213,11 +213,11 @@ def generateGeometry(path=os.path.dirname(mc.file(q=True, sceneName=True))):
 		return False
 	
 	# Convert .obj files to .bjson
-	bjsons = bjsonExport(objs, BJSONPATH)
+	#bjsons = bjsonExport(objs, BJSONPATH)
 	
 	# Check to see if all .bjson files were created
-	if not len(checkFiles(bjsons)) == 0:
-		return False
+	#if not len(checkFiles(bjsons)) == 0:
+	#	return False
 		
 	return True
 
