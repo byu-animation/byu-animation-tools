@@ -13,7 +13,6 @@
     <memberTool name="unlock DB"/>
     <memberTool name="rename"/>
     <memberTool name="delete"/>
-    <memberTool name="abc2bjson"/>
     <memberTool name="weeklyRender"/>
     <memberTool name="new_texture"/>
     <memberTool name="refreshOTL"/>

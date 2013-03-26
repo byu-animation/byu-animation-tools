@@ -12,6 +12,7 @@ This function returns the index of the button pressed.'''
     return False # Put real logic here
 
 listWindow = _ui_base.listWindow
+warningWindow = _ui_base.warningWindow
 inputWindow = _ui_base.inputWindow
 passwordWindow = _ui_base.passwordWindow
 fileChooser = _ui_base.fileChooser

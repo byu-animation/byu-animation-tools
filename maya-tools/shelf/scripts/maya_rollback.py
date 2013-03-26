@@ -33,6 +33,7 @@ class RollbackDialog(QDialog):
 
         #Create Select and Cancel buttons
         self.open_button = QPushButton('Open Version')
+        self.checkout_button = QPushButton('Checkout Version')
         self.select_button = QPushButton('Rollback')
         self.cancel_button = QPushButton('Cancel')
 
@@ -41,6 +42,7 @@ class RollbackDialog(QDialog):
         button_layout.setSpacing(2)
         button_layout.addStretch()
         button_layout.addWidget(self.open_button)
+        button_layout.addWidget(self.checkout_button)
         button_layout.addWidget(self.select_button)
         button_layout.addWidget(self.cancel_button)
 
@@ -61,6 +63,7 @@ class RollbackDialog(QDialog):
             
         #Connect the buttons
         self.connect(self.open_button, SIGNAL('clicked()'), self.open_version)
+        self.connect(self.checkout_button, SIGNAL('clicked()'), self.checkout_version)
         self.connect(self.select_button, SIGNAL('clicked()'), self.rollback)
         self.connect(self.cancel_button, SIGNAL('clicked()'), self.close_dialog)
 
@@ -125,17 +128,70 @@ class RollbackDialog(QDialog):
                                    , cancelButton  = 'Ok'
                                    , dismissString = 'Ok')
 
+    def verify_checkout_dialog(self):
+        return cmd.confirmDialog(  title           = 'Verify Checkout'
+                                   , message       = 'You are about to checkout an older version of this asset. Once you check it in, it will be saved as the most recent version. Is this what you want?'
+                                   , button        = ['Yes', 'No']
+                                   , defaultButton = 'No'
+                                   , cancelButton  = 'No'
+                                   , dismissString = 'No')
+    def verify_open_version_dialog(self):
+        return cmd.confirmDialog(  title           = 'Read Only File'
+                                   , message       = 'This is meant to be a read only file and should not be edited. If you want to edit this version, please click the \'Checkout Version\' button.'
+                                   , button        = ['Ok']
+                                   , defaultButton = 'Ok'
+                                   , cancelButton  = 'Ok'
+                                   , dismissString = 'Ok'
+                                   , backgroundColor = [1.0, 0, 0])
+
+
     def open_version(self):
-        filePath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(self.ORIGINAL_FILE_NAME)))
-        checkInDest = amu.getCheckinDest(filePath)
-        v = str(self.current_item.text())
-        checkinPath = os.path.join(checkInDest, "src", v)
-        checkinName = os.path.join(checkinPath, os.path.basename(self.ORIGINAL_FILE_NAME))
-        print checkinName
-        if os.path.exists(checkinName):
-            cmd.file(checkinName, force=True, open=True)
-        else:
-            self.show_no_file_dialog()
+        dialogResult = self.verify_open_version_dialog()
+        if (dialogResult == 'Ok'):
+            filePath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(self.ORIGINAL_FILE_NAME)))
+            checkInDest = amu.getCheckinDest(filePath)
+            v = str(self.current_item.text())
+            checkinPath = os.path.join(checkInDest, "src", v)
+            checkinName = os.path.join(checkinPath, os.path.basename(self.ORIGINAL_FILE_NAME))
+            print checkinName
+            if os.path.exists(checkinName):
+                cmd.file(checkinName, force=True, open=True)
+            else:
+                self.show_no_file_dialog()
+
+    def checkout_version(self):
+        dialogResult = self.verify_checkout_dialog()
+        if(dialogResult == 'Yes'):
+            #checkout
+            version = str(self.current_item.text())[1:]
+            filePath = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(self.ORIGINAL_FILE_NAME)))
+            toCheckout = amu.getCheckinDest(filePath)
+            
+            latestVersion = amu.tempSetVersion(toCheckout, version)
+            amu.discard(filePath)
+            try:
+                destpath = amu.checkout(toCheckout, True)
+            except Exception as e:
+                if not amu.checkedOutByMe(toCheckout):
+                    cmd.confirmDialog(  title          = 'Can Not Checkout'
+                                   , message       = str(e)
+                                   , button        = ['Ok']
+                                   , defaultButton = 'Ok'
+                                   , cancelButton  = 'Ok'
+                                   , dismissString = 'Ok')
+                    return
+                else:
+                    destpath = amu.getCheckoutDest(toCheckout)
+
+            toOpen = os.path.join(destpath, self.get_filename(toCheckout)+'.mb')
+            self.ORIGINAL_FILE_NAME = toOpen
+            amu.tempSetVersion(toCheckout, latestVersion)
+            if not os.path.exists(toOpen):
+                # create new file
+                cmd.file(force=True, new=True)
+                cmd.file(rename=toOpen)
+                cmd.file(save=True, force=True)
+            self.close_dialog()
 
 def go():
     currentFile = cmd.file(query=True, sceneName=True)

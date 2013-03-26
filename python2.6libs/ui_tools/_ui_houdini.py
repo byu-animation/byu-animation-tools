@@ -29,6 +29,11 @@ def infoWindow(wmessage, wtitle=None, wbuttons=('Ok',), wdefault_choice=0, msev=
     This function returns the index of the button pressed.'''
     return hou.ui.displayMessage(wmessage, buttons=wbuttons, default_choice=wdefault_choice, title=wtitle, severity=_hsev(msev))
 
+def warningWindow(wmessage, wtitle='Warning!', wbuttons=('Ok', 'Cancel',), wdefault_choice=1, msev=ms.Warning):
+    '''Pop up a warning window with Ok and Cancel buttons
+    Returns the index of the button pressed.'''
+    return hou.ui.displayMessage(wmessage, buttons=wbuttons, default_choice=wdefault_choice, title = wtitle, severity=_hsev(msev))
+
 def listWindow(dlist, wtitle=None, wmessage=None, multi_select=False):
     '''Pop up an window with a list of options to choose from
     This function returns a tuple of indices that were selected. When cancel is 
