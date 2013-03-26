@@ -463,7 +463,7 @@ def checkin(toCheckin, isAnim):
 	_writeConfigFile(os.path.join(chkInDest, ".nodeInfo"), nodeInfo)
 	
 	#print glob.glob(os.path.join(chkInDest, "src", "*"))
-	if(!isAnim):
+	if not isAnim:
 		purge(os.path.join(chkInDest, "src"), newVersion - 5)
 
 	# Clean up
