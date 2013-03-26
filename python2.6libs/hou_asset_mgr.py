@@ -228,7 +228,7 @@ def checkinLightingFile():
     if amu.canCheckin(toCheckin):
         hou.hipFile.save()
         hou.hipFile.clear()
-        dest = amu.checkin(toCheckin)
+        dest = amu.checkin(toCheckin, False)
         srcFile = amu.getAvailableInstallFiles(dest)[0]
         amu.install(dest, srcFile)
     else:
