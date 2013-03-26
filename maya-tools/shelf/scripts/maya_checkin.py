@@ -57,7 +57,7 @@ def checkin():
         anim = isAnimationAsset()
         if amu.canCheckin(toCheckin) and saveGeo(): # objs must be saved before checkin
                 cmds.file(force=True, new=True) #open new file
-                dest = amu.checkin(toCheckin) #checkin
+                dest = amu.checkin(toCheckin, anim) #checkin
                 srcFile = amu.getAvailableInstallFiles(dest)[0]
                 if rig:
                     amu.install(dest, srcFile)

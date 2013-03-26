@@ -431,7 +431,7 @@ def getCheckinDest(toCheckin):
 	chkoutInfo.read(os.path.join(toCheckin, ".checkoutInfo"))
 	return chkoutInfo.get("Checkout", "checkedoutfrom")
 
-def checkin(toCheckin):
+def checkin(toCheckin, isAnim):
 	"""
 	Checks a folder back in as the newest version
 	@precondition: toCheckin is a valid path
@@ -463,9 +463,8 @@ def checkin(toCheckin):
 	_writeConfigFile(os.path.join(chkInDest, ".nodeInfo"), nodeInfo)
 	
 	#print glob.glob(os.path.join(chkInDest, "src", "*"))
-	#assetName, assetType, version = maya_geo_export.decodeFileName()
-	#if(assetType!='animation'):
-	#	purge(os.path.join(chkInDest, "src"), newVersion - 5)
+	if(!isAnim):
+		purge(os.path.join(chkInDest, "src"), newVersion - 5)
 
 	# Clean up
 	shutil.rmtree(toCheckin)
