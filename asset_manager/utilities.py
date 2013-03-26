@@ -3,11 +3,8 @@ This module contains functionality to manage the animation project.
 @author: Morgan Strong, Brian Kingery
 """
 
-import os, time, shutil, glob
+import os, time, shutil, glob, pwd, tempfile
 from ConfigParser import ConfigParser
-import tempfile
-import subprocess
-from subprocess import call
 
 def getProjectName():
 	return os.environ['PROJECT_NAME']
@@ -201,6 +198,19 @@ def getVersionedFolderInfo(dirPath):
 		nodeInfo.append("")
 	return nodeInfo
 
+def tempSetVersion(chkInDest, version):
+    """
+    Temporarily sets the 'latest version' as the specified version without deleting later versions
+    Returns the version number that we override
+    @precondition 'chkInDest' is a valid versioned folder
+    """
+    nodeInfo = ConfigParser()
+    nodeInfo.read(os.path.join(chkInDest, ".nodeInfo"))
+    latestVersion = nodeInfo.get("Versioning", "latestversion")
+    nodeInfo.set("Versioning", "latestversion", str(version))
+    _writeConfigFile(os.path.join(chkInDest, ".nodeInfo"), nodeInfo)
+    return latestVersion
+
 def setVersion(dirPath, version):	
     """
     Sets the 'latest version' as the specified version and deletes later versions
@@ -297,26 +307,18 @@ def getCheckoutDest(coPath):
 	return os.path.join(getUserCheckoutDir(), os.path.basename(os.path.dirname(coPath))+"_"+os.path.basename(coPath)+"_"+version)
 
 def lockedBy(logname):
-    """Returns a tuple of the logname and the real name based on the login name passed in.
+    """
+    Returns a tuple containing the logname and the real name
 
-Raises an exception with a tuple of the logname and an exception if an error occurs."""
-    tfd = tempfile.NamedTemporaryFile(mode='r+') # Create temp file to write to
-    myargs = ["/usr/bin/ldapsearch", "-LLL", "uid=" + str(logname), "cn"] # Command args
-    try:
-        subprocess.check_call(myargs, executable="ldapsearch", stdout=tfd)
-        tfd.seek(0) # Return to start of file
-        fstr = str(tfd.read()) # Read contents of file and cast to string
-        tfd.close() # Close and delete our temp file
-        fstr = fstr.strip() # Strip leading and trailing whitespace
-        lastline = fstr.splitlines()[-1] # Get last line
-        truename = lastline[4:] # Strip off first four characters of line
+    Raises a generic exception if real name cannot be determined.
+    """
 
-        lockstr = "This asset is locked by the following user:\n\n"
-        lockstr += "User Name: " + logname + "\n"
-        lockstr += "Real Name: " + truename
-        return logname, truename # Return lock string
-    except Exception as ex:
-        return logname, "Real name not found." # Uh-oh... We jacked something up...
+    try: # Throws KeyError exception when the name cannot be found
+        p = pwd.getpwnam( str(logname) )
+    except KeyError as ke: # Re-throws KeyError as generic exception
+        raise Exception( str(ke) )
+
+    return p.pw_name, p.pw_gecos # Return lockedBy tuple
 
 def checkout(coPath, lock):
 	"""
@@ -461,7 +463,9 @@ def checkin(toCheckin):
 	_writeConfigFile(os.path.join(chkInDest, ".nodeInfo"), nodeInfo)
 	
 	#print glob.glob(os.path.join(chkInDest, "src", "*"))
-	purge(os.path.join(chkInDest, "src"), newVersion - 5)
+	#assetName, assetType, version = maya_geo_export.decodeFileName()
+	#if(assetType!='animation'):
+	#	purge(os.path.join(chkInDest, "src"), newVersion - 5)
 
 	# Clean up
 	shutil.rmtree(toCheckin)
@@ -529,14 +533,6 @@ def install(vDirPath, srcFilePath):
 	newInstFilePath = os.path.join(stableDir, stableName+srcExt)
 	print newInstFilePath
 	
-	#if _isHoudiniFile(newInstFilePath):
-	#	call([getHoudiniPython(), "installHoudiniFile.py", srcFilePath, newInstFilePath])
-	#elif _isMayaFile(newInstFilePath):
-	#	call([getMayapy(), "installMayaFile.py", srcFilePath, newInstFilePath])
-	#else:
-	#	#Just copy the file
-	#	print 'copying file...'
-	#	
 	shutil.copy(srcFilePath, newInstFilePath)
 
 def runAlembicConverter(vDirPath, srcFilePath):
