@@ -374,9 +374,15 @@ def checkin(node = None):
                 saveOTL(node)
                 moveToOtlDir(node, filename)
                 unlockOTL(filename)
-                if isCameraAsset(node):
+                if isCameraAsset(node) and ui.infoWindow('Export Alembic?'
+                                                        , wbuttons=('Yes','No',)
+                                                        , wdefault_choice=0
+                                                        , wtitle='Export Alembic') == 0:
                     writeCamerasToAlembic(node)
-                if isSetAsset(node):
+                if isSetAsset(node) and ui.infoWindow('Export Alembic?'
+                                                        , wbuttons=('Yes','No',)
+                                                        , wdefault_choice=0
+                                                        , wtitle='Export Alembic') == 0:
                     writeSetToAlembic(node)
                 ui.infoWindow("Checkin Successful!")
             else:
