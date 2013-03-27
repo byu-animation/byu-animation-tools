@@ -714,14 +714,14 @@ def newTexture():
             finalTexture = '/tmp/finalTexture.exr'
 
             # Change to 16 bits and convert to png 
-            os.system('iconvert -d 16 ' +userTextureMap+ newTexture)
+            os.system('iconvert -d 16 ' +userTextureMap+' '+newTexture)
         
             # Gamma correct for linear workflow
             if shadingPass == 'diffuse' or shadingPass == 'specular' or shadingPass == 'single_SSS' or shadingPass == 'multi_SSS' or shadingPass == 'other':
-                os.system('icomposite' +convertedTexture +'= gamma 0.4545454545' +newTexture) 
+                os.system('icomposite '+convertedTexture+' = gamma 0.4545454545 '+newTexture) 
             
             # Convert to .exr with otimized settings
-            os.system('iconvert -d half '+convertedTexture+finalTexture+' storage tile 64 tiley 65 compression zip')
+            os.system('iconvert -d half '+convertedTexture+' '+finalTexture+' storage tile 64 tiley 65 compression zip')
             
             # Seperate extension from filename and rename texture to production pipeline name 
             finalTextureName, ext = os.path.splitext(os.path.basename(finalTexture))
