@@ -45,6 +45,14 @@ def showFailDialog():
                                  , cancelButton  = 'Ok'
                                  , dismissString = 'Ok')
 
+def showConfirmAlembicDialog():
+        return cmds.confirmDialog( title         = 'Export Alembic'
+                                 , message       = 'Export Alembic?'
+                                 , button        = ['Yes', 'No']
+                                 , defaultButton = 'Yes'
+                                 , cancelButton  = 'No'
+                                 , dismissString = 'No')
+
 def checkin():
         print 'checkin'
         saveFile() # save the file before doing anything
@@ -61,7 +69,7 @@ def checkin():
                 srcFile = amu.getAvailableInstallFiles(dest)[0]
                 if rig:
                     amu.install(dest, srcFile)
-                if anim:
+                if anim and showConfirmAlembicDialog() == 'Yes':
                     amu.runAlembicConverter(dest, srcFile)
         else:
                 showFailDialog()
