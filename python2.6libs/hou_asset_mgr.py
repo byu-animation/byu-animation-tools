@@ -269,7 +269,7 @@ def checkout(node):
         info = getFileInfo(filename)
         if info == None:
             ui.infoWindow("Add OTL First.")
-        elif not info[2]: #or (info[2] and info[3] == USERNAME):
+        elif not info[2] or (info[2] and info[3].encode('utf-8') == USERNAME):
             copyToUsrDir(node, filename)
             lockAsset(node, True)
             saveOTL(node)
