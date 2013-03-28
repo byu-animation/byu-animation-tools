@@ -1,7 +1,7 @@
 '''
 Houdini weekly render script
 Author: Elizabeth Brayton
-Last Modified: 18 Mar 2013
+Last Modified: 28 Mar 2013
 '''
 
 import shutil
@@ -16,14 +16,17 @@ DAILIES_DIR = os.environ['DAILIES_DIR']
 TMPDIR = os.path.join(DAILIES_DIR, 'tmp')
 RENDERDIR = os.path.join(DAILIES_DIR, 'renders')
 
-LIGHTING_SUFFIX = "_lighting"
-LIGHTING_FOLDER_NAME = "lighting"
+LIGHTING_SUFFIX = "_lighting_stable"
+LIGHTING_FOLDER_NAME = "lighting/stable"
 HOUDINI_EXTENSION = ".hipnc"
 FRAME_SUFFIX = "_$F3"
 FILE_TYPE = ".tif"
 
-HQ_SERVER = "hqueue:5000"
-HQ_JOB_NAME = "${USER}_${OS}_${HIPNAME}"
+MANTRA_NODES_PATH = "/out/owned_render_nodes1"
+MANTRA_NAME = "Main"
+
+#HQ_SERVER = "hqueue:5000"
+#HQ_JOB_NAME = "${USER}_${OS}_${HIPNAME}"
 
 # Validation Functions #
 def _isValidTextFile(p):
@@ -40,6 +43,7 @@ def copyFileToTmp(shotname, srcPath):
     fileName = getHouFileName(shotname)
     oldfilepath = os.path.join(srcPath, fileName)
     shutil.copy(oldfilepath, newfilepath)
+
 
 # Parsing #
 def parseShotLine(line):
@@ -111,28 +115,26 @@ def getRenderContext():
 
 def setUpMantraNode(shotName, frameRange):
     cameraPath = "/obj/owned_cameras_%s1/shot_%s" % (shotName[0], shotName[1:])
-    man = hou.node("/out").createNode("ifd")
+
     outputDir = RENDERDIR.replace(JOB_DIR, "$JOB")
     outputLoc = os.path.join(outputDir, getOutFileName(shotName))
 
+    renderNodes = hou.node(MANTRA_NODES_PATH)
+    renderNodes.allowEditingOfContents()
+    man = renderNodes.node(MANTRA_NAME)
+    
     man.parm("vm_picture").set(outputLoc)
     man.parm("trange").set("normal")
 
     man.parm("f1").set(frameRange[0])
     man.parm("f2").set(frameRange[1])
     man.parm("f3").set(1)
-    
-    man.parm("vm_renderengine").set("pbrraytrace")
-    man.parm("camera").set(cameraPath)
-    # TODO other paramaters
+
     return man
 
 def setUpHQueueNode(man):
     hq = hou.node("/out").createNode("hq_render")
     hq.parm("hq_driver").set(man.path())
-    hq.parm("hq_server").set(HQ_SERVER)
-    hq.parm("hq_autosave").set(1)
-    #TODO other parameters?
     return hq
 
 # Main #
@@ -152,7 +154,6 @@ def weeklyRender(inputFile, local):
 
         fileDir = os.path.join(SHOT_DIR, shotName)
         fileDir = os.path.join(fileDir, LIGHTING_FOLDER_NAME)
-        fileDir = os.path.join(fileDir, "stable")
 
         copyFileToTmp(shotName, fileDir)
         filePath = os.path.join(TMPDIR, getHouFileName(shotName))
@@ -168,3 +169,4 @@ def weeklyRender(inputFile, local):
         else:
             hqueue = setUpHQueueNode(mantra)
             hqueue.render()
+    hou.ui.displayMessage("Finished rendering! Check %s for renders." % (os.path.join(DAILIES_DIR, 'renders')))
