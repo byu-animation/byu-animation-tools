@@ -734,3 +734,17 @@ def newTexture():
 
             # Output final success message
             ui.infoWindow('Your texture was saved to: '+newfilepath+' as a .exr image file')
+
+def getNodeInfo(node):
+    if isDigitalAsset():
+        updateDB()
+        libraryPath = node.type().definition().libraryFilePath()
+        filename = os.path.basename(libraryPath)
+        nodeInfo = getFileInfo(filename)
+        message = ''
+        logname, realname = amu.lockedBy(nodeInfo[3].encode('utf-8'))
+        if nodeInfo[2]:
+            message = 'Checked out by '+realname+' ('+logname+')'
+        else:
+            message = 'Not checked out. Last checked in by '+realname+' ('+logname+')'
+        ui.infoWindow(message, wtitle='Node Info')

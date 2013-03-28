@@ -16,5 +16,6 @@
     <memberTool name="weeklyRender"/>
     <memberTool name="new_texture"/>
     <memberTool name="refreshOTL"/>
+    <memberTool name="nodeInfo"/>
   </toolshelf>
 </shelfDocument>

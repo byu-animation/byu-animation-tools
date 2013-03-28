@@ -118,7 +118,8 @@ class RollbackDialog(QDialog):
                                    , button        = ['Yes', 'No']
                                    , defaultButton = 'No'
                                    , cancelButton  = 'No'
-                                   , dismissString = 'No')
+                                   , dismissString = 'No'
+                                   , backgroundColor = [1.0, 0, 0])
 
     def show_no_file_dialog(self):
         return cmd.confirmDialog(  title           = 'No Such Version'
@@ -135,15 +136,14 @@ class RollbackDialog(QDialog):
                                    , defaultButton = 'No'
                                    , cancelButton  = 'No'
                                    , dismissString = 'No')
+
     def verify_open_version_dialog(self):
         return cmd.confirmDialog(  title           = 'Read Only File'
                                    , message       = 'This is meant to be a read only file and should not be edited. If you want to edit this version, please click the \'Checkout Version\' button.'
                                    , button        = ['Ok']
                                    , defaultButton = 'Ok'
                                    , cancelButton  = 'Ok'
-                                   , dismissString = 'Ok'
-                                   , backgroundColor = [1.0, 0, 0])
-
+                                   , dismissString = 'Ok')
 
     def open_version(self):
         dialogResult = self.verify_open_version_dialog()
