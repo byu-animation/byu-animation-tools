@@ -36,11 +36,8 @@ export DAILIES_DIR=${JOB}/dailies
 # Root directory for assets
 export ASSETS_DIR=${PRODUCTION_DIR}/assets
 
-# Root directory for animation
-export ANIMATION_DIR=${PRODUCTION_DIR}/animation
-
-# Root directory for lighting files
-export LIGHTING_DIR=${PRODUCTION_DIR}/lighting
+# Root directory for sequences
+export SHOTS_DIR=${PRODUCTION_DIR}/shots
 
 # Directory for otls
 export OTLS_DIR=${PRODUCTION_DIR}/otls
@@ -49,7 +46,7 @@ export OTLS_DIR=${PRODUCTION_DIR}/otls
 export HTOOLS_DIR=${PROJECT_TOOLS}/houdini-tools
 
 # Append to python path so batch scripts can access our modules
-export PYTHONPATH=/usr/lib64/python2.6/site-packages:${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${HTOOLS_DIR}/python2.6libs:${PYTHONPATH}
+export PYTHONPATH=/usr/autodesk/maya2012-x64/lib/python2.6/site-packages/:/usr/lib64/python2.6/site-packages:${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${PROJECT_TOOLS}/python2.6libs:${PYTHONPATH}
 
 # Function to build directory structure
 buildProjectDirs()
@@ -72,13 +69,9 @@ buildProjectDirs()
     fi
 
     # Create Root directory for animation
-    if [ ! -d "$ANIMATION_DIR" ]; then
-        mkdir -p "$ANIMATION_DIR"
-    fi
-
-    # Create Root directory for lighting files
-    if [ ! -d "$LIGHTING_DIR" ]; then
-        mkdir -p "$LIGHTING_DIR"
+    if [ ! -d "$SHOTS_DIR" ]; then
+        echo "making shots dir"
+	mkdir -p "$SHOTS_DIR"
     fi
 
     # Create Directory for otls
@@ -140,5 +133,15 @@ export MAYA_SHELF_DIR=${MAYA_TOOLS_DIR}/shelf
 export MAYA_SCRIPT_PATH=${MAYA_SCRIPT_PATH}:${PYTHONPATH}:${MAYA_SHELF_DIR}
 
 ###############################################################################
+# Nuke specific environment
+###############################################################################
+
+export NUKE_LOCATION=/usr/local/Nuke6.3v9
+
+export NUKE_TOOLS_DIR=${PROJECT_TOOLS}/nuke-tools
+export NUKE_PATH=${HOME}/.nuke:${NUKE_TOOLS_DIR}:${NUKE_LOCATION}/plugins/user:${NUKE_LOCATION}/plugins/icons:${NUKE_LOCATION}/plugins
+
+###############################################################################
 # BEGIN AWESOMENESS!!!
 ###############################################################################
+

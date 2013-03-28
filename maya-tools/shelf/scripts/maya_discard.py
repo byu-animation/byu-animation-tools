@@ -14,15 +14,26 @@ def showWarningDialog():
                                  , cancelButton  = 'No'
                                  , dismissString = 'No')
 
-def discard(filePath=cmds.file(q=True, sceneName=True)):
+def discard():
+        filePath=cmds.file(q=True, sceneName=True)
         if not filePath:
           return
         print filePath
         dlgResult = showWarningDialog()
         if dlgResult == 'Yes':
-                toDiscard = os.path.dirname(filePath) # get discard directory before opening new file
-                cmds.file(force=True, new=True) #open new file
-                amu.discard(toDiscard) # discard changes
+                # get discard directory before opening new file
+                toDiscard = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(filePath)))
+                if(amu.isCheckedOutCopyFolder(toDiscard)): 
+                        cmds.file(force=True, new=True) #open new file
+                        amu.discard(toDiscard) # discard changes
+                else:
+                        cmds.confirmDialog(  title         = 'Invalid Command'
+                                           , message       = 'This is not a checked out file. There is nothing to discard.'
+                                           , button        = ['Ok']
+                                           , defaultButton = 'Ok'
+                                           , cancelButton  = 'Ok'
+                                           , dismissString = 'Ok')
+
         elif dlgResult == 'Brent':
                 brent.go()
         else:

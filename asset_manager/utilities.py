@@ -3,9 +3,8 @@ This module contains functionality to manage the animation project.
 @author: Morgan Strong, Brian Kingery
 """
 
-import os, time, shutil, glob
+import os, time, shutil, glob, pwd, tempfile
 from ConfigParser import ConfigParser
-from subprocess import call
 
 def getProjectName():
 	return os.environ['PROJECT_NAME']
@@ -24,14 +23,6 @@ def getHoudiniPython():
 def getMayapy():
 	"""precondition: MAYA_LOCATION environment variable is set correctly"""
 	return os.path.join(os.environ['MAYA_LOCATION'], "bin", "mayapy")
-
-#def getNullReference():
-#	"""@returns: The path to the .nullReference file used for symlinks"""
-#	if not os.path.exists(os.path.join(getProductionDir(), '.nullReference')):
-#		nullRef = open(os.path.join(getProductionDir(), '.nullReference'), "w")
-#		nullRef.write("#This is a null reference for symlinks.\n#Nothing has been installed.")
-#		nullRef.close()
-#	return os.path.join(getProductionDir(), '.nullReference')
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Folder Management
 
@@ -93,9 +84,22 @@ def createNewAssetFolders(parent, name):
 	addVersionedFolder(new_dir, 'model')
 	addVersionedFolder(new_dir, 'rig')
 	os.makedirs(os.path.join(new_dir, "geo"))
-	os.makedirs(os.path.join(new_dir, "abc"))
 	os.makedirs(os.path.join(new_dir, "images"))
 	return new_dir
+
+def createNewShotFolders(parent, name):
+	if parent != os.environ['SHOTS_DIR']:
+		raise Exception("Shot folders must be created in "+os.environ['SHOTS_DIR'])
+	
+	new_dir = os.path.join(parent, name)
+	print 'creating :'+new_dir
+	addProjectFolder(parent, name)
+	addVersionedFolder(new_dir, 'animation')
+	addVersionedFolder(new_dir, 'lighting')
+	addVersionedFolder(new_dir, 'compositing')
+	addProjectFolder(new_dir, 'animation_cache')
+	addProjectFolder(os.path.join(new_dir, 'animation_cache'), 'abc')
+	addProjectFolder(os.path.join(new_dir, 'animation_cache'), 'geo_sequences')
 
 def isEmptyFolder(dirPath):
 	return not bool(glob.glob(os.path.join(dirPath, '*')))
@@ -105,10 +109,10 @@ def canRemove(dirPath):
 
 def removeFolder(dirPath):
 	if not canRemove(dirPath):
-		raise Exception ("Can not Remove")
+		raise Exception ("Cannot remove directory: " + str(dirPath))
 	shutil.rmtree(dirPath)
 
-def canRename(assetDirPath, newName):
+def canRename(assetDirPath, newName='__null_asset_path'):
 	head, tail = os.path.split(assetDirPath)
 	dest = os.path.join(head, newName)
 	modelDir = os.path.join(assetDirPath, 'model')
@@ -164,6 +168,12 @@ def isVersionedFolder(dirPath):
 	else:
 		return False
 
+def isCheckedOutCopyFolder(dirPath):
+	if os.path.exists(os.path.join(dirPath, ".checkoutInfo")):
+		return True
+	else:
+		return False
+
 def isInstalled(dirPath):
 	return bool(glob.glob(os.path.join(dirPath, 'stable', '*stable*')))
 
@@ -187,6 +197,55 @@ def getVersionedFolderInfo(dirPath):
 		nodeInfo.append("No")
 		nodeInfo.append("")
 	return nodeInfo
+
+def tempSetVersion(chkInDest, version):
+    """
+    Temporarily sets the 'latest version' as the specified version without deleting later versions
+    Returns the version number that we override
+    @precondition 'chkInDest' is a valid versioned folder
+    """
+    nodeInfo = ConfigParser()
+    nodeInfo.read(os.path.join(chkInDest, ".nodeInfo"))
+    latestVersion = nodeInfo.get("Versioning", "latestversion")
+    nodeInfo.set("Versioning", "latestversion", str(version))
+    _writeConfigFile(os.path.join(chkInDest, ".nodeInfo"), nodeInfo)
+    return latestVersion
+
+def setVersion(dirPath, version):	
+    """
+    Sets the 'latest version' as the specified version and deletes later versions
+    @precondition: dirPath is a valid path
+    @precondition: version is an existing version
+    @precondition: the folder has been checked out by the user
+
+    @postcondition: the folder will be checked in and unlocked
+    """
+
+    chkoutInfo = ConfigParser()
+    chkoutInfo.read(os.path.join(dirPath, ".checkoutInfo"))
+    chkInDest = chkoutInfo.get("Checkout", "checkedoutfrom")
+    lockedbyme = chkoutInfo.getboolean("Checkout", "lockedbyme")
+    
+    nodeInfo = ConfigParser()
+    nodeInfo.read(os.path.join(chkInDest, ".nodeInfo"))
+    newVersionPath = os.path.join(chkInDest, "src", "v"+str(version))
+
+    if lockedbyme == False:
+        print "Cannot overwrite locked folder."
+        raise Exception("Can not overwrite locked folder.")
+        
+    # Set version
+    timestamp = time.strftime("%a, %d %b %Y %I:%M:%S %p", time.localtime())
+    nodeInfo.set("Versioning", "lastcheckintime", timestamp)
+    nodeInfo.set("Versioning", "lastcheckinuser", getUsername())
+    nodeInfo.set("Versioning", "latestversion", str(version))
+    nodeInfo.set("Versioning", "locked", "False")
+    _writeConfigFile(os.path.join(chkInDest, ".nodeInfo"), nodeInfo)
+    
+    # Clean up
+    purgeAfter(os.path.join(chkInDest, "src"), version)
+    shutil.rmtree(dirPath)
+    #os.remove(os.path.join(newVersionPath, ".checkoutInfo"))
 
 #################################################################################
 # Checkout
@@ -247,6 +306,20 @@ def getCheckoutDest(coPath):
 	version = nodeInfo.get("Versioning", "latestversion")
 	return os.path.join(getUserCheckoutDir(), os.path.basename(os.path.dirname(coPath))+"_"+os.path.basename(coPath)+"_"+version)
 
+def lockedBy(logname):
+    """
+    Returns a tuple containing the logname and the real name
+
+    Raises a generic exception if real name cannot be determined.
+    """
+
+    try: # Throws KeyError exception when the name cannot be found
+        p = pwd.getpwnam( str(logname) )
+    except KeyError as ke: # Re-throws KeyError as generic exception
+        raise Exception( str(ke) )
+
+    return p.pw_name, p.pw_gecos # Return lockedBy tuple
+
 def checkout(coPath, lock):
 	"""
 	Copies the 'latest version' from the src folder into the local directory
@@ -286,7 +359,9 @@ def checkout(coPath, lock):
 	else:
 		whoLocked = nodeInfo.get("Versioning", "lastcheckoutuser")
 		whenLocked = nodeInfo.get("Versioning", "lastcheckouttime")
-		raise Exception("Can not checkout. Folder is locked by "+whoLocked+" at "+whenLocked)
+		logname, realname = lockedBy(whoLocked)
+		whoLocked = 'User Name: ' + logname + '\nReal Name: ' + realname + '\n'
+		raise Exception("Can not checkout. Folder is locked by:\n\n"+ whoLocked+"\nat "+ whenLocked)
 	return dest
 
 ################################################################################
@@ -326,6 +401,15 @@ def purge(dirPath, upto):
 		if int(os.path.basename(f).split('v')[1]) < upto:
 			shutil.rmtree(f)
 
+def purgeAfter(dirPath, after):
+    """
+    purges all folders in dirPath with a version higher than after
+    """
+    files = glob.glob(os.path.join(dirPath, '*'))
+    for f in files:
+        if int(os.path.basename(f).split('v')[1]) > after:
+            shutil.rmtree(f)
+
 def discard(toDiscard):
 	"""
 	Discards a local checked out folder without creating a new version.
@@ -347,7 +431,7 @@ def getCheckinDest(toCheckin):
 	chkoutInfo.read(os.path.join(toCheckin, ".checkoutInfo"))
 	return chkoutInfo.get("Checkout", "checkedoutfrom")
 
-def checkin(toCheckin):
+def checkin(toCheckin, isAnim):
 	"""
 	Checks a folder back in as the newest version
 	@precondition: toCheckin is a valid path
@@ -379,7 +463,8 @@ def checkin(toCheckin):
 	_writeConfigFile(os.path.join(chkInDest, ".nodeInfo"), nodeInfo)
 	
 	#print glob.glob(os.path.join(chkInDest, "src", "*"))
-	purge(os.path.join(chkInDest, "src"), newVersion - 5)
+	if not isAnim:
+		purge(os.path.join(chkInDest, "src"), newVersion - 5)
 
 	# Clean up
 	shutil.rmtree(toCheckin)
@@ -447,13 +532,16 @@ def install(vDirPath, srcFilePath):
 	newInstFilePath = os.path.join(stableDir, stableName+srcExt)
 	print newInstFilePath
 	
-	#if _isHoudiniFile(newInstFilePath):
-	#	call([getHoudiniPython(), "installHoudiniFile.py", srcFilePath, newInstFilePath])
-	#elif _isMayaFile(newInstFilePath):
-	#	call([getMayapy(), "installMayaFile.py", srcFilePath, newInstFilePath])
-	#else:
-	#	#Just copy the file
-	#	print 'copying file...'
-	#	
 	shutil.copy(srcFilePath, newInstFilePath)
-	
+
+def runAlembicConverter(vDirPath, srcFilePath):
+	filename, ext = os.path.splitext(os.path.basename(srcFilePath))
+	dest_path = os.path.join(os.path.dirname(vDirPath), 'animation_cache', 'abc', filename+'.abc')
+	converter = os.path.join(os.environ['MAYA_TOOLS_DIR'], 'alembic', 'alembicconvert.py')
+	if os.path.exists(dest_path):
+		os.remove(dest_path)
+	os.system(getMayapy()+' '+converter+' '+srcFilePath+' '+dest_path)
+
+def mayaImportAlembicFile(maya_file, abc_file):
+	importer = os.path.join(os.environ['MAYA_TOOLS_DIR'], 'alembic', 'alembicImport.py')
+	os.system(getMayapy()+' '+importer+' '+maya_file+' '+abc_file)

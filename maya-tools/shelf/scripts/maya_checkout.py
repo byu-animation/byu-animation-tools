@@ -12,7 +12,7 @@ CHECKOUT_WINDOW_HEIGHT = 600
 
 def maya_main_window():
 	ptr = omu.MQtUtil.mainWindow()
-	return sip.wrapinstance(long(ptr), QObject)
+	return sip.wrapinstance(long(ptr), QObject)		
 
 class CheckoutDialog(QDialog):
 	def __init__(self, parent=maya_main_window()):
@@ -28,7 +28,7 @@ class CheckoutDialog(QDialog):
 		#Create the selected item list
 		self.selection_list = QListWidget()
 		self.selection_list.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-				
+
 		#Create Models, Rig, Animation		
 		radio_button_group = QVBoxLayout()
 		self.model_radio = QRadioButton('Model')
@@ -39,9 +39,13 @@ class CheckoutDialog(QDialog):
 		radio_button_group.addWidget(self.model_radio)
 		radio_button_group.addWidget(self.rig_radio)
 		radio_button_group.addWidget(self.animation_radio)
+
+		#Create New Animation button
+		self.new_animation_button = QPushButton('New Animation')
 		
 		#Create Select and Cancel buttons
 		self.select_button = QPushButton('Select')
+		self.info_button = QPushButton('Get Info')
 		self.cancel_button = QPushButton('Cancel')
 		
 		#Create button layout
@@ -49,6 +53,7 @@ class CheckoutDialog(QDialog):
 		button_layout.setSpacing(2)
 		button_layout.addStretch()
 		button_layout.addWidget(self.select_button)
+		button_layout.addWidget(self.info_button)
 		button_layout.addWidget(self.cancel_button)
 		
 		#Create main layout
@@ -57,6 +62,7 @@ class CheckoutDialog(QDialog):
 		main_layout.setMargin(2)
 		main_layout.addWidget(self.selection_list)		
 		main_layout.addLayout(radio_button_group)
+		main_layout.addWidget(self.new_animation_button)
 		main_layout.addLayout(button_layout)
 		
 		self.setLayout(main_layout)
@@ -71,7 +77,9 @@ class CheckoutDialog(QDialog):
 		self.connect(self.model_radio, SIGNAL('clicked()'), self.refresh)
 		self.connect(self.rig_radio, SIGNAL('clicked()'), self.refresh)
 		self.connect(self.animation_radio, SIGNAL('clicked()'), self.refresh)
+		self.connect(self.new_animation_button, SIGNAL('clicked()'), self.new_animation)
 		self.connect(self.select_button, SIGNAL('clicked()'), self.checkout)
+		self.connect(self.info_button, SIGNAL('clicked()'), self.show_node_info)
 		self.connect(self.cancel_button, SIGNAL('clicked()'), self.close_dialog)
 	
 	def update_selection(self, selection):
@@ -87,14 +95,20 @@ class CheckoutDialog(QDialog):
 	
 	def refresh(self):
 		if self.animation_radio.isChecked():
-			selections = glob.glob(os.path.join(os.environ['ANIMATION_DIR'], '*'))
+			self.new_animation_button.setEnabled(True)
+			selections = glob.glob(os.path.join(os.environ['SHOTS_DIR'], '*'))
 		else:
+			self.new_animation_button.setEnabled(False)
 			selections = glob.glob(os.path.join(os.environ['ASSETS_DIR'], '*'))
 		self.update_selection(selections)
 	
-	def get_checkout_mode(self):
-		if self.animation_radio.isChecked():
-			return ''
+	def new_animation(self):
+		text, ok = QInputDialog.getText(self, 'New Animation', 'Enter seq_shot (ie: a01)')
+		if ok:
+			text = str(text)
+			amu.createNewShotFolders(os.environ['SHOTS_DIR'], text)
+		self.refresh()
+		return
 	
 	def get_filename(self, parentdir):
 		return os.path.basename(os.path.dirname(parentdir))+'_'+os.path.basename(parentdir)
@@ -113,7 +127,7 @@ class CheckoutDialog(QDialog):
 		elif self.rig_radio.isChecked():
 			toCheckout = os.path.join(os.environ['ASSETS_DIR'], asset_name, 'rig')
 		elif self.animation_radio.isChecked():
-			toCheckout = os.path.join(os.environ['ANIMATION_DIR'], asset_name)
+			toCheckout = os.path.join(os.environ['SHOTS_DIR'], asset_name, 'animation')
 		
 		try:
 			destpath = amu.checkout(toCheckout, True)
@@ -147,7 +161,28 @@ class CheckoutDialog(QDialog):
 	def set_current_item(self, item):
 		self.current_item = item
 		
-
+	def show_node_info(self):
+		asset_name = str(self.current_item.text())
+		if self.model_radio.isChecked():
+			filePath = os.path.join(os.environ['ASSETS_DIR'], asset_name, 'model')
+		elif self.rig_radio.isChecked():
+			filePath = os.path.join(os.environ['ASSETS_DIR'], asset_name, 'rig')
+		elif self.animation_radio.isChecked():
+			filePath = os.path.join(os.environ['SHOTS_DIR'], asset_name, 'animation')
+		node_info = amu.getVersionedFolderInfo(filePath)
+		checkout_str = node_info[0]
+		if(checkout_str ==''):
+			checkout_str = 'Not checked out. '
+		else:
+			checkout_str = 'Checked out by '+node_info[0]+'. '
+		checkin_str = 'Last checked in by '+node_info[1]+' on '+node_info[2]
+		cmd.confirmDialog(  title          = asset_name+" Info"
+                                   , message       = checkout_str+checkin_str
+                                   , button        = ['Ok']
+                                   , defaultButton = 'Ok'
+                                   , cancelButton  = 'Ok'
+                                   , dismissString = 'Ok')
+		
 def go():
 	dialog = CheckoutDialog()
 	dialog.show()

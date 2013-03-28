@@ -12,6 +12,9 @@
 
 This tool can break file paths and should be used with care!]]></helpText>
     <script scriptType="python"><![CDATA[import hou_asset_mgr as mgr
-mgr.rename()]]></script>
+
+node = mgr.getSelectedNode()
+
+mgr.rename(node)]]></script>
   </tool>
 </shelfDocument>

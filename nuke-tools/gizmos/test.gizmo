@@ -1,0 +1,31 @@
+#! /usr/local/Nuke6.3v9/Nuke6.3 -nx
+version 6.3 v9
+Gizmo {
+ label "Welcome to Owned"
+}
+ Input {
+  inputs 0
+  name Input1
+  xpos -157
+  ypos -148
+ }
+ Text {
+  message "Welcome to Owned!"
+  font /usr/share/fonts/vlgothic/VL-Gothic-Regular.ttf
+  size 35.5
+  yjustify center
+  Transform 1
+  box {160 120 480 360}
+  translate {765 530}
+  scale 6
+  center {320 240}
+  name Text4
+  xpos -157
+  ypos -108
+ }
+ Output {
+  name Output1
+  xpos -157
+  ypos -8
+ }
+end_group

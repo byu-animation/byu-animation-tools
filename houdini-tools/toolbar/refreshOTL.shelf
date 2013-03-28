@@ -5,17 +5,11 @@
  Note, that two definitions of the same element are not allowed in
  a single file. -->
 
-  <tool name="unlock DB" label="Unlock" icon="PLASMA_App">
-    <helpText><![CDATA[= Unlock DB =
-
-"""Unlock the database even if someone else has an asset locked. Use with caution!"""
-
-This tool is dangerous and should be used with caution!]]></helpText>
+  <tool name="refreshOTL" label="Refresh" icon="PLASMA_App">
     <script scriptType="python"><![CDATA[import hou_asset_mgr as mgr
 
 node = mgr.getSelectedNode()
 
-mgr.unlockOTLbyNode(node)
-]]></script>
+mgr.refresh(node)]]></script>
   </tool>
 </shelfDocument>

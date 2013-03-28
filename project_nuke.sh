@@ -7,8 +7,8 @@
 DIR=`dirname $0`
 source ${DIR}/project_env.sh
 
-export CURRENT_PROG='Maya'
+export CURRENT_PROG='Nuke'
 
-echo "Starting Maya..."
-maya -script ${MAYA_SHELF_DIR}/byu_shelf.mel &
+echo "Starting Nuke..."
+/usr/local/Nuke6.3v9/Nuke6.3 -b --nukex
 

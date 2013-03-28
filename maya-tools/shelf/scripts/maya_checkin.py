@@ -17,6 +17,11 @@ def isRigAsset():
         assetName, assetType, version = geo.decodeFileName()
         return assetType == 'rig'
 
+def isAnimationAsset():
+        # unpack decoded entries and check if assetType is a 'rig'
+        assetName, assetType, version = geo.decodeFileName()
+        return assetType == 'animation'
+
 def saveGeo():
         # this is not a model asset. don't save objs
         if not isModelAsset():
@@ -40,6 +45,14 @@ def showFailDialog():
                                  , cancelButton  = 'Ok'
                                  , dismissString = 'Ok')
 
+def showConfirmAlembicDialog():
+        return cmds.confirmDialog( title         = 'Export Alembic'
+                                 , message       = 'Export Alembic?'
+                                 , button        = ['Yes', 'No']
+                                 , defaultButton = 'Yes'
+                                 , cancelButton  = 'No'
+                                 , dismissString = 'No')
+
 def checkin():
         print 'checkin'
         saveFile() # save the file before doing anything
@@ -49,12 +62,15 @@ def checkin():
         toCheckin = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(filePath)))
         print 'toCheckin: '+toCheckin
         rig = isRigAsset()
+        anim = isAnimationAsset()
         if amu.canCheckin(toCheckin) and saveGeo(): # objs must be saved before checkin
                 cmds.file(force=True, new=True) #open new file
-                dest = amu.checkin(toCheckin) #checkin
+                dest = amu.checkin(toCheckin, anim or rig) #checkin
+                srcFile = amu.getAvailableInstallFiles(dest)[0]
                 if rig:
-                    srcFile = amu.getAvailableInstallFiles(dest)[0]
                     amu.install(dest, srcFile)
+                if anim and showConfirmAlembicDialog() == 'Yes':
+                    amu.runAlembicConverter(dest, srcFile)
         else:
                 showFailDialog()
 

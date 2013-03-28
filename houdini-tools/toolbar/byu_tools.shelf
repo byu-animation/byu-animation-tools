@@ -10,9 +10,12 @@
     <memberTool name="CheckoutOTL"/>
     <memberTool name="CheckinOTL"/>
     <memberTool name="RevertChanges"/>
-    <memberTool name="rename"/>
     <memberTool name="unlock DB"/>
-    <memberTool name="abc2bjson"/>
+    <memberTool name="rename"/>
+    <memberTool name="delete"/>
     <memberTool name="weeklyRender"/>
+    <memberTool name="new_texture"/>
+    <memberTool name="refreshOTL"/>
+    <memberTool name="nodeInfo"/>
   </toolshelf>
 </shelfDocument>

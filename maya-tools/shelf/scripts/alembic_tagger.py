@@ -22,7 +22,7 @@ class AlembicTagger(object):
         self.populate_list()
 
     def make_ui(self):
-        d = QtGui.QDialog(parent=maya_main_window())
+        d = QtGui.QDialog(maya_main_window())
 
         d.resize(394, 611)
         d.setWindowTitle("Alembic Tagger")

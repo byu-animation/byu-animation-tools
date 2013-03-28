@@ -1,7 +1,7 @@
 '''
 Houdini weekly render script
 Author: Elizabeth Brayton
-Last Modified: 18 mar 2013
+Last Modified: 18 Mar 2013
 '''
 
 import shutil
@@ -10,13 +10,14 @@ import os
 import hou
 
 JOB_DIR = os.environ['JOB']
-LIGHTING_DIR = os.environ['LIGHTING_DIR']
+SHOT_DIR = os.environ['SHOTS_DIR']
 DAILIES_DIR = os.environ['DAILIES_DIR']
 
 TMPDIR = os.path.join(DAILIES_DIR, 'tmp')
 RENDERDIR = os.path.join(DAILIES_DIR, 'renders')
 
-LIGHTING_PREFIX = "lighting_"
+LIGHTING_SUFFIX = "_lighting"
+LIGHTING_FOLDER_NAME = "lighting"
 HOUDINI_EXTENSION = ".hipnc"
 FRAME_SUFFIX = "_$F3"
 FILE_TYPE = ".tif"
@@ -60,7 +61,7 @@ def parseDefinitionFile(filePath):
     return shotList
 
 def getHouFileName(shotname):
-    fileName = LIGHTING_PREFIX + string.lower(shotname) + HOUDINI_EXTENSION
+    fileName = string.lower(shotname) + LIGHTING_SUFFIX + HOUDINI_EXTENSION
     return fileName
 
 def getOutFileName(shotName):
@@ -109,7 +110,7 @@ def getRenderContext():
     return (local == 0)
 
 def setUpMantraNode(shotName, frameRange):
-    cameraPattern = "/obj/owned_cameras_%s1/shot_%s" % (shotName[0], shotName[1:])
+    cameraPath = "/obj/owned_cameras_%s1/shot_%s" % (shotName[0], shotName[1:])
     man = hou.node("/out").createNode("ifd")
     outputDir = RENDERDIR.replace(JOB_DIR, "$JOB")
     outputLoc = os.path.join(outputDir, getOutFileName(shotName))
@@ -122,8 +123,8 @@ def setUpMantraNode(shotName, frameRange):
     man.parm("f3").set(1)
     
     man.parm("vm_renderengine").set("pbrraytrace")
-    man.parm("camera").set(cameraPattern)
-    # TODO other paramaters?
+    man.parm("camera").set(cameraPath)
+    # TODO other paramaters
     return man
 
 def setUpHQueueNode(man):
@@ -148,7 +149,12 @@ def weeklyRender(inputFile, local):
     for shot in shotList:
         shotName = shot[0]
         frameRange = (shot[1], shot[2])
-        copyFileToTmp(shotName, os.path.join(LIGHTING_DIR, shotName))
+
+        fileDir = os.path.join(SHOT_DIR, shotName)
+        fileDir = os.path.join(fileDir, LIGHTING_FOLDER_NAME)
+        fileDir = os.path.join(fileDir, "stable")
+
+        copyFileToTmp(shotName, fileDir)
         filePath = os.path.join(TMPDIR, getHouFileName(shotName))
         try:
             hou.hipFile.load(filePath, suppress_save_prompt = True)
