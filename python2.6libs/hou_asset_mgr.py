@@ -736,7 +736,7 @@ def newTexture():
             ui.infoWindow('Your texture was saved to: '+newfilepath+' as a .exr image file')
 
 def getNodeInfo(node):
-    if isDigitalAsset():
+    if isDigitalAsset(node):
         updateDB()
         libraryPath = node.type().definition().libraryFilePath()
         filename = os.path.basename(libraryPath)
