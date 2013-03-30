@@ -5,12 +5,6 @@
  Note, that two definitions of the same element are not allowed in
  a single file. -->
 
-  <tool name="new_texture" label="New Texture" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[import hou_asset_mgr as mgr
-
-mgr.newTexture()]]></script>
-  </tool>
-
   <tool name="new_texture0" label="New Texture" icon="PLASMA_App">
     <script scriptType="python"><![CDATA[import new_texture
 
@@ -21,5 +15,11 @@ new_texture.go()]]></script>
     <script scriptType="python"><![CDATA[import new_texture
 
 new_texture.go()]]></script>
+  </tool>
+
+  <tool name="texture_update" label="Texture Update" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import hou_asset_mgr as mgr
+
+mgr.newTexture()]]></script>
   </tool>
 </shelfDocument>
