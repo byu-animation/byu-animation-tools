@@ -191,15 +191,15 @@ def get_filename(parentdir):
     return os.path.basename(os.path.dirname(parentdir))+'_'+os.path.basename(parentdir)
 
 def checkoutLightingFile():
-    print "checkoutLightingFile"
+    print("checkoutLightingFile")
     shotPaths = glob.glob(os.path.join(os.environ['SHOTS_DIR'], '*'))
     selections = []
     for sp in shotPaths:
         selections.append(os.path.basename(sp))
     selections.sort()
-    print 'Im calling ui'
+    print('Im calling ui')
     answer = ui.listWindow(selections, wmessage='Select shot file to checkout:')
-    print 'Im done calling ui'
+    print('Im done calling ui')
     if answer:
         answer = answer[0]
         toCheckout = os.path.join(os.environ['SHOTS_DIR'], selections[answer], 'lighting')
@@ -222,7 +222,7 @@ def checkoutLightingFile():
             hou.hipFile.save(toOpen)
 
 def checkinLightingFile():
-    print 'checkin lighting file'
+    print('checkin lighting file')
     filepath = hou.hipFile.path()
     toCheckin = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(filepath)))
     if amu.canCheckin(toCheckin):
@@ -237,7 +237,7 @@ def checkinLightingFile():
 def discardLightingFile():
     filepath = hou.hipFile.path()
     #TODO
-    print filepath
+    print(filepath)
     if ui.infoWindow('YOU ARE ABOUT TO IRREVOKABLY DISCARD ALL CHANGES YOU HAVE MADE. '
                         'Please think this through very carefully.\n\nNow that we have '
                         'gotten that straightened out, are you sure you want to discard '
@@ -340,7 +340,7 @@ def writeCamerasToAlembic(node):
 def writeSetToAlembic(node):
     exclude_objects = ('owned_jeff_couch', 'owned_jeffs_controller', 'owned_abby_controller', 'owned_cyclopes_toy')
     assetName = getAssetName(node)
-    print assetName
+    print(assetName)
     abcName = assetName+'.abc'
     setDir = os.path.join(os.environ['PRODUCTION_DIR'], 'set_cache', assetName)
     include_objects = ''
@@ -506,7 +506,7 @@ def rename(node = None):
                                 newnode = hou.node(determineHPATH()).createNode(newfilename)
                                 node.destroy()
                                 hou.hda.uninstallFile(oldlibraryPath, change_oplibraries_file=False)
-                                os.system('rm -f '+oldlibraryPath)
+                                subprocess.check_call( ['rm','-f',oldlibraryPath] )
                                 amu.renameAsset(assetDirPath, newfilename)
                 else:
                     logname, realname = amu.lockedBy(info[3].encode('utf-8'))
@@ -631,18 +631,18 @@ def refresh(node = None):
             c = children[i]
             if isContainer(c):
                 assetName = getAssetName(c)
-                print assetName
+                print(assetName)
                 nameLookup[i] = assetName
                 c.changeNodeType('containerTemplate', keep_network_contents=False)
 
-        print '\n'
+        print('\n')
         # Update children and change back
         children = node.children()
         for i in range(len(children)):
             c = children[i]
             if isContainer(c):
                 name = nameLookup[i]
-                print name
+                print(name)
                 c.changeNodeType(name, keep_network_contents=False)
 
         # Change the top level node
@@ -696,7 +696,7 @@ def newTexture():
         geoName, ext = os.path.splitext(os.path.basename(geoPath))
 
         # Show a list of shading passes
-        shadingPassList = ['diffuse','specular','bump','scalar_displacement','vector_displacement', 'opacity', 'single_SSS', 'multi_SSS', 'other']
+        shadingPassList = ['diffuse','specular','single_SSS','multi_SSS','opacity','bump','scalar_displacement','vector_displacement','other']
         answer = ui.listWindow(shadingPassList, wmessage='Which texture will you be creating/updating?')
         if answer: 
             answer = answer[0]
@@ -709,31 +709,43 @@ def newTexture():
             userTextureMap = os.path.expandvars(userTextureMap)
 
             # Set Variables for texture paths
-            newTexture = '/tmp/newTexture.png'
-            convertedTexture = '/tmp/convertedTexture.png'
+            convertedTexture = '/tmp/convertedTexture.exr'
             finalTexture = '/tmp/finalTexture.exr'
 
-            # Change to 16 bits and convert to png 
-            os.system('iconvert -d 16 ' +userTextureMap+' '+newTexture)
-        
             # Gamma correct for linear workflow
-            if shadingPass == 'diffuse' or shadingPass == 'specular' or shadingPass == 'single_SSS' or shadingPass == 'multi_SSS' or shadingPass == 'other':
-                os.system('icomposite '+convertedTexture+' = gamma 0.4545454545 '+newTexture) 
+            if shadingPass in (shadingPassList[:4] + shadingPassList[-1:]):
+                args = ['icomposite',convertedTexture,'=','gamma',str(1/2.2),userTextureMap]
+                subprocess.check_call(args)
+                didgamma = '\nIt has been gamma corrected.'
+            else:
+                convertedTexture = userTextureMap
+                didgamma = ''
             
-            # Convert to .exr with otimized settings
-            os.system('iconvert -d half '+convertedTexture+' '+finalTexture+' storage tile 64 tiley 65 compression zip')
+            # Convert to .exr with otimized settings. Also, setting compatible with RenderMan (in case we need to render there)
+            args = ['txmake','-mode','periodic','-compression','zip']
+            args += ['-format','openexr','-half',convertedTexture,finalTexture]
+
+            subprocess.check_call(args)
+
+            # Uncomment the following and comment out the previous call if PRMan is not present
+            """
+            args = 'iconvert -d half ' + convertedTexture + ' ' 
+            args += finalTexture + ' storage tile tilex 32 tiley 32 compression zip'
+
+            subprocess.check_call( args.split() )
+            """
             
-            # Seperate extension from filename and rename texture to production pipeline name 
+            # Rename texture and move into production pipeline 
             finalTextureName, ext = os.path.splitext(os.path.basename(finalTexture))
 
-            newTextureName = assetName+'_'+geoName+'_'+shadingPass+ext
+            newTextureName = assetName + '_' + geoName + '_' + shadingPass + ext
  
             newfilepath = os.path.join(assetImageDir,newTextureName)
 
             shutil.copy(finalTexture,newfilepath)
 
             # Output final success message
-            ui.infoWindow('Your texture was saved to: '+newfilepath+' as a .exr image file')
+            ui.infoWindow('Your texture was saved to: ' + newfilepath + didgamma)
 
 def getNodeInfo(node):
     if isDigitalAsset(node):
@@ -748,3 +760,4 @@ def getNodeInfo(node):
         else:
             message = 'Not checked out. Last checked in by '+realname+' ('+logname+')'
         ui.infoWindow(message, wtitle='Node Info')
+
