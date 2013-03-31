@@ -12,12 +12,18 @@
 # Project specific environment variables
 ###############################################################################
 
-# The name of the project (ie: owned)
-export PROJECT_NAME=owned
-
-# Root directory for the projcet (ie: /groups/owned)
+# Root directory for the project (eg: /groups/owned)
 # This directory should be created manually.
-export JOB=/groups/${PROJECT_NAME}
+# If JOB is not already set, then set it with a hardcoded default.
+# Also, set PROJECT_NAME based on JOB.
+if [ -z "$JOB" ]
+then
+    # The name of the project (eg: owned)
+    export PROJECT_NAME=owned
+    export JOB=/groups/${PROJECT_NAME}
+else
+    export PROJECT_NAME=`basename $JOB`
+fi
 
 # Tools/scripts directory. This project_env.sh script should be placed here.
 # along with the other tools and scripts.
