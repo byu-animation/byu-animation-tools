@@ -754,10 +754,10 @@ def getNodeInfo(node):
         filename = os.path.basename(libraryPath)
         nodeInfo = getFileInfo(filename)
         message = ''
-        logname, realname = amu.lockedBy(nodeInfo[3].encode('utf-8'))
         if nodeInfo[2]:
+            logname, realname = amu.lockedBy(nodeInfo[3].encode('utf-8'))
             message = 'Checked out by '+realname+' ('+logname+')'
         else:
-            message = 'Not checked out. Last checked in by '+realname+' ('+logname+')'
+            message = 'Not checked out.'
         ui.infoWindow(message, wtitle='Node Info')
 
