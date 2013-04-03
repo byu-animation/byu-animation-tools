@@ -9,7 +9,11 @@ source ./houdini_setup
 cd -
 
 # source project environment
-source ./project_env.sh
+DIR=`dirname $0`
+source ${DIR}/project_env.sh
+
+# Change directories so $HIP is not in the tools folder
+cd ${JOB}/tmp
 
 echo "Starting Houdini..."
 houdinifx

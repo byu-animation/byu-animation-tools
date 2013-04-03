@@ -1,7 +1,6 @@
 '''
 Houdini weekly render script
 Author: Elizabeth Brayton
-Last Modified: 1 Apr 2013
 '''
 
 import shutil

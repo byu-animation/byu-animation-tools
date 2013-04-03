@@ -14,7 +14,7 @@
     <memberTool name="rename"/>
     <memberTool name="delete"/>
     <memberTool name="weeklyRender"/>
-    <memberTool name="new_texture"/>
+    <memberTool name="texture_update"/>
     <memberTool name="refreshOTL"/>
     <memberTool name="nodeInfo"/>
   </toolshelf>

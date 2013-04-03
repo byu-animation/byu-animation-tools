@@ -12,12 +12,18 @@
 # Project specific environment variables
 ###############################################################################
 
-# The name of the project (ie: owned)
-export PROJECT_NAME=owned
-
-# Root directory for the projcet (ie: /groups/owned)
+# Root directory for the project (eg: /groups/owned)
 # This directory should be created manually.
-export JOB=/groups/${PROJECT_NAME}
+# If JOB is not already set, then set it with a hardcoded default.
+# Also, set PROJECT_NAME based on JOB.
+if [ -z "$JOB" ]
+then
+    # The name of the project (eg: owned)
+    export PROJECT_NAME=owned
+    export JOB=/groups/${PROJECT_NAME}
+else
+    export PROJECT_NAME=`basename $JOB`
+fi
 
 # Tools/scripts directory. This project_env.sh script should be placed here.
 # along with the other tools and scripts.
@@ -46,7 +52,10 @@ export OTLS_DIR=${PRODUCTION_DIR}/otls
 export HTOOLS_DIR=${PROJECT_TOOLS}/houdini-tools
 
 # Append to python path so batch scripts can access our modules
-export PYTHONPATH=/usr/autodesk/maya2012-x64/lib/python2.6/site-packages/:/usr/lib64/python2.6/site-packages:${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${PROJECT_TOOLS}/python2.6libs:${PYTHONPATH}
+export PYTHONPATH=/usr/autodesk/maya2012-x64/lib/python2.6/site-packages:/usr/lib64/python2.6/site-packages:${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${PROJECT_TOOLS}/python2.6libs:${PYTHONPATH}
+
+# Add some extra directories to PATH in case they weren't there before
+export PATH=/opt/pixar/RenderManProServer/bin:${PATH}
 
 # Function to build directory structure
 buildProjectDirs()
