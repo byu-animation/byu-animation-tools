@@ -138,12 +138,12 @@ class CheckoutDialog(QDialog):
                                 , dismissString = 'Ok')
 			return
 
-		if not cmd.confirmDialog(title    = 'Confirmation'
+		if cmd.confirmDialog(title    = 'Confirmation'
                                    , message       = 'Are you sure you want to unlock this asset?'
                                    , button        = ['No', 'Yes']
                                    , defaultButton = 'No'
                                    , cancelButton  = 'No'
-                                   , dismissString = 'No'):
+                                   , dismissString = 'No') == 'No':
 			return	
 		
 		amu.unlock(toUnlock)
