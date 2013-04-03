@@ -1,7 +1,6 @@
 '''
 Houdini weekly render script
 Author: Elizabeth Brayton
-Last Modified: 28 Mar 2013
 '''
 
 import shutil
@@ -20,7 +19,7 @@ LIGHTING_SUFFIX = "_lighting_stable"
 LIGHTING_FOLDER_NAME = "lighting/stable"
 HOUDINI_EXTENSION = ".hipnc"
 FRAME_SUFFIX = "_$F3"
-FILE_TYPE = ".tif"
+FILE_TYPE = ".exr"
 
 MANTRA_NODES_PATH = "/out/owned_render_nodes1"
 MANTRA_NAME = "Main"
