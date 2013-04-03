@@ -43,6 +43,9 @@ class CheckoutDialog(QDialog):
 		#Create New Animation button
 		self.new_animation_button = QPushButton('New Animation')
 		
+		#Create Unlock button
+		self.unlock_button = QPushButton('Unlock')
+
 		#Create Select and Cancel buttons
 		self.select_button = QPushButton('Select')
 		self.info_button = QPushButton('Get Info')
@@ -52,6 +55,7 @@ class CheckoutDialog(QDialog):
 		button_layout = QHBoxLayout()
 		button_layout.setSpacing(2)
 		button_layout.addStretch()
+		button_layout.addWidget(self.unlock_button)
 		button_layout.addWidget(self.select_button)
 		button_layout.addWidget(self.info_button)
 		button_layout.addWidget(self.cancel_button)
@@ -78,6 +82,7 @@ class CheckoutDialog(QDialog):
 		self.connect(self.rig_radio, SIGNAL('clicked()'), self.refresh)
 		self.connect(self.animation_radio, SIGNAL('clicked()'), self.refresh)
 		self.connect(self.new_animation_button, SIGNAL('clicked()'), self.new_animation)
+		self.connect(self.unlock_button, SIGNAL('clicked()'), self.unlock)
 		self.connect(self.select_button, SIGNAL('clicked()'), self.checkout)
 		self.connect(self.info_button, SIGNAL('clicked()'), self.show_node_info)
 		self.connect(self.cancel_button, SIGNAL('clicked()'), self.close_dialog)
@@ -112,6 +117,43 @@ class CheckoutDialog(QDialog):
 	
 	def get_filename(self, parentdir):
 		return os.path.basename(os.path.dirname(parentdir))+'_'+os.path.basename(parentdir)
+
+	def unlock(self):
+
+		asset_name = str(self.current_item.text())
+
+		if self.model_radio.isChecked():
+			toUnlock = os.path.join(os.environ['ASSETS_DIR'], asset_name, 'model')
+		elif self.rig_radio.isChecked():
+			toUnlock = os.path.join(os.environ['ASSETS_DIR'], asset_name, 'rig')
+		elif self.animation_radio.isChecked():
+			toUnlock = os.path.join(os.environ['SHOTS_DIR'], asset_name, 'animation')
+		
+		if not amu.isLocked(toUnlock):
+			cmd.confirmDialog(title = 'Already Unlocked'
+                                , message       = 'Asset already unlocked'
+                                , button        = ['Ok']
+                                , defaultButton = 'Ok'
+                                , cancelButton  = 'Ok'
+                                , dismissString = 'Ok')
+			return
+
+		if not cmd.confirmDialog(title    = 'Confirmation'
+                                   , message       = 'Are you sure you want to unlock this asset?'
+                                   , button        = ['No', 'Yes']
+                                   , defaultButton = 'No'
+                                   , cancelButton  = 'No'
+                                   , dismissString = 'No'):
+			return	
+		
+		amu.unlock(toUnlock)
+		cmd.confirmDialog(title    = 'Asset unlocked'
+                           , message       = 'Asset unlocked'
+                           , button        = ['Ok']
+                           , defaultButton = 'Ok'
+                           , cancelButton  = 'Ok'
+                           , dismissString = 'Ok')
+		return	
 	
 	########################################################################
 	# SLOTS
