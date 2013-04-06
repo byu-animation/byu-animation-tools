@@ -57,11 +57,15 @@ export PYTHONPATH=/usr/autodesk/maya2012-x64/lib/python2.6/site-packages:/usr/li
 # Add some extra directories to PATH in case they weren't there before
 export PATH=/opt/pixar/RenderManProServer/bin:${PATH}
 
+# Issue submission website
+export ISSUE_URL="https://docs.google.com/forms/d/1biz6BLm9Z7Z53yNVgPB6fBb4zgGGaXh4JMKudu8lGTE/viewform"
+
 # Function to build directory structure
 buildProjectDirs()
 {
     # Create Dailies directory
     if [ ! -d "$DAILIES_DIR" ]; then
+        echo "making dailies dir"
         mkdir -p "$DAILIES_DIR"
 	mkdir -p "$DAILIES_DIR"/tmp
 	mkdir -p "$DAILIES_DIR"/renders
@@ -69,28 +73,32 @@ buildProjectDirs()
     
     # Create Production directory
     if [ ! -d "$PRODUCTION_DIR" ]; then
+        echo "making production dir"
         mkdir -p "$PRODUCTION_DIR"
     fi
 
     # Create Root directory for assets
     if [ ! -d "$ASSETS_DIR" ]; then
+        echo "making assets dir"
         mkdir -p "$ASSETS_DIR"
     fi
 
     # Create Root directory for animation
     if [ ! -d "$SHOTS_DIR" ]; then
         echo "making shots dir"
-	mkdir -p "$SHOTS_DIR"
+        mkdir -p "$SHOTS_DIR"
     fi
 
     # Create Directory for otls
     if [ ! -d "$OTLS_DIR" ]; then
+        echo "making otls dir"
         mkdir -p "$OTLS_DIR"
     fi
 
 
     # Create User directory for checkout files, testing, ect.
     if [ ! -d "$USER_DIR" ]; then
+        echo "making user dir"
         mkdir -p "$USER_DIR"
         mkdir -p "$USER_DIR"/checkout
         mkdir -p "$USER_DIR"/otls
@@ -98,6 +106,7 @@ buildProjectDirs()
 
     # Create tmp directory for ifds
     if [ ! -d "$JOB"/tmp/ifds ]; then
+        echo "making tmp dir"
         mkdir -p "$JOB"/tmp/ifds
     fi
 

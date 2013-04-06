@@ -6,16 +6,17 @@
  a single file. -->
 
   <toolshelf name="byu_tools" label="BYU Tools">
-    <memberTool name="newOTL"/>
+    <memberTool name="new"/>
     <memberTool name="CheckoutOTL"/>
     <memberTool name="CheckinOTL"/>
     <memberTool name="RevertChanges"/>
     <memberTool name="unlock DB"/>
     <memberTool name="rename"/>
     <memberTool name="delete"/>
-    <memberTool name="weeklyRender"/>
     <memberTool name="texture_update"/>
     <memberTool name="refreshOTL"/>
     <memberTool name="nodeInfo"/>
+    <memberTool name="weeklyRender"/>
+    <memberTool name="issue_submit"/>
   </toolshelf>
 </shelfDocument>
