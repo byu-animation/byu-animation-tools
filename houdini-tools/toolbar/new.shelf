@@ -5,15 +5,15 @@
  Note, that two definitions of the same element are not allowed in
  a single file. -->
 
-  <tool name="newOTL" label="New Asset" icon="PLASMA_App">
+  <tool name="new" label="New" icon="PLASMA_App">
     <helpText><![CDATA[= New Asset =
 
 """Creates a new (empty) asset in the PRODUCTION/otls folder with the name given."""
 
 In order to use the new asset it must first be checked out using the checkout tool button.]]></helpText>
     <script scriptType="python"><![CDATA[import hou_asset_mgr as mgr
+
 mgr.new()
 ]]></script>
   </tool>
-
 </shelfDocument>

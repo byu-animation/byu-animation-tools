@@ -748,7 +748,7 @@ def newTexture():
             ui.infoWindow('Your texture was saved to: ' + newfilepath + didgamma)
 
 def getNodeInfo(node):
-    if isDigitalAsset(node):
+    if node != None and isDigitalAsset(node):
         updateDB()
         libraryPath = node.type().definition().libraryFilePath()
         filename = os.path.basename(libraryPath)
