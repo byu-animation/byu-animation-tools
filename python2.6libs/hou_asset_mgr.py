@@ -709,8 +709,8 @@ def newTexture():
             userTextureMap = os.path.expandvars(userTextureMap)
 
             # Set Variables for texture paths
-            convertedTexture = '/tmp/convertedTexture.exr'
-            finalTexture = '/tmp/finalTexture.exr'
+            convertedTexture = '/tmp/intermediateTexture.exr'
+            finalTexture = '/tmp/finishedTexture.exr'
 
             # Gamma correct for linear workflow
             if shadingPass in (shadingPassList[:4] + shadingPassList[-1:]):
@@ -743,6 +743,10 @@ def newTexture():
             newfilepath = os.path.join(assetImageDir,newTextureName)
 
             shutil.copy(finalTexture,newfilepath)
+
+            # Remove temporary files
+            os.remove(finalTexture)
+            os.remove(convertedTexture)
 
             # Output final success message
             ui.infoWindow('Your texture was saved to: ' + newfilepath + didgamma)
