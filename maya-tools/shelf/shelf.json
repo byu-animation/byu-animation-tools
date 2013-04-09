@@ -29,6 +29,11 @@
             "icon":"roll.xpm",
             "annotation":"Roll back to an older version",
             "python_file":"maya_rollback.py"
+        },
+        {
+            "icon":"maya_issue_submit",
+            "annotation":"Open a webpage with a form to submit issues regarding pipeline and tools",
+            "python_file":"maya_issue_submit.py"
         }
     ]
 }
