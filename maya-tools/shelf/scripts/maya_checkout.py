@@ -159,7 +159,9 @@ class CheckoutDialog(QDialog):
 
 			if self.showConfirmUnlockDialog() == 'No':
 				return
-					
+			
+			cmd.file(save=True, force=True)
+			cmd.file(force=True, new=True) #open new file
 			amu.unlock(toUnlock)
 			self.showUnlockedDialog()
 				
@@ -186,6 +188,7 @@ class CheckoutDialog(QDialog):
 		try:
 			destpath = amu.checkout(toCheckout, True)
 		except Exception as e:
+			print str(e)
 			if not amu.checkedOutByMe(toCheckout):
 				cmd.confirmDialog(  title          = 'Can Not Checkout'
                                    , message       = str(e)

@@ -372,12 +372,11 @@ def unlock(ulPath):
 
 	toCopy = getCheckoutDest(ulPath)
 	dirname = os.path.basename(toCopy) 
-	parentPath = os.path.join(os.path.dirname(toCopy), ".unlocked/" + dirname)
-	shutil.move(toCopy,parentPath)
-
+	parentPath = os.path.join(os.path.dirname(toCopy), ".unlocked")
 	if not (os.path.exists(parentPath)):
 		os.mkdir(parentPath)
-	
+
+	os.system('mv -f '+toCopy+' '+parentPath+'/')
 	_writeConfigFile(os.path.join(ulPath, ".nodeInfo"), nodeInfo)
 	return 0;
 
