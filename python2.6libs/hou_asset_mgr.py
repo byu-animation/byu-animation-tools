@@ -488,6 +488,13 @@ def rename(node = None):
                 oldfilename = os.path.basename(oldlibraryPath)
                 oldAssetName = oldfilename.split('.')[0]
                 assetDirPath = os.path.join(ASSETSDIR, oldAssetName)
+
+                dependents = getAssetDependents(oldAssetName)
+
+                if dependents:
+                    ui.infoWindow('The following assets are depenent on this asset: \n\n'+printList(dependents)+'\nModify these assets first before attempting to rename again!!', wtitle='Can NOT rename!', msev=messageSeverity.Error)
+                    return
+
                 info = getFileInfo(oldfilename)
                 if not info[2]:
                     if ui.passwordWindow('r3n@m3p@ssw0rd', wmessage='Enter the rename password...'):
@@ -709,8 +716,8 @@ def newTexture():
             userTextureMap = os.path.expandvars(userTextureMap)
 
             # Set Variables for texture paths
-            convertedTexture = '/tmp/convertedTexture.exr'
-            finalTexture = '/tmp/finalTexture.exr'
+            convertedTexture = '/tmp/intermediateTexture.exr'
+            finalTexture = '/tmp/finishedTexture.exr'
 
             # Gamma correct for linear workflow
             if shadingPass in (shadingPassList[:4] + shadingPassList[-1:]):
@@ -744,11 +751,15 @@ def newTexture():
 
             shutil.copy(finalTexture,newfilepath)
 
+            # Remove temporary files
+            os.remove(finalTexture)
+            os.remove(convertedTexture)
+
             # Output final success message
             ui.infoWindow('Your texture was saved to: ' + newfilepath + didgamma)
 
 def getNodeInfo(node):
-    if isDigitalAsset(node):
+    if node != None and isDigitalAsset(node):
         updateDB()
         libraryPath = node.type().definition().libraryFilePath()
         filename = os.path.basename(libraryPath)

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
+  <tool name="issue_submit" label="Issue Submission" icon="PLASMA_App">
+    <helpText><![CDATA[= Issue Submission =
+
+"""Opens a web page with a form to submit issues regarding pipeline and tools."""
+
+This is meant to make it easier for the Global Tech team to track and resolve user issues.]]></helpText>
+    <script scriptType="python"><![CDATA[import webbrowser
+import os
+
+webbrowser.open( os.environ['ISSUE_URL'] )]]></script>
+  </tool>
+</shelfDocument>

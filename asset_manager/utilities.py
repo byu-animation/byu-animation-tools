@@ -364,6 +364,21 @@ def checkout(coPath, lock):
 		raise Exception("Can not checkout. Folder is locked by:\n\n"+ whoLocked+"\nat "+ whenLocked)
 	return dest
 
+def unlock(ulPath):
+	nodeInfo = ConfigParser()
+	nodeInfo.read(os.path.join(ulPath, ".nodeInfo"))
+	nodeInfo.set("Versioning", "locked", "False")
+	return 0;
+
+def isLocked(ulPath):
+	nodeInfo = ConfigParser()
+	nodeInfo.read(os.path.join(ulPath, ".nodeInfo"))
+	if nodeInfo.get("Versioning", "locked") == "False":
+		return False;
+	nodeInfo.set("Versioning", "locked", "False")
+	_writeConfigFile(os.path.join(ulPath, ".nodeInfo"), nodeInfo)
+	return True;
+
 ################################################################################
 # Checkin
 ################################################################################

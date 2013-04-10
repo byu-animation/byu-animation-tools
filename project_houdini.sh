@@ -13,7 +13,7 @@ DIR=`dirname $0`
 source ${DIR}/project_env.sh
 
 # Change directories so $HIP is not in the tools folder
-cd ${JOB}/tmp
+cd ${USER_DIR}
 
 echo "Starting Houdini..."
 houdinifx
