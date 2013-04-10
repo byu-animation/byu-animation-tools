@@ -20,7 +20,7 @@ if [ -z "$JOB" ]
 then
     # The name of the project (eg: owned)
     export PROJECT_NAME=owned
-    export JOB=/groups/${PROJECT_NAME}
+    export JOB=/users/home2/ugrad/j/jmoborn/Development/${PROJECT_NAME}
 else
     export PROJECT_NAME=`basename $JOB`
 fi
