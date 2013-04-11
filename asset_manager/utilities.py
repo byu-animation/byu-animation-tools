@@ -365,9 +365,19 @@ def checkout(coPath, lock):
 	return dest
 
 def unlock(ulPath):
+	
 	nodeInfo = ConfigParser()
 	nodeInfo.read(os.path.join(ulPath, ".nodeInfo"))
 	nodeInfo.set("Versioning", "locked", "False")
+
+	toCopy = getCheckoutDest(ulPath)
+	dirname = os.path.basename(toCopy) 
+	parentPath = os.path.join(os.path.dirname(toCopy), ".unlocked")
+	if not (os.path.exists(parentPath)):
+		os.mkdir(parentPath)
+
+	os.system('mv -f '+toCopy+' '+parentPath+'/')
+	_writeConfigFile(os.path.join(ulPath, ".nodeInfo"), nodeInfo)
 	return 0;
 
 def isLocked(ulPath):
@@ -375,8 +385,7 @@ def isLocked(ulPath):
 	nodeInfo.read(os.path.join(ulPath, ".nodeInfo"))
 	if nodeInfo.get("Versioning", "locked") == "False":
 		return False;
-	nodeInfo.set("Versioning", "locked", "False")
-	_writeConfigFile(os.path.join(ulPath, ".nodeInfo"), nodeInfo)
+	
 	return True;
 
 ################################################################################

@@ -55,9 +55,10 @@ class CheckoutDialog(QDialog):
 		button_layout = QHBoxLayout()
 		button_layout.setSpacing(2)
 		button_layout.addStretch()
-		button_layout.addWidget(self.unlock_button)
+	
 		button_layout.addWidget(self.select_button)
 		button_layout.addWidget(self.info_button)
+		button_layout.addWidget(self.unlock_button)
 		button_layout.addWidget(self.cancel_button)
 		
 		#Create main layout
@@ -118,6 +119,31 @@ class CheckoutDialog(QDialog):
 	def get_filename(self, parentdir):
 		return os.path.basename(os.path.dirname(parentdir))+'_'+os.path.basename(parentdir)
 
+	def showIsLockedDialog(self):
+		return cmd.confirmDialog(title = 'Already Unlocked'
+                                , message       = 'Asset already unlocked'
+                                , button        = ['Ok']
+                                , defaultButton = 'Ok'
+                                , cancelButton  = 'Ok'
+                                , dismissString = 'Ok')
+
+	def showConfirmUnlockDialog(self):
+		return cmd.confirmDialog( title = 'Confirmation'
+                                 , message       = 'Are you sure you want to unlock this asset?'
+                                 , button        = ['Yes', 'No']
+                                 , defaultButton = 'No'
+                                 , cancelButton  = 'No'
+                                 , dismissString = 'No')
+
+	def showUnlockedDialog(self):
+		return cmd.confirmDialog(title    = 'Asset unlocked'
+		           , message       = 'Asset unlocked'
+		           , button        = ['Ok']
+		           , defaultButton = 'Ok'
+		           , cancelButton  = 'Ok'
+		           , dismissString = 'Ok')
+
+
 	def unlock(self):
 
 		asset_name = str(self.current_item.text())
@@ -129,31 +155,19 @@ class CheckoutDialog(QDialog):
 		elif self.animation_radio.isChecked():
 			toUnlock = os.path.join(os.environ['SHOTS_DIR'], asset_name, 'animation')
 		
-		if not amu.isLocked(toUnlock):
-			cmd.confirmDialog(title = 'Already Unlocked'
-                                , message       = 'Asset already unlocked'
-                                , button        = ['Ok']
-                                , defaultButton = 'Ok'
-                                , cancelButton  = 'Ok'
-                                , dismissString = 'Ok')
-			return
+		if amu.isLocked(toUnlock):
 
-		if cmd.confirmDialog(title    = 'Confirmation'
-                                   , message       = 'Are you sure you want to unlock this asset?'
-                                   , button        = ['No', 'Yes']
-                                   , defaultButton = 'No'
-                                   , cancelButton  = 'No'
-                                   , dismissString = 'No') == 'No':
-			return	
-		
-		amu.unlock(toUnlock)
-		cmd.confirmDialog(title    = 'Asset unlocked'
-                           , message       = 'Asset unlocked'
-                           , button        = ['Ok']
-                           , defaultButton = 'Ok'
-                           , cancelButton  = 'Ok'
-                           , dismissString = 'Ok')
-		return	
+			if self.showConfirmUnlockDialog() == 'No':
+				return
+			
+			cmd.file(save=True, force=True)
+			cmd.file(force=True, new=True) #open new file
+			amu.unlock(toUnlock)
+			self.showUnlockedDialog()
+				
+		else:
+			self.showIsLockedDialog()
+
 	
 	########################################################################
 	# SLOTS
@@ -174,6 +188,7 @@ class CheckoutDialog(QDialog):
 		try:
 			destpath = amu.checkout(toCheckout, True)
 		except Exception as e:
+			print str(e)
 			if not amu.checkedOutByMe(toCheckout):
 				cmd.confirmDialog(  title          = 'Can Not Checkout'
                                    , message       = str(e)
