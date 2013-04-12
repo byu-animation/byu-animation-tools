@@ -7,7 +7,6 @@ import os, glob
 import hou
 import subprocess
 from ui_tools import ui, messageSeverity, fileMode
-from miscutil import futil
 
 import utilities as amu #asset manager utilites
 
@@ -95,7 +94,6 @@ def copyToOtlDir(node, filename, newName, newDef):
     newfilepath = os.path.join(OTLDIR, filename)
     oldfilepath = os.path.join(USERDIR, filename)
     node.type().definition().copyToHDAFile(newfilepath, new_name=newName, new_menu_name=newDef)
-    futil.clobberPermissions(newfilepath)
     switchOPLibraries(oldfilepath, newfilepath)
 
 def moveToOtlDir(node, filename):
@@ -112,7 +110,6 @@ def copyToUsrDir(node, filename):
     newfilepath = os.path.join(USERDIR, filename)
     oldfilepath = os.path.join(OTLDIR, filename)
     node.type().definition().copyToHDAFile(newfilepath)
-    futil.clobberPermissions(newfilepath)
     switchOPLibraries(oldfilepath, newfilepath)
 
 def lockOTL(filename):
@@ -449,7 +446,6 @@ def newContainer(hpath):
             amu.createNewAssetFolders(ASSETSDIR, filename)
             templateNode.type().definition().copyToHDAFile(newfilepath, new_name=filename, new_menu_name=name)
             hou.hda.installFile(newfilepath, change_oplibraries_file=True)
-            futil.clobberPermissions(newfilepath)
             newnode = hou.node(hpath).createNode(filename)
         else:
             ui.infoWindow("Asset by that name already exists. Cannot create asset.", wtitle='Asset Name', msev=messageSeverity.Error)
@@ -514,7 +510,6 @@ def rename(node = None):
                             else:
                                 node.type().definition().copyToHDAFile(newfilepath, new_name=newfilename, new_menu_name=name)
                                 hou.hda.installFile(newfilepath, change_oplibraries_file=True)
-                                futil.clobberPermissions(newfilepath)
                                 newnode = hou.node(determineHPATH()).createNode(newfilename)
                                 node.destroy()
                                 hou.hda.uninstallFile(oldlibraryPath, change_oplibraries_file=False)
@@ -737,6 +732,8 @@ def newTexture():
             args = ['txmake','-mode','periodic','-compression','zip']
             args += ['-format','openexr','-half',convertedTexture,finalTexture]
 
+            subprocess.check_call(args)
+
             # Uncomment the following and comment out the previous call if PRMan is not present
             """
             args = 'iconvert -d half ' + convertedTexture + ' ' 
@@ -744,30 +741,22 @@ def newTexture():
 
             subprocess.check_call( args.split() )
             """
+            
+            # Rename texture and move into production pipeline 
+            finalTextureName, ext = os.path.splitext(os.path.basename(finalTexture))
 
-            try:
-                subprocess.check_call(args)
-            except subprocess.CalledProcessError as e:
-                ui.infoWindow('Failed to convert texture.')
-            else:
-                # Rename texture and move into production pipeline 
-                finalTextureName, ext = os.path.splitext(os.path.basename(finalTexture))
+            newTextureName = assetName + '_' + geoName + '_' + shadingPass + ext
+ 
+            newfilepath = os.path.join(assetImageDir,newTextureName)
 
-                newTextureName = assetName + '_' + geoName + '_' + shadingPass + ext
-     
-                newfilepath = os.path.join(assetImageDir,newTextureName)
+            shutil.copy(finalTexture,newfilepath)
 
-                #shutil.copy(finalTexture,newfilepath)
-                futil.copy(finalTexture,newfilepath)
+            # Remove temporary files
+            os.remove(finalTexture)
+            os.remove(convertedTexture)
 
-                # Output final success message
-                ui.infoWindow('Your texture was saved to: ' + newfilepath + didgamma)
-            finally:
-                # Remove temporary files
-                os.remove(finalTexture)
-                os.remove(convertedTexture)
-
-
+            # Output final success message
+            ui.infoWindow('Your texture was saved to: ' + newfilepath + didgamma)
 
 def getNodeInfo(node):
     if node != None and isDigitalAsset(node):
