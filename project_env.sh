@@ -54,9 +54,6 @@ export HTOOLS_DIR=${PROJECT_TOOLS}/houdini-tools
 # Append to python path so batch scripts can access our modules
 export PYTHONPATH=/usr/autodesk/maya2012-x64/lib/python2.6/site-packages:/usr/lib64/python2.6/site-packages:${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${PROJECT_TOOLS}/python2.6libs:${PYTHONPATH}
 
-# Add some extra directories to PATH in case they weren't there before
-export PATH=/opt/pixar/RenderManProServer/bin:${PATH}
-
 # Issue submission website
 export ISSUE_URL="https://docs.google.com/forms/d/1biz6BLm9Z7Z53yNVgPB6fBb4zgGGaXh4JMKudu8lGTE/viewform"
 
@@ -115,6 +112,16 @@ buildProjectDirs()
 
 # Uncomment to build the project directories
 buildProjectDirs
+
+
+###############################################################################
+# RenderMan specific environment
+###############################################################################
+
+export RMANTREE=/opt/pixar/RenderManProServer
+
+# Add some extra directories to PATH in case they weren't there before
+export PATH=${RMANTREE}/bin:${PATH}
 
 ###############################################################################
 # Houdini specific environment
