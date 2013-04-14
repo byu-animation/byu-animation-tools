@@ -760,16 +760,14 @@ def newTexture():
                     #shutil.copy(finalTexture,newfilepath)
                     fileutil.move(finalTexture, newfilepath)  
                 except Exception as e:
-                    ui.infoWindow('Failed to move texture. The following error occured:\n' + str(e))
                     os.remove(finalTexture)
-
-                if convertedTexture != userTextureMap:
-                    os.remove(convertedTexture)
-
-                # Output final success message
-                ui.infoWindow('Your texture was saved to: ' + newfilepath + didgamma)
-            finally:
-                pass
+                    ui.infoWindow('Failed to move texture. The following error occured:\n' + str(e))
+                else:
+                    # Output final success message
+                    ui.infoWindow('Your texture was saved to: ' + newfilepath + didgamma)
+                finally:
+                    if convertedTexture != userTextureMap:
+                        os.remove(convertedTexture)
 
 def getNodeInfo(node):
     if node != None and isDigitalAsset(node):
