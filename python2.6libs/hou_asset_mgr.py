@@ -756,8 +756,12 @@ def newTexture():
      
                 newfilepath = os.path.join(assetImageDir,newTextureName)
 
-                #shutil.copy(finalTexture,newfilepath)
-                fileutil.move(finalTexture, newfilepath)  
+                try:
+                    #shutil.copy(finalTexture,newfilepath)
+                    fileutil.move(finalTexture, newfilepath)  
+                except Exception as e:
+                    ui.infoWindow('Failed to move texture. The following error occured:\n' + str(e))
+                    os.remove(finalTexture)
 
                 if convertedTexture != userTextureMap:
                     os.remove(convertedTexture)
