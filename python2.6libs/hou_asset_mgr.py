@@ -761,7 +761,7 @@ def newTexture():
                     fileutil.move(finalTexture, newfilepath)  
                 except Exception as e:
                     os.remove(finalTexture)
-                    ui.infoWindow('Failed to move texture. The following error occured:\n' + str(e))
+                    ui.infoWindow('Failed to move texture. The following error occured:\n' + str(e), msev=messageSeverity.Error)
                 else:
                     # Output final success message
                     ui.infoWindow('Your texture was saved to: ' + newfilepath + didgamma)
