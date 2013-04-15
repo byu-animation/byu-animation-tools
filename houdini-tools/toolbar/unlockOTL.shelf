@@ -14,8 +14,10 @@ This tool is dangerous and should be used with caution!]]></helpText>
     <script scriptType="python"><![CDATA[import hou_asset_mgr as mgr
 
 node = mgr.getSelectedNode()
-
-mgr.unlockOTLbyNode(node)
+if node != None:
+    mgr.unlockOTLbyNode(node)
+else:
+    mgr.unlockLightingFile()
 ]]></script>
   </tool>
 </shelfDocument>
