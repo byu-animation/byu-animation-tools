@@ -219,7 +219,7 @@ def checkoutLightingFile():
             hou.hipFile.load(toOpen)
         else:
             hou.hipFile.clear()
-            hou.hipFile.save(toOpen)
+            hou.hipFile.save(toOpen) 
 
 def unlockLightingFile():
     print("unlockLightingFile")
@@ -228,22 +228,20 @@ def unlockLightingFile():
     for sp in shotPaths:
         selections.append(os.path.basename(sp))
     selections.sort()
-    print('Im calling ui')
     answer = ui.listWindow(selections, wmessage='Select shot file to unlock:')
-    print('Im done calling ui')
     if answer:
         answer = answer[0]
         toUnlock = os.path.join(os.environ['SHOTS_DIR'], selections[answer], 'lighting')
 	if amu.isLocked(toUnlock):
 		reply = ui.warningWindow('Are you sure you want to unlock this file?')
-    		if reply == 0:		
-			cmd.file(save=True, force=True)
-			cmd.file(force=True, new=True) #open new file
+    		if reply == 0:
+			hou.hipFile.save()
+        		hou.hipFile.clear()		
 			amu.unlock(toUnlock)
-			ui.infoWindow('Lighting file unlocked: ')
+			ui.infoWindow('Lighting file unlocked')
 			
 	else:
-		ui.infoWindow('Lighting file already unlocked: ')
+		ui.infoWindow('Lighting file already unlocked')
                 return
 
 
