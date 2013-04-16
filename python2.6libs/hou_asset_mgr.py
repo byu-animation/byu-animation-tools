@@ -147,7 +147,7 @@ def unlockOTL(filename):
         cur = con.cursor()
         cur.execute("UPDATE otl_table SET locked=0, lockedby='' WHERE filename='"+filename+"'")
         con.commit()
-    con.close()
+    con.close()	
 
 def addOTL(filename):
     """Updates the database with a new table entry for filename"""
@@ -222,7 +222,31 @@ def checkoutLightingFile():
             hou.hipFile.load(toOpen)
         else:
             hou.hipFile.clear()
-            hou.hipFile.save(toOpen)
+            hou.hipFile.save(toOpen) 
+
+def unlockLightingFile():
+    print("unlockLightingFile")
+    shotPaths = glob.glob(os.path.join(os.environ['SHOTS_DIR'], '*'))
+    selections = []
+    for sp in shotPaths:
+        selections.append(os.path.basename(sp))
+    selections.sort()
+    answer = ui.listWindow(selections, wmessage='Select shot file to unlock:')
+    if answer:
+        answer = answer[0]
+        toUnlock = os.path.join(os.environ['SHOTS_DIR'], selections[answer], 'lighting')
+	if amu.isLocked(toUnlock):
+		reply = ui.warningWindow('Are you sure you want to unlock this file?')
+    		if reply == 0:
+			hou.hipFile.save()
+        		hou.hipFile.clear()		
+			amu.unlock(toUnlock)
+			ui.infoWindow('Lighting file unlocked')
+			
+	else:
+		ui.infoWindow('Lighting file already unlocked')
+                return
+
 
 def checkinLightingFile():
     print('checkin lighting file')
