@@ -17,7 +17,7 @@ def clobberPermissions(path):
     except Exception as e:
         sys.stderr.write('Error occured while changing group: ' + str(e) + '\n')
     else:
-        sys.stderr.write('Group forcefully changed. \n') # + str(path) + '\n')
+        sys.stderr.write('Group forcefully changed: ' + str(path) + '\n')
     finally:
         pass
 
@@ -26,7 +26,7 @@ def clobberPermissions(path):
     except Exception as e:
         sys.stderr.write('Error occured while changing permissions: ' + str(e) + '\n')
     else:
-        sys.stderr.write('Forcefully changed permissions. \n')# + str(path) + '\n')
+        sys.stderr.write('Forcefully changed permissions: ' + str(path) + '\n')
     finally:
         pass
 
