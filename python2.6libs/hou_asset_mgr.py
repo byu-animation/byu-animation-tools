@@ -252,6 +252,10 @@ def checkinLightingFile():
     print('checkin lighting file')
     filepath = hou.hipFile.path()
     toCheckin = os.path.join(amu.getUserCheckoutDir(), os.path.basename(os.path.dirname(filepath)))
+    backups = os.path.join(toCheckin, 'backup')
+    print 'backup = ' + backups
+    if os.path.isdir(backups):
+        os.system('rm -rf '+backups)
     if amu.canCheckin(toCheckin):
         hou.hipFile.save()
         hou.hipFile.clear()
