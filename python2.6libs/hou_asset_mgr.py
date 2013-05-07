@@ -3,7 +3,7 @@
 # Author: Brian Kingery
 import shutil
 import sqlite3 as lite
-import os, glob
+import os, glob, sys
 import hou
 import subprocess
 from ui_tools import ui, messageSeverity, fileMode
@@ -797,8 +797,13 @@ def newTexture():
                     if convertedTexture != userTextureMap:
                         os.remove(convertedTexture)
 
-def getNodeInfo(node):
-    if node != None and isDigitalAsset(node):
+def getInfo(node):
+    if node == None:
+        # code for getting info from the checked out scene file goes here
+        sys.stderr.write('Code for shot info does not yet exist for Houdini!')
+        pass
+    elif isDigitalAsset(node):
+        # code for getting info selected node
         updateDB()
         libraryPath = node.type().definition().libraryFilePath()
         filename = os.path.basename(libraryPath)
@@ -810,4 +815,7 @@ def getNodeInfo(node):
         else:
             message = 'Not checked out.'
         ui.infoWindow(message, wtitle='Node Info')
+
+# make getNodeInfo an alias of getInfo
+getNodeInfo = getInfo
 
