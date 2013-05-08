@@ -181,14 +181,23 @@ def isContainer(node):
     else:
         return False
 
-def lockAsset(node, lockit):
+def _lockAssetOriginal(node, lockit):
+     if isContainer(node):
+         ndef = node.type().definition()
+         opts = ndef.options()
+         opts.setLockContents(lockit)
+         ndef.setOptions(opts)
+ 
+def _lockAssetNew(node, lockit):
     if isContainer(node):
         ndef = node.type().definition()
-        nsec = ndef.sections()['Tools.shelf']
-        contents = str(nsec.contents())
+        val = '' if lockit else '*'
+        ndef.addSection('EditableNodes', val)
         opts = ndef.options()
-        opts.setLockContents(lockit)
+        opts.setLockContents(True)
         ndef.setOptions(opts)
+
+lockAsset = _lockAssetOriginal
 
 def get_filename(parentdir):
     return os.path.basename(os.path.dirname(parentdir))+'_'+os.path.basename(parentdir)
