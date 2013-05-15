@@ -95,7 +95,7 @@ def copyToOtlDir(node, filename, newName, newDef):
     newfilepath = os.path.join(OTLDIR, filename)
     oldfilepath = os.path.join(USERDIR, filename)
     node.type().definition().copyToHDAFile(newfilepath, new_name=newName, new_menu_name=newDef)
-    fileutil.clobberPermissions(newfilepath)
+    #fileutil.clobberPermissions(newfilepath)
     switchOPLibraries(oldfilepath, newfilepath)
 
 def moveToOtlDir(node, filename):
@@ -112,7 +112,7 @@ def copyToUsrDir(node, filename):
     newfilepath = os.path.join(USERDIR, filename)
     oldfilepath = os.path.join(OTLDIR, filename)
     node.type().definition().copyToHDAFile(newfilepath)
-    fileutil.clobberPermissions(newfilepath)
+    #fileutil.clobberPermissions(newfilepath)
     switchOPLibraries(oldfilepath, newfilepath)
 
 def lockOTL(filename):
