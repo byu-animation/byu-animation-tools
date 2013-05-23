@@ -3,7 +3,7 @@
 # Author: Brian Kingery
 import shutil
 import sqlite3 as lite
-import os, glob
+import os, glob, sys
 import hou
 import subprocess
 from ui_tools import ui, messageSeverity, fileMode
@@ -181,14 +181,23 @@ def isContainer(node):
     else:
         return False
 
-def lockAsset(node, lockit):
+def _lockAssetOriginal(node, lockit):
+     if isContainer(node):
+         ndef = node.type().definition()
+         opts = ndef.options()
+         opts.setLockContents(lockit)
+         ndef.setOptions(opts)
+ 
+def _lockAssetNew(node, lockit):
     if isContainer(node):
         ndef = node.type().definition()
-        nsec = ndef.sections()['Tools.shelf']
-        contents = str(nsec.contents())
+        val = '' if lockit else '*'
+        ndef.addSection('EditableNodes', val)
         opts = ndef.options()
-        opts.setLockContents(lockit)
+        opts.setLockContents(True)
         ndef.setOptions(opts)
+
+lockAsset = _lockAssetOriginal
 
 def get_filename(parentdir):
     return os.path.basename(os.path.dirname(parentdir))+'_'+os.path.basename(parentdir)
@@ -797,8 +806,13 @@ def newTexture():
                     if convertedTexture != userTextureMap:
                         os.remove(convertedTexture)
 
-def getNodeInfo(node):
-    if node != None and isDigitalAsset(node):
+def getInfo(node):
+    if node == None:
+        # code for getting info from the checked out scene file goes here
+        sys.stderr.write('Code for shot info does not yet exist for Houdini!')
+        pass
+    elif isDigitalAsset(node):
+        # code for getting info selected node
         updateDB()
         libraryPath = node.type().definition().libraryFilePath()
         filename = os.path.basename(libraryPath)
@@ -810,4 +824,7 @@ def getNodeInfo(node):
         else:
             message = 'Not checked out.'
         ui.infoWindow(message, wtitle='Node Info')
+
+# make getNodeInfo an alias of getInfo
+getNodeInfo = getInfo
 
