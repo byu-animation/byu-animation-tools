@@ -197,7 +197,7 @@ def _lockAssetNew(node, lockit):
         opts.setLockContents(True)
         ndef.setOptions(opts)
 
-lockAsset = _lockAssetOriginal
+lockAsset = _lockAssetNew
 
 def get_filename(parentdir):
     return os.path.basename(os.path.dirname(parentdir))+'_'+os.path.basename(parentdir)
