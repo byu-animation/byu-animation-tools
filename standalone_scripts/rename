@@ -1,0 +1,49 @@
+#!/usr/bin/python
+import os
+import shutil as poo
+import re
+import glob
+
+#original name=
+	#shot number
+	#main or test or comp (will need if loop for navigating to comp files)
+	#version number
+	#-->d04_mainRender_ver2_###.exr
+	#-->d04_compRender_ver3_###.exr
+	#get these from user
+#target name=
+	#shot number_Latest_###.exr
+
+#declare variables
+sNum= "none"
+qual= "none"
+vNum= "A"
+
+#get user input
+print "Enter shot number (e.g. a01): "
+sNum= raw_input()
+print "main, test, or comp render? "
+qual= raw_input()
+print "version number: "
+vNum= raw_input()
+
+#change directory
+os.chdir('../../PRODUCTION/shots')
+os.chdir(sNum + '/renders')
+if qual== "comp":
+   os.chdir('compositing')
+else:
+   os.chdir('lighting')
+
+#store filenames
+for namecheck in glob.glob(qual +'*'):
+    names=glob.glob(qual +'*')
+
+#rename
+count=0
+for var in names:
+	Num=re.findall('[0-9]{3}', names[count])  #breaks out numbers
+	poo.copyfile(names[count], '../latest/' +sNum +'_latest_'  +Num[0]  +'.exr')
+	count=count+1
+print("finished")
+raw_input('Press enter to exit')
