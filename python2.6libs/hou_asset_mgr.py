@@ -201,13 +201,20 @@ def _lockAssetOriginal(node, lockit):
          ndef.setOptions(opts)
  
 def _lockAssetNew(node, lockit):
-    if isContainer(node) or isEditableAsset(node):
+    if isDigitalAsset(node):
         ndef = node.type().definition()
-        val = '' if lockit else '*'
-        ndef.addSection('EditableNodes', val)
         opts = ndef.options()
-        opts.setLockContents(True)
-        ndef.setOptions(opts)
+        val = '' if lockit else '*'
+        if isContainer(node): 
+            ndef.addSection('EditableNodes', '')
+            opts.setLockContents(True)
+            ndef.setOptions(opts)
+        elif isEditableAsset(node):
+            ndef.addSection('EditableNodes', val)
+            opts.setLockContents(True)
+            ndef.setOptions(opts)
+        else: # On everything else, for now do nothing.
+            pass
 
 lockAsset = _lockAssetNew
 
