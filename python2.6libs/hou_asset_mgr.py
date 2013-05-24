@@ -181,6 +181,18 @@ def isContainer(node):
     else:
         return False
 
+def isEditableAsset(node):
+    if not isDigitalAsset(node):
+        return False
+
+    ndef = node.type().definition()
+    nsec = ndef.sections()['Tools.shelf']
+    contents = str(nsec.contents())
+    if contents.find('Editable Assets') != -1:
+        return True
+    else:
+        return False
+
 def _lockAssetOriginal(node, lockit):
      if isContainer(node):
          ndef = node.type().definition()
@@ -189,7 +201,7 @@ def _lockAssetOriginal(node, lockit):
          ndef.setOptions(opts)
  
 def _lockAssetNew(node, lockit):
-    if isContainer(node):
+    if isContainer(node) or isEditableAsset(node):
         ndef = node.type().definition()
         val = '' if lockit else '*'
         ndef.addSection('EditableNodes', val)
