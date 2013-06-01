@@ -687,6 +687,7 @@ def refresh(node = None):
     Everything else is probably either light linking data, or something else 
     that should always have a local override."""
     updateDB()
+    hou.hscript("otrefresh -r") # Refresh all definitions first
     
     if node == None or hasattr(node, "__len__"):
         ui.infoWindow("Select EXACTLY one node.")
