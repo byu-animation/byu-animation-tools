@@ -682,42 +682,25 @@ def getAssetName(node):
         return None
 
 def refresh(node = None):
+    """Only updates transforms of internal nodes of "Editable Assets"
+
+    Everything else is probably either light linking data, or something else 
+    that should always have a local override."""
     updateDB()
     
-    if node == None:
+    if node == None or hasattr(node, "__len__"):
         ui.infoWindow("Select EXACTLY one node.")
-        return
-
-    nodeName = getAssetName(node)
-    if isContainer(node):
-        
-        # Get children and change to containerTemplate
-        children = node.children()
-        nameLookup = list(children)
-        for i in range(len(children)):
-            c = children[i]
-            if isContainer(c):
-                assetName = getAssetName(c)
-                print(assetName)
-                nameLookup[i] = assetName
-                c.changeNodeType('containerTemplate', keep_network_contents=False)
-
-        print('\n')
-        # Update children and change back
-        children = node.children()
-        for i in range(len(children)):
-            c = children[i]
-            if isContainer(c):
-                name = nameLookup[i]
-                print(name)
-                c.changeNodeType(name, keep_network_contents=False)
-
-        # Change the top level node
-        if not isSetAsset(node):
-            tempnode = node.changeNodeType('containerTemplate', keep_network_contents=False)
-            tempnode.changeNodeType(nodeName, keep_network_contents=False)
+    elif not isEditableAsset(node):
+        ui.infoWindow('Not an "Editable Asset".')
     else:
-        ui.infoWindow('Not a container')
+        npath = os.path.dirname(node.path())
+        dopple = hou.node(npath).createNode(node.type().name())
+        for c in node.children():
+            for dc in dopple.children():
+                if c.name() == dc.name() and isinstance(c, hou.ObjNode):
+                    c.setParmTransform(dc.parmTransform())
+        dopple.destroy()
+        ui.infoWindow('Refresh successful.')
 
 # TODO: This function probably needs to be removed.
 def add(node = None):
