@@ -386,7 +386,7 @@ def writeCamerasToAlembic(node):
             sFrame, eFrame = hou.playbar.playbackRange()
             sSize = hou.playbar.frameIncrement()
             abcFilePath = writeToAlembic(camDir, abcName, node
-                                        , objects=c.path()
+                                        , objects=os.path.join(c.path(), 'cam1')
                                         , trange='normal'
                                         , startFrame=sFrame
                                         , endFrame=eFrame
