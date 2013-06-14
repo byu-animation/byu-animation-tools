@@ -740,7 +740,7 @@ def convert_texture(userTextureMap, assetImageDir, folder_name=''):
     finalTexture = os.path.join('/tmp','finished'+userFileName+'.exr')
 
     # Gamma correct for linear workflow
-    if 'COLOR' in userTextureMap:
+    if 'DIFF' in userTextureMap or 'diffuse' in userTextureMap:
         args = ['icomposite',convertedTexture,'=','gamma',str(1/2.2),userTextureMap]
         subprocess.check_call(args)
         didgamma = '\nIt has been gamma corrected.'
@@ -808,7 +808,7 @@ def newTexture():
 
         if os.path.isdir(userSelection):
             folder_name = os.path.basename(userSelection)
-            texture_paths = glob.glob(os.path(userSelection, '*'))
+            texture_paths = glob.glob(os.path.join(userSelection, '*'))
             for t in texture_paths:
                 convert_texture(t, assetImageDir, folder_name=folder_name)
         else:
