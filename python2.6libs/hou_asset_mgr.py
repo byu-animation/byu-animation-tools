@@ -727,6 +727,8 @@ def add(node = None):
 
 
 def convert_texture(userTextureMap, assetImageDir, folder_name=''):
+    print userTextureMap
+
     if os.path.isdir(userTextureMap):
         return
 
@@ -737,7 +739,9 @@ def convert_texture(userTextureMap, assetImageDir, folder_name=''):
 
     # Set Variables for texture paths
     convertedTexture = os.path.join('/tmp','intermediate'+userFileName+'.exr')
+    print "convertedTexture:: "+convertedTexture
     finalTexture = os.path.join('/tmp','finished'+userFileName+'.exr')
+    print "finalTexture:: "+finalTexture
 
     # Gamma correct for linear workflow
     if 'DIFF' in userTextureMap or 'diffuse' in userTextureMap:
@@ -768,12 +772,8 @@ def convert_texture(userTextureMap, assetImageDir, folder_name=''):
         # Rename texture and move into production pipeline 
         newTextureName = userFileName + '.exr'
 
-        if folder_name != '':
-            newFileDir = os.path.join(assetImageDir, folder_name)
-            os.system('rm -rf '+newFileDir)
-            os.makedirs(newFileDir)
-
         newfilepath = os.path.join(assetImageDir, folder_name, newTextureName)
+        print "new file path:: "+newfilepath
 
         try:
             fileutil.move(finalTexture, newfilepath)  
@@ -807,8 +807,14 @@ def newTexture():
         userSelection = os.path.expandvars(userSelection)
 
         if os.path.isdir(userSelection):
-            folder_name = os.path.basename(userSelection)
+            folder_name = os.path.basename(os.path.dirname(userSelection))
             texture_paths = glob.glob(os.path.join(userSelection, '*'))
+
+            newFileDir = os.path.join(assetImageDir, folder_name)
+            os.system('rm -rf '+newFileDir)
+            print 'newFileDir:: '+newFileDir
+            os.makedirs(newFileDir)
+            
             for t in texture_paths:
                 convert_texture(t, assetImageDir, folder_name=folder_name)
         else:
