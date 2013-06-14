@@ -726,6 +726,64 @@ def add(node = None):
         ui.infoWindow("Select EXACTLY one node.")
 
 
+def convert_texture(userTextureMap, assetImageDir, folder_name=''):
+    if os.path.isdir(userTextureMap):
+        return
+
+    extensions = ['.jpg','.jpeg','.tiff','.tif','.png','.exr']
+    userFileName, userExt = os.path.splitext(os.path.basename(userTextureMap))
+    if userExt not in extensions:
+        return
+
+    # Set Variables for texture paths
+    convertedTexture = '/tmp/intermediateTexture.exr'
+    finalTexture = '/tmp/finishedTexture.exr'
+
+    # Gamma correct for linear workflow
+    if 'COLOR' in userTextureMap:
+        args = ['icomposite',convertedTexture,'=','gamma',str(1/2.2),userTextureMap]
+        subprocess.check_call(args)
+        didgamma = '\nIt has been gamma corrected.'
+    else:
+        convertedTexture = userTextureMap
+        didgamma = ''
+    
+    # Convert to .exr with otimized settings. Also, setting compatible with RenderMan (in case we need to render there)
+    args = ['txmake','-mode','periodic','-compression','zip']
+    args += ['-format','openexr','-half',convertedTexture,finalTexture]
+
+    # Uncomment the following and comment out the previous call if PRMan is not present
+    """
+    args = 'iconvert -d half ' + convertedTexture + ' ' 
+    args += finalTexture + ' storage tile tilex 32 tiley 32 compression zip'
+
+    subprocess.check_call( args.split() )
+    """
+
+    try:
+        subprocess.check_call(args)
+    except subprocess.CalledProcessError as e:
+        ui.infoWindow('Failed to convert texture. The following error occured:\n' + str(e))
+    else:
+        # Rename texture and move into production pipeline 
+        newTextureName = userFileName + '.exr'
+
+        if folder_name != '':
+            newFileDir = os.path.join(assetImageDir, folder_name)
+            os.system('rm -rf '+newFileDir)
+            os.makedirs(newFileDir)
+
+        newfilepath = os.path.join(assetImageDir, folder_name, newTextureName)
+
+        try:
+            fileutil.move(finalTexture, newfilepath)  
+        except Exception as e:
+            os.remove(finalTexture)
+            ui.infoWindow('Failed to move texture. The following error occured:\n' + str(e), msev=messageSeverity.Error)
+        finally:
+            if convertedTexture != userTextureMap:
+                os.remove(convertedTexture)
+
 def newTexture():
     # Get a list of assets 
     assetList = glob.glob(os.path.join(os.environ['ASSETS_DIR'], '*'))
@@ -741,73 +799,22 @@ def newTexture():
         assetName = selections[answer]
         assetImageDir = os.path.join(os.environ['ASSETS_DIR'], assetName, 'images')
 
-        # Direct user to geometry file path and have them choose the correct one
-        sdir = '$JOB/PRODUCTION/assets/'+assetName+'/geo/bjsonFiles'
-        geoPath = ui.fileChooser(start_dir=sdir, wtitle='Choose Asset Geometry for Texture', mode=fileMode.Read, extensions='*.bjson, *.obj')
-        geoName, ext = os.path.splitext(os.path.basename(geoPath))
+        # Allow user to choose texture map in user local directory   
+        userDirectory = os.environ['USER_DIR']
+        userSelection = ui.fileChooser(start_dir=userDirectory, wtitle='Select texture map, or folder of texture maps', image=True, extensions='*.jpg,*.jpeg,*.tiff,*.tif,*.png,*.exr') 
+        
+        #Allow user to search for texture in any directory
+        userSelection = os.path.expandvars(userSelection)
 
-        # Show a list of shading passes
-        shadingPassList = ['diffuse','specular','single_SSS','multi_SSS','opacity','bump','scalar_displacement','vector_displacement','other']
-        answer = ui.listWindow(shadingPassList, wmessage='Which texture will you be creating/updating?')
-        if answer: 
-            answer = answer[0]
-            shadingPass = shadingPassList[answer]
+        if os.path.isdir(userSelection):
+            folder_name = os.path.basename(userSelection)
+            texture_paths = glob.glob(os.path(userSelection, '*'))
+            for t in texture_paths:
+                convert_texture(t, assetImageDir, folder_name=folder_name)
+        else:
+            convert_texture(userSelection, assetImageDir)
 
-            # Allow user to choose texture map in user local directory   
-            userDirectory = os.environ['USER_DIR']
-            userTextureMap = ui.fileChooser(start_dir=userDirectory, wtitle='Browse to the Texture Map in your User Directory', image=True, extensions='*.jpg,*.jpeg,*.tiff,*.tif,*.png,*.exr') 
-            #Allow user to search for texture in any directory
-            userTextureMap = os.path.expandvars(userTextureMap)
-
-            # Set Variables for texture paths
-            convertedTexture = '/tmp/intermediateTexture.exr'
-            finalTexture = '/tmp/finishedTexture.exr'
-
-            # Gamma correct for linear workflow
-            if shadingPass in (shadingPassList[:4] + shadingPassList[-1:]):
-                args = ['icomposite',convertedTexture,'=','gamma',str(1/2.2),userTextureMap]
-                subprocess.check_call(args)
-                didgamma = '\nIt has been gamma corrected.'
-            else:
-                convertedTexture = userTextureMap
-                didgamma = ''
-            
-            # Convert to .exr with otimized settings. Also, setting compatible with RenderMan (in case we need to render there)
-            args = ['txmake','-mode','periodic','-compression','zip']
-            args += ['-format','openexr','-half',convertedTexture,finalTexture]
-
-            # Uncomment the following and comment out the previous call if PRMan is not present
-            """
-            args = 'iconvert -d half ' + convertedTexture + ' ' 
-            args += finalTexture + ' storage tile tilex 32 tiley 32 compression zip'
-
-            subprocess.check_call( args.split() )
-            """
-
-            try:
-                subprocess.check_call(args)
-            except subprocess.CalledProcessError as e:
-                ui.infoWindow('Failed to convert texture. The following error occured:\n' + str(e))
-            else:
-               # Rename texture and move into production pipeline 
-                finalTextureName, ext = os.path.splitext(os.path.basename(finalTexture))
-
-                newTextureName = assetName + '_' + geoName + '_' + shadingPass + ext
-     
-                newfilepath = os.path.join(assetImageDir,newTextureName)
-
-                try:
-                    #shutil.copy(finalTexture,newfilepath)
-                    fileutil.move(finalTexture, newfilepath)  
-                except Exception as e:
-                    os.remove(finalTexture)
-                    ui.infoWindow('Failed to move texture. The following error occured:\n' + str(e), msev=messageSeverity.Error)
-                else:
-                    # Output final success message
-                    ui.infoWindow('Your texture was saved to: ' + newfilepath + didgamma)
-                finally:
-                    if convertedTexture != userTextureMap:
-                        os.remove(convertedTexture)
+        ui.infoWindow('Done.')
 
 def getInfo(node):
     if node == None:
