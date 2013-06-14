@@ -736,8 +736,8 @@ def convert_texture(userTextureMap, assetImageDir, folder_name=''):
         return
 
     # Set Variables for texture paths
-    convertedTexture = '/tmp/intermediateTexture.exr'
-    finalTexture = '/tmp/finishedTexture.exr'
+    convertedTexture = os.path.join('/tmp','intermediate'+userFileName+'.exr')
+    finalTexture = os.path.join('/tmp','finished'+userFileName+'.exr')
 
     # Gamma correct for linear workflow
     if 'COLOR' in userTextureMap:
