@@ -52,7 +52,7 @@ export OTLS_DIR=${PRODUCTION_DIR}/otls
 export HTOOLS_DIR=${PROJECT_TOOLS}/houdini-tools
 
 # Append to python path so batch scripts can access our modules
-export PYTHONPATH=/usr/autodesk/maya2012-x64/lib/python2.6/site-packages:/usr/lib64/python2.6/site-packages:${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${PROJECT_TOOLS}/python2.6libs:${PYTHONPATH}
+export PYTHONPATH=/usr/autodesk/maya2012-x64/lib/python2.6/site-packages:/usr/lib64/python2.6/site-packages:${PROJECT_TOOLS}:${PROJECT_TOOLS}/asset_manager:${PROJECT_TOOLS}/python2.6libs:${PROJECT_TOOLS}/nuke-tools/python:${PYTHONPATH}
 
 # Issue submission website
 export ISSUE_URL="https://docs.google.com/forms/d/1biz6BLm9Z7Z53yNVgPB6fBb4zgGGaXh4JMKudu8lGTE/viewform"
@@ -164,6 +164,7 @@ export MAYA_SCRIPT_PATH=${MAYA_SCRIPT_PATH}:${PYTHONPATH}:${MAYA_SHELF_DIR}
 export NUKE_LOCATION=/usr/local/Nuke6.3v9
 
 export NUKE_TOOLS_DIR=${PROJECT_TOOLS}/nuke-tools
+export NUKE_TOOLS_DIR=${NUKE_TOOLS_DIR}/python:${NUKE_TOOLS_DIR}
 export NUKE_PATH=${HOME}/.nuke:${NUKE_TOOLS_DIR}:${NUKE_LOCATION}/plugins/user:${NUKE_LOCATION}/plugins/icons:${NUKE_LOCATION}/plugins
 
 ###############################################################################
