@@ -53,6 +53,9 @@ def showConfirmAlembicDialog():
                                  , cancelButton  = 'No'
                                  , dismissString = 'No')
 
+def getAssetName(filepath):
+        return os.path.basename(filepath).split('.')[0]
+
 def checkin():
         print 'checkin'
         saveFile() # save the file before doing anything
@@ -63,14 +66,38 @@ def checkin():
         print 'toCheckin: '+toCheckin
         rig = isRigAsset()
         anim = isAnimationAsset()
+        references = cmds.ls(references=True)
+        loaded = []
         if amu.canCheckin(toCheckin) and saveGeo(): # objs must be saved before checkin
+                dest = amu.getCheckinDest(toCheckin)
+                # if anim and showConfirmAlembicDialog() == 'Yes':
+                #   for ref in references:
+                #     if cmds.referenceQuery(ref, isLoaded=True):
+                #       loaded.append(ref)
+                #       cmds.file(unloadReference=ref)
+                #   print loaded
+                #   for ref in loaded:
+                #     cmds.file(loadReference=ref)
+                #     refPath = cmds.referenceQuery(ref, filename=True)
+                #     assetName = getAssetName(refPath)
+                #     print "\n\n\n\n**************************************************************\n"
+                #     print dest
+                #     print filePath
+                #     print refPath
+                #     print assetName
+                #     saveFile()
+                #     amu.runAlembicConverter(dest, filePath, filename=assetName)
+                #     cmds.file(unloadReference=ref)
+
+                #   for ref in loaded:
+                #     cmds.file(loadReference=ref)
+
+                saveFile()
                 cmds.file(force=True, new=True) #open new file
                 dest = amu.checkin(toCheckin, anim or rig or os.path.basename(os.path.dirname(filePath))[:32]=='owned_jeff_apartment_walls_model') #checkin
                 srcFile = amu.getAvailableInstallFiles(dest)[0]
                 if rig:
                     amu.install(dest, srcFile)
-                if anim and showConfirmAlembicDialog() == 'Yes':
-                    amu.runAlembicConverter(dest, srcFile)
         else:
                 showFailDialog()
 

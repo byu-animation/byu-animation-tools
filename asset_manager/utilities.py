@@ -558,13 +558,16 @@ def install(vDirPath, srcFilePath):
 	
 	shutil.copy(srcFilePath, newInstFilePath)
 
-def runAlembicConverter(vDirPath, srcFilePath):
-	filename, ext = os.path.splitext(os.path.basename(srcFilePath))
+def runAlembicConverter(vDirPath, srcFilePath, filename=None):
+	if filename is None:
+		filename, ext = os.path.splitext(os.path.basename(srcFilePath))
 	dest_path = os.path.join(os.path.dirname(vDirPath), 'animation_cache', 'abc', filename+'.abc')
 	converter = os.path.join(os.environ['MAYA_TOOLS_DIR'], 'alembic', 'alembicconvert.py')
 	if os.path.exists(dest_path):
 		os.remove(dest_path)
-	os.system(getMayapy()+' '+converter+' '+srcFilePath+' '+dest_path)
+	res = os.system(getMayapy()+' '+converter+' '+srcFilePath+' '+dest_path)
+	print res
+	return res
 
 def mayaImportAlembicFile(maya_file, abc_file):
 	importer = os.path.join(os.environ['MAYA_TOOLS_DIR'], 'alembic', 'alembicImport.py')

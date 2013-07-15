@@ -21,11 +21,6 @@
             "python_file":"maya_discard.py"
         },
         {
-            "icon":"alembic_tagger.xpm",
-            "annotation":"Tag objects for Alembic export.",
-            "python_file":"alembic_tagger.py"
-        },
-        {
             "icon":"roll.xpm",
             "annotation":"Roll back to an older version",
             "python_file":"maya_rollback.py"
@@ -34,6 +29,16 @@
             "icon":"maya_issue_submit",
             "annotation":"Open a webpage with a form to submit issues regarding pipeline and tools",
             "python_file":"maya_issue_submit.py"
+        },
+        {
+            "icon":"alembic_tagger.xpm",
+            "annotation":"Tag objects for Alembic export.",
+            "python_file":"alembic_tagger.py"
+        },
+        {
+            "icon":"alembic_exporter.xpm",
+            "annotation":"Export loaded references to alembic",
+            "python_file":"alembic_exporter.py"
         }
     ]
 }

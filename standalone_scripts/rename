@@ -36,8 +36,8 @@ else:
    os.chdir('lighting')
 
 #store filenames
-for namecheck in glob.glob(qual +'*'):
-    names=glob.glob(qual +'*')
+for namecheck in glob.glob(qual +'Render_ver' +vNum +'*'):
+    names=glob.glob(qual +'Render_ver' +vNum +'*')
 
 #rename
 count=0

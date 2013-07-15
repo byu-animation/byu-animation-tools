@@ -30,5 +30,6 @@
     <memberToolshelf name="character"/>
     <memberToolshelf name="autorigs"/>
     <memberToolshelf name="tdtools"/>
+    <memberToolshelf name="ethan"/>
   </shelfSet>
 </shelfDocument>
