@@ -9,7 +9,7 @@ shots=['t01', 'a02', 'a03', 'a04', 'a05', 'a06', 'a07', 'b03', 'c01', 'c04', 'c0
 count=0
 for dunno in shots:
     file="No"
-    check=os.listdir('./'+shots[count] +'/renders/latest/')
+    check=os.listdir('./'+shots[count] +'/renders/compositing/latest/')
     if len(check)>0:
         file= "Yes"
         frames=str(len(check))

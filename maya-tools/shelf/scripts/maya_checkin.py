@@ -23,6 +23,7 @@ def isAnimationAsset():
         return assetType == 'animation'
 
 def saveGeo():
+        print 'saving geo...'
         # this is not a model asset. don't save objs
         if not isModelAsset():
                 return True

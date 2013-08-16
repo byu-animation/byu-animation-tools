@@ -204,7 +204,7 @@ class CheckoutDialog(QDialog):
 		
 		# open the file
 		if os.path.exists(toOpen):
-			cmd.file(toOpen, force=True, open=True, loadReferenceDepth="none")
+			cmd.file(toOpen, force=True, open=True)#, loadReferenceDepth="none")
 		else:
 			# create new file
 			cmd.file(force=True, new=True)

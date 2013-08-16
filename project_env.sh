@@ -30,6 +30,8 @@ fi
 # Yes, its a chicken egg problem...
 export PROJECT_TOOLS=${JOB}/byu-animation-tools
 
+export PATH=${PROJECT_TOOLS}/standalone_scripts:$PATH
+
 # Production directory
 export PRODUCTION_DIR=${JOB}/PRODUCTION
 

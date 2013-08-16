@@ -10,13 +10,15 @@
     <memberTool name="CheckoutOTL"/>
     <memberTool name="CheckinOTL"/>
     <memberTool name="RevertChanges"/>
-    <memberTool name="unlock DB"/>
     <memberTool name="rename"/>
+    <memberTool name="unlock DB"/>
     <memberTool name="delete"/>
     <memberTool name="texture_update"/>
     <memberTool name="refreshOTL"/>
     <memberTool name="nodeInfo"/>
     <memberTool name="weeklyRender"/>
     <memberTool name="issue_submit"/>
+    <memberTool name="tool_4"/>
+    <memberTool name="preRender"/>
   </toolshelf>
 </shelfDocument>
