@@ -1,0 +1,63 @@
+#!/usr/bin/python
+import os
+import shutil as poo
+import re
+import glob
+import sys
+
+#original name=
+    #shot number
+    #main or test or comp (will need if loop for navigating to comp files)
+    #version number
+    #-->d04_mainRender_ver2_###.exr
+    #-->d04_compRender_ver3_###.exr
+    #get these from user
+#target name=
+    #latest_quality_###.exr
+
+#declare variables
+sNum= "none"
+qual= "none"
+vNum= "A"
+passed= 1
+
+#get user input
+#print "Enter shot number (e.g. a01): "
+#sNum= sys.argv[1]
+path= os.getcwd()
+parent= os.path.dirname(path)
+folder= os.path.split(parent)
+sNum= folder[1]
+check= len(sNum)
+if check > 3:
+    passed= 0
+    print("wrong directory")
+
+if passed==1:
+#print "main, test, or comp render? "
+    qual= sys.argv[1]
+#print "version number: "
+    vNum= sys.argv[2]
+    if qual!= "main" and qual!="test" and qual!="blur" and qual!="globals" and qual!="mask" and qual!="comp":
+        print("invalid input")
+        passed= 0
+
+if passed==1:
+#change directory
+    if qual== "comp":
+       os.chdir('compositing')
+    else:
+       os.chdir('lighting')
+
+#store filenames
+    for namecheck in glob.glob(qual +'Render_ver' +vNum +'*'):
+        names=glob.glob(qual +'Render_ver' +vNum +'*')
+
+#rename
+    count=0
+    for var in names:
+        Num=re.findall('[0-9]{3}', names[count])  #breaks out numbers
+        poo.copyfile(names[count], 'latest/Latest_' +qual +'_' +Num[0]  +'.exr')
+        count=count+1
+    print("finished")
+raw_input('Press enter to exit')

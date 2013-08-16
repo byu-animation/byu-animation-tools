@@ -184,7 +184,7 @@ class CheckoutDialog(QDialog):
 			toCheckout = os.path.join(os.environ['ASSETS_DIR'], asset_name, 'rig')
 		elif self.animation_radio.isChecked():
 			toCheckout = os.path.join(os.environ['SHOTS_DIR'], asset_name, 'animation')
-		
+
 		try:
 			destpath = amu.checkout(toCheckout, True)
 		except Exception as e:
@@ -204,7 +204,7 @@ class CheckoutDialog(QDialog):
 		
 		# open the file
 		if os.path.exists(toOpen):
-			cmd.file(toOpen, force=True, open=True)
+			cmd.file(toOpen, force=True, open=True)#, loadReferenceDepth="none")
 		else:
 			# create new file
 			cmd.file(force=True, new=True)

@@ -17,6 +17,7 @@
     <memberToolshelf name="autorigs"/>
     <memberToolshelf name="animation"/>
     <memberToolshelf name="tdtools"/>
+    <memberToolshelf name="shelf_1"/>
   </shelfSet>
 
   <shelfSet name="shelf_set_td" label="Technical Director">

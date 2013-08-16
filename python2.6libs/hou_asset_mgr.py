@@ -740,29 +740,33 @@ def convert_texture(userTextureMap, assetImageDir, folder_name=''):
     # Set Variables for texture paths
     convertedTexture = os.path.join('/tmp','intermediate'+userFileName+'.exr')
     print "convertedTexture:: "+convertedTexture
-    finalTexture = os.path.join('/tmp','finished'+userFileName+'.exr')
+    finalTexture = os.path.join('/tmp','finished'+userFileName+'.rat')
     print "finalTexture:: "+finalTexture
 
     # Gamma correct for linear workflow
     if 'DIFF' in userTextureMap or 'diffuse' in userTextureMap:
         args = ['icomposite',convertedTexture,'=','gamma',str(1/2.2),userTextureMap]
-        subprocess.check_call(args)
+        
+        try:
+            subprocess.check_call(args)
+        except subprocess.CalledProcessError as e:
+            ui.infoWindow('Failed to convert texture. The following error occured:\n' + str(e))        
+            return
         didgamma = '\nIt has been gamma corrected.'
     else:
         convertedTexture = userTextureMap
         didgamma = ''
-    
-    # Convert to .exr with otimized settings. Also, setting compatible with RenderMan (in case we need to render there)
+    '''    
+    # Convert to .exr with optimized settings. Also, setting compatible with RenderMan (in case we need to render there)
     args = ['txmake','-mode','periodic','-compression','zip']
     args += ['-format','openexr','-half',convertedTexture,finalTexture]
-
+    '''
     # Uncomment the following and comment out the previous call if PRMan is not present
-    """
-    args = 'iconvert -d half ' + convertedTexture + ' ' 
-    args += finalTexture + ' storage tile tilex 32 tiley 32 compression zip'
 
-    subprocess.check_call( args.split() )
-    """
+    args = ['iconvert', convertedTexture, finalTexture] 
+    
+    #subprocess.check_call( args.split() )
+
 
     try:
         subprocess.check_call(args)
@@ -770,7 +774,7 @@ def convert_texture(userTextureMap, assetImageDir, folder_name=''):
         ui.infoWindow('Failed to convert texture. The following error occured:\n' + str(e))
     else:
         # Rename texture and move into production pipeline 
-        newTextureName = userFileName + '.exr'
+        newTextureName = userFileName + '.rat'
 
         newfilepath = os.path.join(assetImageDir, folder_name, newTextureName)
         print "new file path:: "+newfilepath
