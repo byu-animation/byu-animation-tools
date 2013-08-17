@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# project_houdini.sh: opens houdini with the project environment
+# project_houdini_12.5.sh: opens houdini with the project environment
 # @author Brian Kingery
 
 if [ -z "${HFS}" ]
@@ -22,5 +22,5 @@ source ${DIR}/project_env.sh
 cd ${USER_DIR}
 
 echo "Starting Houdini..."
-houdinifx $@
+houdinifx "$@"
 

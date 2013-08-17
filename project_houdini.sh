@@ -22,5 +22,5 @@ source ${DIR}/project_env.sh
 cd ${USER_DIR}
 
 echo "Starting Houdini..."
-houdinifx $@
+houdinifx "$@"
 
