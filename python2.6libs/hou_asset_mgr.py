@@ -780,7 +780,7 @@ def convert_texture(userTextureMap, assetImageDir, folder_name=''):
         print "new file path:: "+newfilepath
 
         try:
-            fileutil.move(finalTexture, newfilepath)  
+            shutil.move(finalTexture, newfilepath)  
         except Exception as e:
             os.remove(finalTexture)
             ui.infoWindow('Failed to move texture. The following error occured:\n' + str(e), msev=messageSeverity.Error)
