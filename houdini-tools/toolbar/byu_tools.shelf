@@ -18,7 +18,5 @@
     <memberTool name="nodeInfo"/>
     <memberTool name="weeklyRender"/>
     <memberTool name="issue_submit"/>
-    <memberTool name="tool_4"/>
-    <memberTool name="preRender"/>
   </toolshelf>
 </shelfDocument>
