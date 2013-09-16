@@ -25,6 +25,12 @@ else
     export PROJECT_NAME=`basename $JOB`
 fi
 
+# Set PS1 to a sane default if it doesn't already exist
+if [ -z "$PS1" ]
+then
+    PS1="[\u@\h \W]\$ "; # Customize terminal prompt
+fi
+
 # Tools/scripts directory. This project_env.sh script should be placed here.
 # along with the other tools and scripts.
 # Yes, its a chicken egg problem...
