@@ -29,7 +29,7 @@ parent= os.path.dirname(path)
 folder= os.path.split(parent)
 sNum= folder[1]
 check= len(sNum)
-if check > 3:
+if check != 3:
     passed= 0
     print("wrong directory")
 

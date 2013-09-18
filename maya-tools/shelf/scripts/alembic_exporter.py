@@ -86,10 +86,21 @@ def export_alembic():
   if showConfirmAlembicDialog(loaded) == 'Yes':
     print loaded
     for ref in loaded:
+      print "\n\n\n\n**************************************************************\n"
+      constraints = []
+      #TODO refactor the controller stuff to work with a 'prop list' it will scale easier
+      if 'controller' in ref:
+        for c in loaded:
+          if 'owned_tommy_rig_stable' in c or 'owned_abby_rig_stable' in c or 'owned_jeff_rig_stable' in c:
+            constraints.append(c);
+      
       cmds.file(loadReference=ref)
+      for c in constraints:
+        print c
+        cmds.file(loadReference=c)
+
       refPath = cmds.referenceQuery(ref, filename=True)
       assetName = getAssetName(refPath)
-      print "\n\n\n\n**************************************************************\n"
       print dest
       print filePath
       print refPath
