@@ -373,7 +373,7 @@ def writeToAlembic(outDir, filename, rootObject, objects='*', trange='off', star
     abcROP.destroy()
 
     return abcFilePath
-
+    
 def writeCamerasToAlembic(node):
     sequence = node.name().split('_')[2][0]
     children = node.children()
@@ -388,13 +388,16 @@ def writeCamerasToAlembic(node):
             abcFilePath = writeToAlembic(camDir, abcName, node
                                         , objects=os.path.join(c.path(), 'cam1')
                                         , trange='normal'
-                                        , startFrame=sFrame
-                                        , endFrame=eFrame
+                                        # , startFrame=sFrame
+                                        # , endFrame=eFrame
                                         , stepSize=sSize)
             mayaFilePath = os.path.join(camDir, sequence+shot+'_camera'+'.mb')
             if os.path.exists(mayaFilePath):
                 os.remove(mayaFilePath)
             amu.mayaImportAlembicFile(mayaFilePath, abcFilePath)
+            print hou.node(os.path.join(c.path(),'cam1')).evalParm('focal')
+            amu.setFocalLengthMaya(mayaFilePath, hou.node(os.path.join(c.path(),'cam1')).evalParm('focal'))
+            
 
 def writeSetToAlembic(node):
     exclude_objects = ('owned_jeff_couch', 'owned_jeffs_controller', 'owned_abby_controller', 'owned_cyclopes_toy')
