@@ -572,3 +572,7 @@ def runAlembicConverter(vDirPath, srcFilePath, filename=None):
 def mayaImportAlembicFile(maya_file, abc_file):
 	importer = os.path.join(os.environ['MAYA_TOOLS_DIR'], 'alembic', 'alembicImport.py')
 	os.system(getMayapy()+' '+importer+' '+maya_file+' '+abc_file)
+
+def setFocalLengthMaya(maya_file, focal):
+	setter = os.path.join(os.environ['MAYA_TOOLS_DIR'], 'setFocalLengthMaya.py')
+	os.system(getMayapy()+' '+setter+' '+maya_file+' '+str(focal))
